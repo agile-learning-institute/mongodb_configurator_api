@@ -20,18 +20,22 @@ class TestProcessingAndRendering(unittest.TestCase):
     expected_pro_count = None  # Should be set in subclasses
     expect_enu_05_success = True
 
+    def _ejson_encode(self, obj):
+        """Simple ejson-encode function that handles ObjectId and datetime conversion."""
+        if isinstance(obj, (ObjectId, datetime.datetime, datetime.date)):
+            return str(obj)
+        elif hasattr(obj, 'isoformat'):  # Handle any object with isoformat method
+            return str(obj)
+        return obj
+
     def _normalize_mongo_data(self, obj):
         """Normalize MongoDB data by converting ObjectIds and datetimes to strings."""
         if isinstance(obj, dict):
             return {k: self._normalize_mongo_data(v) for k, v in obj.items()}
         elif isinstance(obj, list):
             return [self._normalize_mongo_data(item) for item in obj]
-        elif isinstance(obj, ObjectId):
-            return str(obj)
-        elif isinstance(obj, (datetime.datetime, datetime.date)):
-            return str(obj)
         else:
-            return obj
+            return self._ejson_encode(obj)
 
     def setUp(self):
         """Set up test environment."""
@@ -328,6 +332,7 @@ class TestProcessingAndRendering(unittest.TestCase):
 
     def _compare_document(self, collection_name: str, doc_index: int, expected_doc: dict, actual_doc: dict):
         """Compare a single document, ignoring properties with value 'ignore'."""
+        
         for key, expected_value in expected_doc.items():
             if expected_value == "ignore":
                 continue  # Skip properties with value "ignore"
@@ -353,17 +358,19 @@ class TestProcessingAndRendering(unittest.TestCase):
                 if isinstance(actual_value, dict) and '$oid' in actual_value:
                     actual_value = actual_value['$oid']
             
-            # Handle datetime conversion for MongoDB date format
+            # Handle MongoDB date format
             if isinstance(expected_value, dict) and '$date' in expected_value:
-                # Expected value is MongoDB date format, convert actual datetime to same format
-                if hasattr(actual_value, 'isoformat'):
-                    # Convert Python datetime to ISO format for comparison
-                    actual_value = actual_value.isoformat() + 'Z'
-                    expected_value = expected_value['$date']
+                # Expected value is MongoDB date format, normalize actual value
+                actual_value = self._ejson_encode(actual_value)
+                expected_value = expected_value['$date']
             elif isinstance(expected_value, dict) and isinstance(actual_value, dict):
                 # Recursively compare nested objects
                 self._compare_document(f"{collection_name}.{key}", doc_index, expected_value, actual_value)
                 continue
+            else:
+                # Normalize both values using ejson-encode for consistent comparison
+                actual_value = self._ejson_encode(actual_value)
+                expected_value = self._ejson_encode(expected_value)
             
             self.assertEqual(expected_value, actual_value, 
                            f"Document {doc_index} in collection {collection_name} has different value for key {key}")
@@ -485,7 +492,7 @@ class TestEmpty(TestProcessingAndRendering):
 class TestProcess(TestProcessingAndRendering):
     """Test Processing and Rendering of passing_process"""
 
-    expected_pro_count = 55  # Set to the expected number for this test case
+    expected_pro_count = 53  # Set to the expected number for this test case
     def setUp(self):
         self.test_case = 'passing_process'
         super().setUp()

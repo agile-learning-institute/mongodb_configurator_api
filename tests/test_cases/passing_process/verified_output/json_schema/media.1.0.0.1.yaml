@@ -21,9 +21,11 @@ properties:
     description: The current status of the media
     type: string
     enum:
-    - draft
     - published
+    - draft
+    - processing
     - archived
+    - scheduled
   last_saved:
     description: When the media was last updated
     type: object
@@ -59,33 +61,39 @@ properties:
       type: string
       enum:
       - action
-      - comedy
-      - drama
       - sci_fi
       - documentary
-  content_data:
+      - drama
+      - comedy
+      - thriller
+  metadata:
     oneOf:
     - description: Video content structure
       type: object
       properties:
-        url:
-          description: Video URL
-          type: string
-          pattern: ^https?://[^\s]+$
         duration:
           description: Video duration in seconds
           type: number
           minimum: 1
           multipleOf: 1
+        format:
+          description: Video format
+          type: string
+          enum:
+          - bluray
+          - dvd
+          - digital
+          - streaming
         quality:
           description: Video quality
           type: string
           enum:
-          - sd
           - hd
           - uhd
+          - sd
+          - fhd
       required:
-      - url
+      - format
       additionalProperties: false
     - description: Audio content structure
       type: object
