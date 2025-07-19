@@ -11,17 +11,34 @@ root:
       items:
         description: User Name
         type: word
-  one_of:
-    schemas:
-      says:
-        description: Things the user says
-        type: sentence
-      does:
-        description: Things the user does
-        type: sentence
-      thinks:
-        description: Things the user thinks
-        type: sentence
-      feels:
-        description: Things the user feels
-        type: sentence
+    observation_data:
+      description: The observation data - can be one of several types
+      type: object
+      required: true
+      properties: {}
+      additionalProperties: false
+      one_of:
+        - type: object
+          properties:
+            says:
+              description: Things the user says
+              type: sentence
+          required: ["says"]
+        - type: object
+          properties:
+            does:
+              description: Things the user does
+              type: sentence
+          required: ["does"]
+        - type: object
+          properties:
+            thinks:
+              description: Things the user thinks
+              type: sentence
+          required: ["thinks"]
+        - type: object
+          properties:
+            feels:
+              description: Things the user feels
+              type: sentence
+          required: ["feels"]

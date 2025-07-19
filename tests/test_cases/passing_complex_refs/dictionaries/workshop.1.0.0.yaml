@@ -67,6 +67,7 @@ root:
             type: array
             required: false
             items:
+              description: A workshop observation with users and one of several observation types
               type: object
               required: false
               properties:
@@ -77,13 +78,15 @@ root:
                   items:
                     description: User Name
                     type: word
-              oneOf:
-                - ref: observation_stakeholder.1.0.0.yaml
-                - ref: observation_empathy.1.0.0.yaml
-                - ref: observation_hills.1.0.0.yaml
-                - ref: observation_priority.1.0.0.yaml
-                - ref: observation_ranking.1.0.0.yaml
-                - ref: observation_retrospective.1.0.0.yaml
+                observation_data:
+                  description: The observation data - one of several types
+                  one_of:
+                    - ref: observation_stakeholder.1.0.0.yaml
+                    - ref: observation_empathy.1.0.0.yaml
+                    - ref: observation_hills.1.0.0.yaml
+                    - ref: observation_priority.1.0.0.yaml
+                    - ref: observation_ranking.1.0.0.yaml
+                    - ref: observation_retrospective.1.0.0.yaml
     last_saved:
       description: Last Saved breadcrumb
       type: breadcrumb

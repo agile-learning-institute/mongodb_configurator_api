@@ -1,17 +1,19 @@
 file_name: notification.1.0.1.yaml
 _locked: true
 root:
-  description: A notification collection for testing enum_array and cross-collection
-    references
+  description: A notification collection 
   type: object
   required: false
+  additionalProperties: false
   properties:
     _id:
       description: The unique identifier for notification
       type: identity
       required: true
     user_id:
-      ref: user.1.0.0.yaml
+      description: The unique identifier for the user
+      type: identity
+      required: true
     title:
       description: Notification title
       type: word
@@ -54,6 +56,7 @@ root:
       description: Additional notification metadata
       type: object
       required: false
+      additionalProperties: false
       properties:
         created_at:
           description: When the notification was created
@@ -75,6 +78,7 @@ root:
           description: Source of the notification
           type: object
           required: false
+          additionalProperties: false
           properties:
             collection:
               description: Source collection name
@@ -89,10 +93,7 @@ root:
               type: enum
               required: false
               enums: notification_action
-          additionalProperties: false
-      additionalProperties: false
     last_saved:
       description: Last saved breadcrumb
       type: breadcrumb
       required: true
-  additionalProperties: false

@@ -4,6 +4,7 @@ root:
   description: An organization in the system
   type: object
   required: false
+  additionalProperties: false
   properties:
     _id:
       description: The unique identifier for the organization
@@ -38,4 +39,3 @@ root:
       description: Organization home address
       type: street_address
       required: false
-  additionalProperties: false

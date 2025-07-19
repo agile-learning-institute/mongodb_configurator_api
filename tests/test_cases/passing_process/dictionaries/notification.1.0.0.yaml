@@ -10,7 +10,9 @@ root:
       type: identity
       required: true
     user_id:
-      ref: user.1.0.0.yaml
+      description: The unique identifier for the user
+      type: identity
+      required: true
     title:
       description: Notification title
       type: word

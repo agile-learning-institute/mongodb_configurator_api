@@ -30,7 +30,6 @@ versions:
 - version: 1.0.1.3
   drop_indexes: []
   add_indexes: []
-  migrations:
-  - content_merge_content_fields.json
+  migrations: []
   test_data: content.1.0.1.3.json
 _locked: true

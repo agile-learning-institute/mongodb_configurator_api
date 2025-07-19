@@ -63,6 +63,23 @@ class Dictionary:
             ref_stack = []
         return self.root.get_bson_schema(enumerations, ref_stack)
 
+    def delete(self):
+        if self._locked:
+            event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY", event_data={"error": "Dictionary is locked"})
+            raise ConfiguratorException("Cannot delete locked dictionary", event)
+        event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY")
+        try:
+            event.append_events(FileIO.delete_document(self.config.DICTIONARY_FOLDER, self.file_name))
+            event.record_success()
+            return event
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure("error deleting dictionary")
+            return event
+        except Exception as e:
+            event.record_failure("unexpected error deleting dictionary", {"error": str(e)})
+            return event
+
     @staticmethod
     def lock_all():
         """Lock all dictionary files."""
@@ -88,24 +105,6 @@ class Dictionary:
             event.record_failure(f"Unexpected error locking dictionary {file.file_name}")
             raise ConfiguratorException(f"Unexpected error locking dictionary {file.file_name}", event)
 
-    def delete(self):
-        if self._locked:
-            event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY", event_data={"error": "Dictionary is locked"})
-            raise ConfiguratorException("Cannot delete locked dictionary", event)
-        event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY")
-        try:
-            event.append_events(FileIO.delete_document(self.config.DICTIONARY_FOLDER, self.file_name))
-            event.record_success()
-            return event
-        except ConfiguratorException as e:
-            event.append_events([e.event])
-            event.record_failure("error deleting dictionary")
-            return event
-        except Exception as e:
-            event.record_failure("unexpected error deleting dictionary", {"error": str(e)})
-            return event
-
-
 class Property:
     """
     Property class is used to represent a property in a dictionary.
@@ -122,6 +121,16 @@ class Property:
         self.config = Config.get_instance()
         self.name = name
         self.ref = property.get("ref", None)
+        self.one_of = property.get("one_of", None)
+        
+        # Solo properties - handle one at a time
+        if self.ref is not None:
+            return
+        elif self.one_of is not None:
+            self.one_of = OneOf(self.one_of)
+            return
+            
+        # Normal properties (type, description, etc.)
         self.description = property.get("description", "Missing Required Description")
         self.type = property.get("type", "void")
         self.required = property.get("required", False)
@@ -129,17 +138,11 @@ class Property:
         self.additional_properties = property.get("additionalProperties", False)
         self.properties = {}
         self.items = None
-        self.one_of = None
 
         # Initialize properties if this is an object type
         if self.type == "object":
             for prop_name, prop_data in property.get("properties", {}).items():
                 self.properties[prop_name] = Property(prop_name, prop_data)
-
-            # Initialize oneOf if present
-            one_of_data = property.get("one_of", None)
-            if one_of_data:
-                self.one_of = OneOf(one_of_data)
 
         # Initialize items if this is an array type
         if self.type == "array":
@@ -153,6 +156,9 @@ class Property:
     def to_dict(self):
         if self.ref:
             return {"ref": self.ref}
+        elif self.one_of:
+            return {"one_of": self.one_of.to_dict()}
+        
         result = {}
         result["description"] = self.description
         result["type"] = self.type
@@ -163,9 +169,6 @@ class Property:
             result["properties"] = {}
             for prop_name, prop in self.properties.items():
                 result["properties"][prop_name] = prop.to_dict()
-
-            if self.one_of:
-                result["one_of"] = self.one_of.to_dict()
 
         elif self.type == "array":
             result["items"] = self.items.to_dict()
@@ -181,6 +184,8 @@ class Property:
 
         if self.ref:
             return self._handle_ref_schema(enumerations, ref_stack, "json")
+        elif self.one_of:
+            return {"oneOf": self.one_of.get_json_schema(enumerations, ref_stack)}
 
         if self.type == "object":
             schema = {}
@@ -193,10 +198,6 @@ class Property:
             if required_props:
                 schema["required"] = required_props
             schema["additionalProperties"] = self.additional_properties
-
-            # Handle oneOf structure (JSON Schema standard)
-            if self.one_of:
-                schema["oneOf"] = self.one_of.get_json_schema(enumerations, ref_stack)
 
             return schema
 
@@ -240,6 +241,8 @@ class Property:
 
         if self.ref:
             return self._handle_ref_schema(enumerations, ref_stack, "bson")
+        elif self.one_of:
+            return {"oneOf": self.one_of.get_bson_schema(enumerations, ref_stack)}
 
         if self.type == "object":
             schema = {}
@@ -251,10 +254,6 @@ class Property:
             if required_props:
                 schema["required"] = required_props
             schema["additionalProperties"] = self.additional_properties
-
-            # Handle oneOf structure (JSON Schema standard)
-            if self.one_of:
-                schema["oneOf"] = self.one_of.get_bson_schema(enumerations, ref_stack)
 
             return schema
 
@@ -325,7 +324,8 @@ class Property:
     def _get_required(self):
         required = []
         for prop_name, prop in self.properties.items():
-            if prop.required:
+            # Skip ref and one_of properties as they don't have required attribute
+            if hasattr(prop, 'required') and prop.required:
                 required.append(prop_name)
         return required
 
@@ -334,29 +334,16 @@ class OneOf:
     def __init__(self, one_of_data):
         self.schemas = []
         
-        # Handle array format (JSON Schema standard)
-        if isinstance(one_of_data, list):
-            for i, schema_data in enumerate(one_of_data):
-                # Check if this is a ref object
-                if isinstance(schema_data, dict) and "ref" in schema_data:
-                    # Create a Property with just the ref
-                    self.schemas.append(Property(f"oneOf_item_{i}", {"ref": schema_data["ref"]}))
-                else:
-                    # Regular schema object
-                    self.schemas.append(Property(f"oneOf_item_{i}", schema_data))
-        else:
-            # If not a list, this is an error - oneOf should always be an array
-            raise ConfiguratorException(
-                f"oneOf data must be an array, got {type(one_of_data)}", 
-                ConfiguratorEvent(event_id="DIC-10", event_type="INVALID_ONEOF_FORMAT")
-            )
+        # Each item in one_of_data becomes a Property object
+        for i, item_data in enumerate(one_of_data):
+            # Create Property object - will validate during construction
+            self.schemas.append(Property(f"oneOf_item_{i}", item_data))
 
     def to_dict(self):
-        # Return array of schemas (JSON Schema standard)
-        return [schema.to_dict() for schema in self.schemas]
+        return [prop.to_dict() for prop in self.schemas]
 
     def get_json_schema(self, enumerations, ref_stack: list = None):
-        return [schema.get_json_schema(enumerations, ref_stack) for schema in self.schemas]
+        return [prop.get_json_schema(enumerations, ref_stack) for prop in self.schemas]
 
     def get_bson_schema(self, enumerations, ref_stack: list = None):
-        return [schema.get_bson_schema(enumerations, ref_stack) for schema in self.schemas]
+        return [prop.get_bson_schema(enumerations, ref_stack) for prop in self.schemas]

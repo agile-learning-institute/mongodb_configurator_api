@@ -30,7 +30,6 @@ versions:
 - version: 1.0.1.3
   drop_indexes: []
   add_indexes: []
-  migrations:
-  - notification_merge_notification_data.json
+  migrations: []
   test_data: notification.1.0.1.3.json
 _locked: true

@@ -1,172 +1,385 @@
-additionalProperties: false
 description: A record of a specific design thinking workshop.
+type: object
 properties:
   _id:
     description: The unique identifier for a Workshop
+    type: string
     pattern: ^[0-9a-fA-F]{24}$
+  status:
+    description: Workshop Status/State
     type: string
-  category:
-    description: Discord Channel Category where this workshop channel is
-    pattern: ^[^\t\n\r]{0,255}$
-    type: string
+    enum:
+    - pending
+    - active
+    - complete
+    - archived
   channel_id:
     description: The discord identifier for the channel this workshop is hosted on
-    pattern: ^\S{1,40}$
     type: string
+    pattern: ^\S{1,40}$
   channel_name:
     description: Workshop Name
-    pattern: ^\S{1,40}$
     type: string
+    pattern: ^\S{1,40}$
+  category:
+    description: Discord Channel Category where this workshop channel is
+    type: string
+    pattern: ^[^\t\n\r]{0,255}$
+  guild:
+    description: Discord Server where this workshop takes place
+    type: string
+    pattern: ^[^\t\n\r]{0,255}$
+  purpose:
+    description: Workshop Purpose
+    type: string
+    maxLength: 4096
+  when:
+    description: From-To Date/Time for the Workshop Event
+    type: object
+    properties:
+      from:
+        description: An ISO 8601 formatted date-time string
+        type: string
+        format: date-time
+      to:
+        description: An ISO 8601 formatted date-time string
+        type: string
+        format: date-time
+    additionalProperties: false
+    required:
+    - from
+    - to
   current_exercise:
     description: Index of the current exercise for Active workshops
+    type: number
     minimum: 0
     multipleOf: 1
-    type: number
   exercises:
     description: List of workshop_exercise documents
+    type: array
     items:
-      additionalProperties: false
       description: A Workshop Exercise and observations
+      type: object
       properties:
-        conversation_id:
-          description: The _id of the conversation for this exercise
-          pattern: ^[0-9a-fA-F]{24}$
-          type: string
         exercise_id:
           description: The Exercise Instructions this is using
-          pattern: ^[0-9a-fA-F]{24}$
           type: string
+          pattern: ^[0-9a-fA-F]{24}$
+        conversation_id:
+          description: The _id of the conversation for this exercise
+          type: string
+          pattern: ^[0-9a-fA-F]{24}$
         exercise_name:
           description: The name of the exercise
-          pattern: ^\S{1,40}$
           type: string
-        observations:
-          description: Observations of the exercise
-          items:
-            additionalProperties: false
-            description: Missing Required Description
-            properties:
-              users:
-                description: Users who made the observation
-                items:
-                  description: User Name
-                  pattern: ^\S{1,40}$
-                  type: string
-                type: array
-            required:
-            - users
-            type: object
-          type: array
-        persona:
-          additionalProperties: false
-          description: A persona observation for design thinking exercises.
-          properties:
-            age:
-              description: The age of the persona
-              type: integer
-            frustrations:
-              description: The frustrations of the persona
-              maxLength: 4096
-              type: string
-            goals:
-              description: The goals of the persona
-              maxLength: 4096
-              type: string
-            name:
-              description: The name of the persona
-              pattern: ^\S{1,40}$
-              type: string
-            needs:
-              description: The needs of the persona
-              maxLength: 4096
-              type: string
-            occupation:
-              description: The occupation of the persona
-              pattern: ^[^\t\n\r]{0,255}$
-              type: string
-          required:
-          - name
-          type: object
+          pattern: ^\S{1,40}$
         status:
           description: The exercise status or state (Observe/Reflect/Make)
+          type: string
           enum:
           - pending
           - observe
           - reflect
           - make
           - complete
-          type: string
+        persona:
+          description: A persona observation for design thinking exercises.
+          type: object
+          properties:
+            name:
+              description: The name of the persona
+              type: string
+              pattern: ^\S{1,40}$
+            age:
+              description: The age of the persona
+              type: integer
+            occupation:
+              description: The occupation of the persona
+              type: string
+              pattern: ^[^\t\n\r]{0,255}$
+            goals:
+              description: The goals of the persona
+              type: string
+              maxLength: 4096
+            frustrations:
+              description: The frustrations of the persona
+              type: string
+              maxLength: 4096
+            needs:
+              description: The needs of the persona
+              type: string
+              maxLength: 4096
+          required:
+          - name
+          additionalProperties: false
+        observations:
+          description: Observations of the exercise
+          type: array
+          items:
+            description: A workshop observation with users and one of several observation
+              types
+            type: object
+            properties:
+              users:
+                description: Users who made the observation
+                type: array
+                items:
+                  description: User Name
+                  type: string
+                  pattern: ^\S{1,40}$
+              observation_data:
+                oneOf:
+                - description: A stakeholder of a Stakeholder exercise
+                  type: object
+                  properties:
+                    users:
+                      description: Users of the stakeholder
+                      type: array
+                      items:
+                        description: User Name
+                        type: string
+                        pattern: ^\S{1,40}$
+                    text:
+                      description: Text of the stakeholder
+                      type: string
+                      pattern: ^[^\t\n\r]{0,255}$
+                    name:
+                      description: Name of the stakeholder
+                      type: string
+                      pattern: ^\S{1,40}$
+                    title:
+                      description: Title of the stakeholder
+                      type: string
+                      pattern: ^\S{1,40}$
+                    roles:
+                      description: Roles of the stakeholder
+                      type: array
+                      items:
+                        description: Role Name
+                        type: string
+                        pattern: ^\S{1,40}$
+                  required:
+                  - users
+                  additionalProperties: false
+                - description: A empathy of a Empathy Mapping exercise
+                  type: object
+                  properties:
+                    users:
+                      description: Users who made the observation
+                      type: array
+                      items:
+                        description: User Name
+                        type: string
+                        pattern: ^\S{1,40}$
+                    observation_data:
+                      oneOf:
+                      - description: Missing Required Description
+                        type: object
+                        properties:
+                          says:
+                            description: Things the user says
+                            type: string
+                            pattern: ^[^\t\n\r]{0,255}$
+                        additionalProperties: false
+                      - description: Missing Required Description
+                        type: object
+                        properties:
+                          does:
+                            description: Things the user does
+                            type: string
+                            pattern: ^[^\t\n\r]{0,255}$
+                        additionalProperties: false
+                      - description: Missing Required Description
+                        type: object
+                        properties:
+                          thinks:
+                            description: Things the user thinks
+                            type: string
+                            pattern: ^[^\t\n\r]{0,255}$
+                        additionalProperties: false
+                      - description: Missing Required Description
+                        type: object
+                        properties:
+                          feels:
+                            description: Things the user feels
+                            type: string
+                            pattern: ^[^\t\n\r]{0,255}$
+                        additionalProperties: false
+                  required:
+                  - users
+                  additionalProperties: false
+                - description: A hill of a Hills exercise
+                  type: object
+                  properties:
+                    name:
+                      description: Unique Name of the hill
+                      type: string
+                      pattern: ^\S{1,40}$
+                    users:
+                      description: Users who made the observation
+                      type: array
+                      items:
+                        description: User Name
+                        type: string
+                        pattern: ^\S{1,40}$
+                    who:
+                      description: Persona Who is the hill about
+                      type: string
+                      pattern: ^[^\t\n\r]{0,255}$
+                    what:
+                      description: What the user does
+                      type: string
+                      pattern: ^[^\t\n\r]{0,255}$
+                    wow:
+                      description: The Wow that happens when Who does What
+                      type: string
+                      pattern: ^[^\t\n\r]{0,255}$
+                  required:
+                  - users
+                  additionalProperties: false
+                - description: A priority of a Priority exercise
+                  type: object
+                  properties:
+                    user:
+                      description: User who made the priority observation
+                      type: string
+                      pattern: ^\S{1,40}$
+                    feasibility:
+                      description: Hills in order of feasibility (low to high)
+                      type: array
+                      items:
+                        description: Hill Name
+                        type: string
+                        pattern: ^\S{1,40}$
+                    impact:
+                      description: Hills in order of impact (low to high)
+                      type: array
+                      items:
+                        description: Hill Name
+                        type: string
+                        pattern: ^\S{1,40}$
+                  required:
+                  - user
+                  additionalProperties: false
+                - description: The outcome of a Priority exercise
+                  type: object
+                  properties:
+                    no_brainers:
+                      description: Hills that are high impact, and high feasibility
+                      type: array
+                      items:
+                        description: Hill Name
+                        type: string
+                        pattern: ^\S{1,40}$
+                    big_bets:
+                      description: Hills that are high impact, but low feasibility
+                      type: array
+                      items:
+                        description: Hill Name
+                        type: string
+                        pattern: ^\S{1,40}$
+                    utilities:
+                      description: Hills that are low impact, but high feasibility
+                      type: array
+                      items:
+                        description: Hill Name
+                        type: string
+                        pattern: ^\S{1,40}$
+                    unwise:
+                      description: Hills that are low impact, and low feasibility
+                      type: array
+                      items:
+                        description: Hill Name
+                        type: string
+                        pattern: ^\S{1,40}$
+                  additionalProperties: false
+                - description: A observation for a Retrospective exercise
+                  type: object
+                  properties:
+                    users:
+                      description: Users who made the observation
+                      type: array
+                      items:
+                        description: User Name
+                        type: string
+                        pattern: ^\S{1,40}$
+                    observation_data:
+                      oneOf:
+                      - description: Missing Required Description
+                        type: object
+                        properties:
+                          question:
+                            description: Question that remains
+                            type: string
+                            pattern: ^[^\t\n\r]{0,255}$
+                        additionalProperties: false
+                      - description: Missing Required Description
+                        type: object
+                        properties:
+                          worked_well:
+                            description: Something that worked well
+                            type: string
+                            pattern: ^[^\t\n\r]{0,255}$
+                        additionalProperties: false
+                      - description: Missing Required Description
+                        type: object
+                        properties:
+                          could_be_improved:
+                            description: Something that could be improved
+                            type: string
+                            pattern: ^[^\t\n\r]{0,255}$
+                        additionalProperties: false
+                      - description: Missing Required Description
+                        type: object
+                        properties:
+                          ideas_to_try:
+                            description: Something to try differently next time
+                            type: string
+                            pattern: ^[^\t\n\r]{0,255}$
+                        additionalProperties: false
+                  required:
+                  - users
+                  additionalProperties: false
+            required:
+            - users
+            additionalProperties: false
       required:
       - exercise_id
       - conversation_id
       - exercise_name
       - status
-      type: object
-    type: array
-  guild:
-    description: Discord Server where this workshop takes place
-    pattern: ^[^\t\n\r]{0,255}$
-    type: string
+      additionalProperties: false
   last_saved:
-    additionalProperties: false
     description: Last Saved breadcrumb
+    type: object
     properties:
-      at_time:
-        description: An ISO 8601 formatted date-time string
-        format: date-time
+      from_ip:
+        description: A valid IP Address
         type: string
+        pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
       by_user:
         description: A String of text, 1 to 40 characters with no spaces, or special
           characters like /t or /n
-        pattern: ^\S{1,40}$
         type: string
+        pattern: ^\S{1,40}$
+      at_time:
+        description: An ISO 8601 formatted date-time string
+        type: string
+        format: date-time
       correlation_id:
         description: A String of text, 1 to 40 characters with no spaces, or special
           characters like /t or /n
+        type: string
         pattern: ^\S{1,40}$
-        type: string
-      from_ip:
-        description: A valid IP Address
-        pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
-        type: string
+    additionalProperties: false
     required:
     - from_ip
     - by_user
     - at_time
     - correlation_id
-    type: object
-  purpose:
-    description: Workshop Purpose
-    maxLength: 4096
-    type: string
-  status:
-    description: Workshop Status/State
-    enum:
-    - pending
-    - active
-    - complete
-    - archived
-    type: string
-  when:
-    additionalProperties: false
-    description: From-To Date/Time for the Workshop Event
-    properties:
-      from:
-        description: An ISO 8601 formatted date-time string
-        format: date-time
-        type: string
-      to:
-        description: An ISO 8601 formatted date-time string
-        format: date-time
-        type: string
-    required:
-    - from
-    - to
-    type: object
 required:
 - _id
 - status
 - exercises
 - last_saved
-type: object
-
+additionalProperties: false

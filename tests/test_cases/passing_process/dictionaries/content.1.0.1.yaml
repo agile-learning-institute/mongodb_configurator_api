@@ -1,8 +1,7 @@
 file_name: content.1.0.1.yaml
 _locked: true
 root:
-  description: A content collection for testing one_of structures and advanced schema
-    features
+  description: A content collection for testing
   type: object
   required: false
   properties:
@@ -29,74 +28,13 @@ root:
       required: true
       enums: default_status
     author_id:
-      ref: user.1.0.0.yaml
+      description: The unique identifier for the author
+      type: identity
+      required: true
     full_title:
       description: Full title including subtitle
       type: sentence
       required: false
-    content_data:
-      description: The actual content data - varies by type
-      type: object
-      required: true
-      properties: {}
-      additionalProperties: false
-      one_of:
-        - description: Article content structure
-          type: object
-          properties:
-            body:
-              description: Article body text
-              type: markdown
-              required: true
-            tags:
-              description: Article tags
-              type: enum_array
-              required: false
-              enums: content_tags
-            word_count:
-              description: Article word count
-              type: count
-              required: false
-          required:
-            - body
-          additionalProperties: false
-        - description: Video content structure
-          type: object
-          properties:
-            url:
-              description: Video URL
-              type: url
-              required: true
-            duration:
-              description: Video duration in seconds
-              type: count
-              required: false
-            quality:
-              description: Video quality
-              type: enum
-              required: false
-              enums: media_quality
-          required:
-            - url
-          additionalProperties: false
-        - description: Podcast content structure
-          type: object
-          properties:
-            audio_url:
-              description: Audio file URL
-              type: url
-              required: true
-            transcript:
-              description: Podcast transcript
-              type: markdown
-              required: false
-            episode_number:
-              description: Episode number
-              type: count
-              required: false
-          required:
-            - audio_url
-          additionalProperties: false
     metadata:
       description: Additional metadata for the content
       type: object

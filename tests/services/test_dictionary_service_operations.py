@@ -51,15 +51,15 @@ class TestProperty(unittest.TestCase):
     def test_init_with_ref(self):
         """Test Property initialization with ref"""
         property_data = {
-            "ref": "sample.1.0.0.yaml",
-            "description": "Reference to another dictionary"
+            "ref": "sample.1.0.0.yaml"
         }
         prop = Property("test_ref", property_data)
         
         self.assertEqual(prop.ref, "sample.1.0.0.yaml")
-        self.assertEqual(prop.description, "Reference to another dictionary")
-        self.assertEqual(prop.type, "void")
-        self.assertFalse(prop.required)
+        # Ref properties are solo properties - they don't have description, type, or required
+        self.assertFalse(hasattr(prop, 'description'))
+        self.assertFalse(hasattr(prop, 'type'))
+        self.assertFalse(hasattr(prop, 'required'))
 
     def test_init_with_enum(self):
         """Test Property initialization with enum type"""
@@ -464,11 +464,6 @@ class TestDictionary(unittest.TestCase):
             "required": False,
             "properties": {
                 "content_data": {
-                    "description": "Content data with oneOf",
-                    "type": "object",
-                    "required": True,
-                    "properties": {},
-                    "additionalProperties": False,
                     "one_of": [
                         {
                             "description": "Article content",
