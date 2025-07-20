@@ -1,1 +1,301 @@
-[]
+[
+  {
+    "_id": "000000000000000000000000",
+    "status": "pending",
+    "channel_id": "workshop-channel-001",
+    "channel_name": "pendingEmpty",
+    "category": "Design Thinking",
+    "guild": "Agile Learning Institute",
+    "purpose": "Practice design thinking exercises",
+    "when": {
+      "from": "2025-01-02 12:00:00",
+      "to": "2025-01-02 13:00:00"
+    },
+    "current_exercise": 4,
+    "exercises": [
+      {
+        "exercise_id": "e00000000000000000000001",
+        "conversation_id": "c00000000000000000000001",
+        "exercise_name": "stakeholders",
+        "status": "complete",
+        "duration": {
+          "from": "2025-01-02 12:10:00",
+          "to": "2025-01-02 12:15:00"
+        },
+        "observations": [
+          {
+            "users": ["fred", "amy"],
+            "text": "I want to talk to the stakeholders",
+            "name": "Jill Johnson",
+            "title": "Product Manager",
+            "roles": ["Product Manager", "Stakeholder"]
+          },
+          {
+            "users": ["fred", "amy"],
+            "text": "Need to understand user needs better",
+            "name": "Sarah Chen",
+            "title": "UX Designer",
+            "roles": ["UX Designer", "User Advocate"]
+          },
+          {
+            "users": ["fred", "amy"],
+            "text": "Budget constraints are a concern",
+            "name": "Mike Rodriguez",
+            "title": "Finance Manager",
+            "roles": ["Finance Manager", "Budget Controller"]
+          }
+        ]
+      },
+      {
+        "exercise_id": "e00000000000000000000002",
+        "conversation_id": "c00000000000000000000002",
+        "exercise_name": "empathy",
+        "status": "complete",
+        "duration": {
+          "from": "2025-01-02 12:15:00",
+          "to": "2025-01-02 12:20:00"
+        },
+        "persona": {
+          "name": "Claire",
+          "age": 35,
+          "occupation": "Marketing Manager",
+          "goals": "To increase customer engagement and brand awareness",
+          "frustrations": "Limited budget and time constraints",
+          "needs": "Better tools to track campaign performance"
+        },
+        "observations": [
+          {
+            "users": ["fred", "amy"],
+            "says": "I want to talk to the stakeholders"
+          },
+          {
+            "users": ["fred", "amy"],
+            "does": "I want to talk to the stakeholders"
+          },
+          {
+            "users": ["fred", "amy"],
+            "thinks": "I want to talk to the stakeholders"
+          },
+          {
+            "users": ["fred", "amy"],
+            "feels": "I want to talk to the stakeholders"
+          },
+          {
+            "users": ["fred", "amy"],
+            "says": "The interface is too complicated"
+          }
+        ]
+      },
+      {
+        "exercise_id": "e00000000000000000000003",
+        "conversation_id": "c00000000000000000000003",
+        "exercise_name": "hills",
+        "status": "complete",
+        "duration": {
+          "from": "2025-01-02 12:20:00",
+          "to": "2025-01-02 12:25:00"
+        },
+        "observations": [
+          {
+            "users": ["fred", "amy"],
+            "who": "Brenda",
+            "what": "Deposits a check on her phone",
+            "wow": "and she doesn't have to take time off work to do it"
+          },
+          {
+            "users": ["fred", "amy"],
+            "who": "Brenda",
+            "what": "Deposits a check on her phone",
+            "wow": "and she doesn't have to take time off work to do it"
+          },
+          {
+            "users": ["fred", "amy"],
+            "who": "Alex",
+            "what": "Books a doctor appointment online",
+            "wow": "and gets a reminder 24 hours before"
+          }
+        ]
+      },
+      {
+        "exercise_id": "e00000000000000000000004",
+        "conversation_id": "c00000000000000000000004",
+        "exercise_name": "priority",
+        "status": "complete",
+        "duration": {
+          "from": "2025-01-02 12:25:00",
+          "to": "2025-01-02 12:30:00"
+        },
+        "observations": [
+          {
+            "user": "fred",
+            "feasibility": ["easy", "medium", "hard"],
+            "impact": ["low", "medium", "high"]
+          },
+          {
+            "user": "amy",
+            "feasibility": ["easy", "medium", "hard"],
+            "impact": ["low", "medium", "high"]
+          }
+        ]
+      },
+      {
+        "exercise_id": "e00000000000000000000005",
+        "conversation_id": "c00000000000000000000005",
+        "exercise_name": "retrospective",
+        "status": "observe",
+        "duration": {
+          "from": "2025-01-02 12:30:00",
+          "to": "2025-01-02 12:35:00"
+        },
+        "observations": [
+          {
+            "users": ["fred", "amy"],
+            "question": "What went well?"
+          },
+          {
+            "users": ["fred", "amy"],
+            "worked_well": "We did a great job of listening to each other"
+          },
+          {
+            "users": ["fred", "amy"],
+            "could_be_improved": "We could have been more specific about what we wanted"
+          },
+          {
+            "users": ["fred", "amy"],
+            "ideas_to_try": "We could try using a different tool to help us listen to each other"
+          },
+          {
+            "users": ["fred", "amy"],
+            "worked_well": "The brainstorming session was very productive"
+          }
+        ]
+      }
+    ],
+    "last_saved": {
+      "from_ip": "192.168.1.100",
+      "by_user": "fred",
+      "at_time": "2025-01-01 12:34:56",
+      "correlation_id": "corr-001"
+    }
+  },
+  {
+    "_id": "000000000000000000000001",
+    "status": "archived",
+    "channel_id": "workshop-channel-002",
+    "channel_name": "WorkshopName1",
+    "category": "Design Thinking",
+    "guild": "Agile Learning Institute",
+    "purpose": "Advanced design thinking workshop",
+    "when": {
+      "from": "2025-01-02 12:00:00",
+      "to": "2025-01-02 13:00:00"
+    },
+    "current_exercise": 0,
+    "exercises": [
+      {
+        "exercise_id": "e00000000000000000000003",
+        "conversation_id": "c00000000000000000000003",
+        "exercise_name": "hills",
+        "status": "pending",
+        "duration": {
+          "from": "2025-01-02 12:10:00",
+          "to": "2025-01-02 12:15:00"
+        },
+        "observations": [
+          {
+            "users": ["bob", "carol"],
+            "who": "David",
+            "what": "Uses mobile banking app",
+            "wow": "and can transfer money instantly"
+          },
+          {
+            "users": ["bob", "carol"],
+            "who": "Emma",
+            "what": "Schedules meetings via calendar app",
+            "wow": "and automatically gets video call links"
+          }
+        ]
+      },
+      {
+        "exercise_id": "e00000000000000000000004",
+        "conversation_id": "c00000000000000000000004",
+        "exercise_name": "priority",
+        "status": "pending",
+        "duration": {
+          "from": "2025-01-02 12:10:00",
+          "to": "2025-01-02 12:15:00"
+        },
+        "observations": [
+          {
+            "user": "bob",
+            "feasibility": ["easy", "medium", "hard"],
+            "impact": ["low", "medium", "high"]
+          },
+          {
+            "user": "carol",
+            "feasibility": ["easy", "medium", "hard"],
+            "impact": ["low", "medium", "high"]
+          }
+        ]
+      }
+    ],
+    "last_saved": {
+      "from_ip": "192.168.1.101",
+      "by_user": "bob",
+      "at_time": "2025-01-01 12:34:56",
+      "correlation_id": "corr-002"
+    }
+  },
+  {
+    "_id": "000000000000000000000002",
+    "status": "pending",
+    "channel_id": "workshop-channel-003",
+    "channel_name": "anotherPendingWorkshop",
+    "category": "Design Thinking",
+    "guild": "Agile Learning Institute",
+    "purpose": "New design thinking workshop",
+    "when": {
+      "from": "2026-01-02 12:00:00",
+      "to": "2026-01-02 13:00:00"
+    },
+    "current_exercise": 0,
+    "exercises": [
+      {
+        "exercise_id": "e00000000000000000000001",
+        "conversation_id": "c00000000000000000000001",
+        "exercise_name": "stakeholders",
+        "status": "pending"
+      },
+      {
+        "exercise_id": "e00000000000000000000002",
+        "conversation_id": "c00000000000000000000002",
+        "exercise_name": "empathy",
+        "status": "pending"
+      },
+      {
+        "exercise_id": "e00000000000000000000003",
+        "conversation_id": "c00000000000000000000003",
+        "exercise_name": "hills",
+        "status": "pending"
+      },
+      {
+        "exercise_id": "e00000000000000000000004",
+        "conversation_id": "c00000000000000000000004",
+        "exercise_name": "priority",
+        "status": "pending"
+      },
+      {
+        "exercise_id": "e00000000000000000000005",
+        "conversation_id": "c00000000000000000000005",
+        "exercise_name": "retrospective",
+        "status": "pending"
+      }
+    ],
+    "last_saved": {
+      "from_ip": "192.168.1.102",
+      "by_user": "dave",
+      "at_time": "2025-01-01 12:34:56",
+      "correlation_id": "corr-003"
+    }
+  }
+]

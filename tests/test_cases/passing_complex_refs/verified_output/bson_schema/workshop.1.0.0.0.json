@@ -121,174 +121,198 @@
                     "pattern": "^\\S{1,40}$",
                     "bsonType": "string"
                   }
+                },
+                "observation_data": {
+                  "bsonType": "object",
+                  "oneOf": [
+                    {
+                      "bsonType": "object",
+                      "properties": {
+                        "text": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        },
+                        "name": {
+                          "pattern": "^[^\\t\\n\\r]{1,40}$",
+                          "bsonType": "string"
+                        },
+                        "title": {
+                          "pattern": "^[^\\t\\n\\r]{1,40}$",
+                          "bsonType": "string"
+                        },
+                        "roles": {
+                          "bsonType": "array",
+                          "items": {
+                            "pattern": "^\\S{1,40}$",
+                            "bsonType": "string"
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "bsonType": "object",
+                      "properties": {
+                        "says": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "bsonType": "object",
+                      "properties": {
+                        "does": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "bsonType": "object",
+                      "properties": {
+                        "thinks": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "bsonType": "object",
+                      "properties": {
+                        "feels": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "bsonType": "object",
+                      "properties": {
+                        "who": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        },
+                        "what": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        },
+                        "wow": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "bsonType": "object",
+                      "properties": {
+                        "user": {
+                          "pattern": "^\\S{1,40}$",
+                          "bsonType": "string"
+                        },
+                        "feasibility": {
+                          "bsonType": "array",
+                          "items": {
+                            "pattern": "^\\S{1,40}$",
+                            "bsonType": "string"
+                          }
+                        },
+                        "impact": {
+                          "bsonType": "array",
+                          "items": {
+                            "pattern": "^\\S{1,40}$",
+                            "bsonType": "string"
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "bsonType": "object",
+                      "properties": {
+                        "no_brainers": {
+                          "bsonType": "array",
+                          "items": {
+                            "pattern": "^\\S{1,40}$",
+                            "bsonType": "string"
+                          }
+                        },
+                        "big_bets": {
+                          "bsonType": "array",
+                          "items": {
+                            "pattern": "^\\S{1,40}$",
+                            "bsonType": "string"
+                          }
+                        },
+                        "utilities": {
+                          "bsonType": "array",
+                          "items": {
+                            "pattern": "^\\S{1,40}$",
+                            "bsonType": "string"
+                          }
+                        },
+                        "unwise": {
+                          "bsonType": "array",
+                          "items": {
+                            "pattern": "^\\S{1,40}$",
+                            "bsonType": "string"
+                          }
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "bsonType": "object",
+                      "properties": {
+                        "question": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "bsonType": "object",
+                      "properties": {
+                        "worked_well": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "bsonType": "object",
+                      "properties": {
+                        "could_be_improved": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    },
+                    {
+                      "bsonType": "object",
+                      "properties": {
+                        "ideas_to_try": {
+                          "pattern": "^[^\\t\\n\\r]{0,255}$",
+                          "bsonType": "string"
+                        }
+                      },
+                      "additionalProperties": false
+                    }
+                  ]
                 }
               },
               "required": [
                 "users"
               ],
-              "additionalProperties": false,
-              "oneOf": [
-                {
-                  "bsonType": "object",
-                  "properties": {
-                    "users": {
-                      "bsonType": "array",
-                      "items": {
-                        "pattern": "^\\S{1,40}$",
-                        "bsonType": "string"
-                      }
-                    },
-                    "text": {
-                      "pattern": "^[^\\t\\n\\r]{0,255}$",
-                      "bsonType": "string"
-                    },
-                    "name": {
-                      "pattern": "^\\S{1,40}$",
-                      "bsonType": "string"
-                    },
-                    "title": {
-                      "pattern": "^\\S{1,40}$",
-                      "bsonType": "string"
-                    },
-                    "roles": {
-                      "bsonType": "array",
-                      "items": {
-                        "pattern": "^\\S{1,40}$",
-                        "bsonType": "string"
-                      }
-                    }
-                  },
-                  "required": [
-                    "users"
-                  ],
-                  "additionalProperties": false
-                },
-                {
-                  "bsonType": "object",
-                  "properties": {
-                    "users": {
-                      "bsonType": "array",
-                      "items": {
-                        "pattern": "^\\S{1,40}$",
-                        "bsonType": "string"
-                      }
-                    }
-                  },
-                  "required": [
-                    "users"
-                  ],
-                  "additionalProperties": false
-                },
-                {
-                  "bsonType": "object",
-                  "properties": {
-                    "name": {
-                      "pattern": "^\\S{1,40}$",
-                      "bsonType": "string"
-                    },
-                    "users": {
-                      "bsonType": "array",
-                      "items": {
-                        "pattern": "^\\S{1,40}$",
-                        "bsonType": "string"
-                      }
-                    },
-                    "who": {
-                      "pattern": "^[^\\t\\n\\r]{0,255}$",
-                      "bsonType": "string"
-                    },
-                    "what": {
-                      "pattern": "^[^\\t\\n\\r]{0,255}$",
-                      "bsonType": "string"
-                    },
-                    "wow": {
-                      "pattern": "^[^\\t\\n\\r]{0,255}$",
-                      "bsonType": "string"
-                    }
-                  },
-                  "required": [
-                    "users"
-                  ],
-                  "additionalProperties": false
-                },
-                {
-                  "bsonType": "object",
-                  "properties": {
-                    "user": {
-                      "pattern": "^\\S{1,40}$",
-                      "bsonType": "string"
-                    },
-                    "feasibility": {
-                      "bsonType": "array",
-                      "items": {
-                        "pattern": "^\\S{1,40}$",
-                        "bsonType": "string"
-                      }
-                    },
-                    "impact": {
-                      "bsonType": "array",
-                      "items": {
-                        "pattern": "^\\S{1,40}$",
-                        "bsonType": "string"
-                      }
-                    }
-                  },
-                  "required": [
-                    "user"
-                  ],
-                  "additionalProperties": false
-                },
-                {
-                  "bsonType": "object",
-                  "properties": {
-                    "no_brainers": {
-                      "bsonType": "array",
-                      "items": {
-                        "pattern": "^\\S{1,40}$",
-                        "bsonType": "string"
-                      }
-                    },
-                    "big_bets": {
-                      "bsonType": "array",
-                      "items": {
-                        "pattern": "^\\S{1,40}$",
-                        "bsonType": "string"
-                      }
-                    },
-                    "utilities": {
-                      "bsonType": "array",
-                      "items": {
-                        "pattern": "^\\S{1,40}$",
-                        "bsonType": "string"
-                      }
-                    },
-                    "unwise": {
-                      "bsonType": "array",
-                      "items": {
-                        "pattern": "^\\S{1,40}$",
-                        "bsonType": "string"
-                      }
-                    }
-                  },
-                  "additionalProperties": false
-                },
-                {
-                  "bsonType": "object",
-                  "properties": {
-                    "users": {
-                      "bsonType": "array",
-                      "items": {
-                        "pattern": "^\\S{1,40}$",
-                        "bsonType": "string"
-                      }
-                    }
-                  },
-                  "required": [
-                    "users"
-                  ],
-                  "additionalProperties": false
-                }
-              ]
+              "additionalProperties": false
             }
           }
         },

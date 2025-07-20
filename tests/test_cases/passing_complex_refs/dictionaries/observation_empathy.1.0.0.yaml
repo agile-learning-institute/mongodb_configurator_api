@@ -1,44 +1,57 @@
 file_name: observation_empathy.1.0.0.yaml
 _locked: false
 root:
-  description: A empathy of a Empathy Mapping exercise
-  type: object
-  properties:
-    users:
-      description: Users who made the observation
-      required: true
-      type: array
-      items:
-        description: User Name
-        type: word
-    observation_data:
-      description: The observation data - can be one of several types
-      type: object
-      required: true
-      properties: {}
-      additional_properties: false
-      one_of:
-        - type: object
-          properties:
-            says:
-              description: Things the user says
-              type: sentence
-          required: ["says"]
-        - type: object
-          properties:
-            does:
-              description: Things the user does
-              type: sentence
-          required: ["does"]
-        - type: object
-          properties:
-            thinks:
-              description: Things the user thinks
-              type: sentence
-          required: ["thinks"]
-        - type: object
-          properties:
-            feels:
-              description: Things the user feels
-              type: sentence
-          required: ["feels"]
+  description: An empathy observation from an Empathy Mapping exercise
+  one_of:
+    - type: object
+      properties:
+        users:
+          description: Users who made the observation
+          required: true
+          type: array
+          items:
+            description: User Name
+            type: word
+        says:
+          description: Things the user says
+          type: sentence
+          required: true
+    - type: object
+      properties:
+        users:
+          description: Users who made the observation
+          required: true
+          type: array
+          items:
+            description: User Name
+            type: word
+        does:
+          description: Things the user does
+          type: sentence
+          required: true
+    - type: object
+      properties:
+        users:
+          description: Users who made the observation
+          required: true
+          type: array
+          items:
+            description: User Name
+            type: word
+        thinks:
+          description: Things the user thinks
+          type: sentence
+          required: true
+    - type: object
+      properties:
+        users:
+          description: Users who made the observation
+          required: true
+          type: array
+          items:
+            description: User Name
+            type: word
+        feels:
+          description: Things the user feels
+          type: sentence
+          required: true

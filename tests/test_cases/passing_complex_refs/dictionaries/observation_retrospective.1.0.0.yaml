@@ -1,44 +1,57 @@
 file_name: observation_retrospective.1.0.0.yaml
 _locked: false
 root:
-  description: A observation for a Retrospective exercise
-  type: object
-  properties:
-    users:
-      description: Users who made the observation
-      required: true
-      type: array
-      items:
-        description: User Name
-        type: word
-    observation_data:
-      description: The observation data - can be one of several types
-      type: object
-      required: true
-      properties: {}
-      additional_properties: false
-      one_of:
-        - type: object
-          properties:
-            question:
-              description: Question that remains
-              type: sentence
-          required: ["question"]
-        - type: object
-          properties:
-            worked_well:
-              description: Something that worked well
-              type: sentence
-          required: ["worked_well"]
-        - type: object
-          properties:
-            could_be_improved:
-              description: Something that could be improved
-              type: sentence
-          required: ["could_be_improved"]
-        - type: object
-          properties:
-            ideas_to_try:
-              description: Something to try differently next time
-              type: sentence
-          required: ["ideas_to_try"]
+  description: An observation for a Retrospective exercise
+  one_of:
+    - type: object
+      properties:
+        users:
+          description: Users who made the observation
+          required: true
+          type: array
+          items:
+            description: User Name
+            type: word
+        question:
+          description: Question that remains
+          type: sentence
+          required: true
+    - type: object
+      properties:
+        users:
+          description: Users who made the observation
+          required: true
+          type: array
+          items:
+            description: User Name
+            type: word
+        worked_well:
+          description: Something that worked well
+          type: sentence
+          required: true
+    - type: object
+      properties:
+        users:
+          description: Users who made the observation
+          required: true
+          type: array
+          items:
+            description: User Name
+            type: word
+        could_be_improved:
+          description: Something that could be improved
+          type: sentence
+          required: true
+    - type: object
+      properties:
+        users:
+          description: Users who made the observation
+          required: true
+          type: array
+          items:
+            description: User Name
+            type: word
+        ideas_to_try:
+          description: Something to try differently next time
+          type: sentence
+          required: true

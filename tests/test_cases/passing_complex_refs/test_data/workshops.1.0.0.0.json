@@ -3,13 +3,13 @@
     "_id": {"$oid": "000000000000000000000000"},
     "status": "pending",
     "channel_id": "workshop-channel-001",
-    "channel_name": "pending Empty",
+    "channel_name": "pendingEmpty",
     "category": "Design Thinking",
     "guild": "Agile Learning Institute",
     "purpose": "Practice design thinking exercises",
     "when": {
-      "from": {"$date": "1/2/2025 12:00:00"},
-      "to": {"$date": "1/2/2025 13:00:00"}
+      "from": {"$date": "2025-01-02T12:00:00"},
+      "to": {"$date": "2025-01-02T13:00:00"}
     },
     "current_exercise": 4,
     "exercises": [
@@ -19,8 +19,8 @@
         "exercise_name": "stakeholders",
         "status": "complete",
         "duration": {
-          "from": {"$date": "1/2/2025 12:10:00"},
-          "to": {"$date": "1/2/2025 12:15:00"}
+          "from": {"$date": "2025-01-02T12:10:00"},
+          "to": {"$date": "2025-01-02T12:15:00"}
         },
         "observations": [
           {
@@ -51,11 +51,14 @@
         "conversation_id": {"$oid": "C00000000000000000000002"},
         "exercise_name": "empathy",
         "status": "complete",
-        "duration": {"from": {"$date": "1/2/2025 12:15:00"}},
+        "duration": {"from": {"$date": "2025-01-02T12:15:00"}, "to": {"$date": "2025-01-02T12:20:00"}},
         "persona": {
           "name": "Claire",
-          "description": "Claire the Customer.",
-          "hobbies": ["hiking", "reading", "traveling"]
+          "age": 35,
+          "occupation": "Marketing Manager",
+          "goals": "To increase customer engagement and brand awareness",
+          "frustrations": "Limited budget and time constraints",
+          "needs": "Better tools to track campaign performance"
         },
         "observations": [
           {
@@ -85,7 +88,7 @@
         "conversation_id": {"$oid": "C00000000000000000000003"},
         "exercise_name": "hills",
         "status": "complete",
-        "duration": {"from": {"$date": "1/2/2025 12:20:00"}},
+        "duration": {"from": {"$date": "2025-01-02T12:20:00"}, "to": {"$date": "2025-01-02T12:25:00"}},
         "observations": [
           {
             "users": ["fred", "amy"],
@@ -112,7 +115,7 @@
         "conversation_id": {"$oid": "C00000000000000000000004"},
         "exercise_name": "priority",
         "status": "complete",
-        "duration": {"from": {"$date": "1/2/2025 12:25:00"}},
+        "duration": {"from": {"$date": "2025-01-02T12:25:00"}, "to": {"$date": "2025-01-02T12:30:00"}},
         "observations": [
           {
             "user": "fred",
@@ -131,7 +134,7 @@
         "conversation_id": {"$oid": "C00000000000000000000005"},
         "exercise_name": "retrospective",
         "status": "observe",
-        "duration": {"from": {"$date": "1/2/2025 12:30:00"}},
+        "duration": {"from": {"$date": "2025-01-02T12:30:00"}, "to": {"$date": "2025-01-02T12:35:00"}},
         "observations": [
           {
             "users": ["fred", "amy"],
@@ -157,10 +160,10 @@
       }
     ],
     "last_saved": {
-      "fromIp": "192.168.1.100",
-      "byUser": "fred",
-      "atTime": {"$date": "1/1/2025 12:34:56"},
-      "correlationId": "corr-001"
+      "from_ip": "192.168.1.100",
+      "by_user": "fred",
+      "at_time": {"$date": "2025-01-01T12:34:56"},
+      "correlation_id": "corr-001"
     }
   },
   {
@@ -172,8 +175,8 @@
     "guild": "Agile Learning Institute",
     "purpose": "Advanced design thinking workshop",
     "when": {
-      "from": {"$date": "1/2/2025 12:00:00"},
-      "to": {"$date": "1/2/2025 13:00:00"}
+      "from": {"$date": "2025-01-02T12:00:00"},
+      "to": {"$date": "2025-01-02T13:00:00"}
     },
     "current_exercise": 0,
     "exercises": [
@@ -183,8 +186,8 @@
         "exercise_name": "hills",
         "status": "pending",
         "duration": {
-          "from": {"$date": "1/2/2025 12:10:00"},
-          "to": {"$date": "1/2/2025 12:15:00"}
+          "from": {"$date": "2025-01-02T12:10:00"},
+          "to": {"$date": "2025-01-02T12:15:00"}
         },
         "observations": [
           {
@@ -207,8 +210,8 @@
         "exercise_name": "priority",
         "status": "pending",
         "duration": {
-          "from": {"$date": "1/2/2025 12:10:00"},
-          "to": {"$date": "1/2/2025 12:15:00"}
+          "from": {"$date": "2025-01-02T12:10:00"},
+          "to": {"$date": "2025-01-02T12:15:00"}
         },
         "observations": [
           {
@@ -225,23 +228,23 @@
       }
     ],
     "last_saved": {
-      "fromIp": "192.168.1.101",
-      "byUser": "bob",
-      "atTime": {"$date": "1/1/2025 12:34:56"},
-      "correlationId": "corr-002"
+      "from_ip": "192.168.1.101",
+      "by_user": "bob",
+      "at_time": {"$date": "2025-01-01T12:34:56"},
+      "correlation_id": "corr-002"
     }
   },
   {
     "_id": {"$oid": "000000000000000000000002"},
     "status": "pending",
     "channel_id": "workshop-channel-003",
-    "channel_name": "another pending workshop",
+    "channel_name": "anotherPendingWorkshop",
     "category": "Design Thinking",
     "guild": "Agile Learning Institute",
     "purpose": "New design thinking workshop",
     "when": {
-      "from": {"$date": "1/2/2026 12:00:00"},
-      "to": {"$date": "1/2/2026 13:00:00"}
+      "from": {"$date": "2026-01-02T12:00:00"},
+      "to": {"$date": "2026-01-02T13:00:00"}
     },
     "current_exercise": 0,
     "exercises": [
@@ -277,10 +280,10 @@
       }
     ],
     "last_saved": {
-      "fromIp": "192.168.1.102",
-      "byUser": "dave",
-      "atTime": {"$date": "1/1/2025 12:34:56"},
-      "correlationId": "corr-003"
+      "from_ip": "192.168.1.102",
+      "by_user": "dave",
+      "at_time": {"$date": "2025-01-01T12:34:56"},
+      "correlation_id": "corr-003"
     }
   }
 ]

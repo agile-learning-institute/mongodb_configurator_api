@@ -399,7 +399,7 @@ class TestTemplate(TestProcessingAndRendering):
 class TestComplexRefs(TestProcessingAndRendering):
     """Test Processing and Rendering of complex refs with oneOf functionality"""
 
-    expected_pro_count = 3  # Updated to match actual processing behavior when versions are skipped
+    expected_pro_count = 4  # Updated to match actual processing behavior with corrected dictionaries
     
     def setUp(self):
         self.test_case = 'passing_complex_refs'
@@ -413,26 +413,63 @@ class TestComplexRefs(TestProcessingAndRendering):
         # Process all configurations
         results = Configuration.process_all()
 
+        # Debug: Print the full processing results
+        print("\n=== PROCESSING RESULTS DEBUG ===")
+        print(f"Overall status: {results.status}")
+        print(f"Full results: {results.to_dict()}")
+        print("=== END DEBUG ===\n")
+
         # Assert processing was successful
         self.assertEqual(results.status, "SUCCESS", f"Processing failed: {results.to_dict()}")
 
         # Recursively check all PRO* events for SUCCESS status, count them, and check ENU-05
         pro_count = 0
         enu_05_success = False
+        failure_events = []
+        
         def check_events(event):
-            nonlocal pro_count, enu_05_success
+            nonlocal pro_count, enu_05_success, failure_events
             if isinstance(event, dict):
                 eid = str(event.get("id", ""))
+                status = event.get("status", "")
+                event_type = event.get("event_type", "")
+                
+                # Debug: Print all events
+                print(f"Event: {eid} ({event_type}) - Status: {status}")
+                
+                # Check for any FAILURE status in the entire event tree
+                if status == "FAILURE":
+                    failure_events.append({
+                        "id": eid,
+                        "type": event_type,
+                        "data": event.get("data", {}),
+                        "event": event
+                    })
+                
+                # Count PRO* events and check their status
                 if eid.startswith("PRO"):
                     pro_count += 1
-                    self.assertEqual(event.get("status"), "SUCCESS", f"Event {eid} did not succeed: {event}")
-                if eid == "ENU-05" and event.get("status") == "SUCCESS":
+                    self.assertEqual(status, "SUCCESS", f"Event {eid} did not succeed: {event}")
+                
+                # Check for ENU-05 success
+                if eid == "ENU-05" and status == "SUCCESS":
                     enu_05_success = True
+                
+                # Recursively check sub-events
                 for sub in event.get("sub_events", []):
                     check_events(sub)
             elif hasattr(event, 'to_dict'):
                 check_events(event.to_dict())
+        
         check_events(results.to_dict())
+
+        # Fail the test if any sub-events had FAILURE status
+        if failure_events:
+            failure_details = "\n".join([
+                f"- {event['id']} ({event['type']}): {event['data']}"
+                for event in failure_events
+            ])
+            self.fail(f"Processing completed with {len(failure_events)} failure events:\n{failure_details}")
 
         # Check ENU-05 if required
         if self.expect_enu_05_success and (self.expected_pro_count is None or self.expected_pro_count > 0):
