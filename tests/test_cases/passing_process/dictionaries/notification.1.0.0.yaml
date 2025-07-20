@@ -15,7 +15,7 @@ root:
       required: true
     title:
       description: Notification title
-      type: word
+      type: sentence
       required: true
     message:
       description: Notification message

@@ -1,6 +1,6 @@
 [
   {
-    "_id": {"$oid": "N00000000000000000000006"},
+    "_id": {"$oid": "FF0000000000000000000006"},
     "user_id": {"$oid": "A00000000000000000000001"},
     "title": "System Maintenance",
     "message": "Scheduled maintenance will begin in 2 hours.",
@@ -28,7 +28,7 @@
     }
   },
   {
-    "_id": {"$oid": "N00000000000000000000007"},
+    "_id": {"$oid": "FF0000000000000000000007"},
     "user_id": {"$oid": "A00000000000000000000003"},
     "title": "New Podcast Episode",
     "message": "Episode 16 of Weekly Tech Roundup is now available.",

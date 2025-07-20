@@ -12,7 +12,7 @@ properties:
   title:
     description: Notification title
     type: string
-    pattern: ^\S{1,40}$
+    pattern: ^[^\t\n\r]{0,255}$
   message:
     description: Notification message
     type: string
@@ -62,6 +62,9 @@ properties:
       - personal
       - project
       - reference
+      - education
+      - technology
+      - news
   channels:
     description: Delivery channels for this notification
     type: array

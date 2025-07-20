@@ -11,7 +11,7 @@ root:
       required: true
     title:
       description: Content title
-      type: word
+      type: sentence
       required: true
     subtitle:
       description: Content subtitle

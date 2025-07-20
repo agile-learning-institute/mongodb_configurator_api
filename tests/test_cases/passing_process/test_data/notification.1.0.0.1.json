@@ -1,6 +1,6 @@
 [
   {
-    "_id": {"$oid": "N00000000000000000000001"},
+    "_id": {"$oid": "FF0000000000000000000001"},
     "user_id": {"$oid": "A00000000000000000000001"},
     "title": "Welcome to the Platform",
     "message": "Thank you for joining our platform!",
@@ -13,7 +13,7 @@
     }
   },
   {
-    "_id": {"$oid": "N00000000000000000000002"},
+    "_id": {"$oid": "FF0000000000000000000002"},
     "user_id": {"$oid": "A00000000000000000000002"},
     "title": "New Content Available",
     "message": "A new article has been published that matches your interests.",
@@ -26,7 +26,7 @@
     }
   },
   {
-    "_id": {"$oid": "N00000000000000000000003"},
+    "_id": {"$oid": "FF0000000000000000000003"},
     "user_id": {"$oid": "A00000000000000000000003"},
     "title": "Reminder: Weekly Meeting",
     "message": "Your weekly team meeting starts in 30 minutes.",

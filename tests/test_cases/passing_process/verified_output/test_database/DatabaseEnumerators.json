@@ -1,6 +1,6 @@
 [
   {
-    "_id": "687c1ec933dbea58030d8b0e",
+    "_id": "687c3597c0e0768e5aa3a310",
     "version": 3,
     "_locked": false,
     "enumerators": {
@@ -27,7 +27,10 @@
         "work": "Work related items",
         "personal": "Personal items",
         "project": "Project specific items",
-        "reference": "Reference materials"
+        "reference": "Reference materials",
+        "education": "Educational items",
+        "technology": "Technology related items",
+        "news": "News related items"
       },
       "category_tags": {
         "urgent": "Requires immediate attention",
@@ -56,13 +59,16 @@
         "movie": "Movie",
         "tv_show": "TV Show",
         "documentary": "Documentary",
-        "short": "Short Film"
+        "short": "Short Film",
+        "image": "Image",
+        "audio": "Audio"
       },
       "media_format": {
         "bluray": "Blu-ray",
         "dvd": "DVD",
         "digital": "Digital",
-        "streaming": "Streaming"
+        "streaming": "Streaming",
+        "jpg": "JPEG Image Format"
       },
       "media_tags": {
         "action": "Action",
@@ -70,7 +76,11 @@
         "documentary": "Documentary",
         "drama": "Drama",
         "comedy": "Comedy",
-        "thriller": "Thriller"
+        "thriller": "Thriller",
+        "art": "Art",
+        "painting": "Painting",
+        "music": "Music",
+        "song": "Song"
       },
       "audio_format": {
         "mp3": "MP3 Audio Format",
@@ -120,7 +130,7 @@
     "file_name": "enumerations.3.yaml"
   },
   {
-    "_id": "687c1ec933dbea58030d8b11",
+    "_id": "687c3597c0e0768e5aa3a313",
     "version": 2,
     "_locked": false,
     "enumerators": {
@@ -147,13 +157,16 @@
         "movie": "Movie",
         "tv_show": "TV Show",
         "documentary": "Documentary",
-        "short": "Short Film"
+        "short": "Short Film",
+        "image": "Image",
+        "audio": "Audio"
       },
       "media_format": {
         "bluray": "Blu-ray",
         "dvd": "DVD",
         "digital": "Digital",
-        "streaming": "Streaming"
+        "streaming": "Streaming",
+        "jpg": "JPEG Image Format"
       },
       "media_tags": {
         "action": "Action",
@@ -161,7 +174,11 @@
         "documentary": "Documentary",
         "drama": "Drama",
         "comedy": "Comedy",
-        "thriller": "Thriller"
+        "thriller": "Thriller",
+        "art": "Art",
+        "painting": "Painting",
+        "music": "Music",
+        "song": "Song"
       },
       "audio_format": {
         "mp3": "MP3 Audio Format",
@@ -181,7 +198,7 @@
     "file_name": "enumerations.2.yaml"
   },
   {
-    "_id": "687c1ec933dbea58030d8b14",
+    "_id": "687c3597c0e0768e5aa3a316",
     "version": 1,
     "_locked": false,
     "enumerators": {
@@ -206,13 +223,16 @@
         "movie": "Movie",
         "tv_show": "TV Show",
         "documentary": "Documentary",
-        "short": "Short Film"
+        "short": "Short Film",
+        "image": "Image",
+        "audio": "Audio"
       },
       "media_format": {
         "bluray": "Blu-ray",
         "dvd": "DVD",
         "digital": "Digital",
-        "streaming": "Streaming"
+        "streaming": "Streaming",
+        "jpg": "JPEG Image Format"
       },
       "media_tags": {
         "action": "Action",
@@ -220,7 +240,11 @@
         "documentary": "Documentary",
         "drama": "Drama",
         "comedy": "Comedy",
-        "thriller": "Thriller"
+        "thriller": "Thriller",
+        "art": "Art",
+        "painting": "Painting",
+        "music": "Music",
+        "song": "Song"
       },
       "audio_format": {
         "mp3": "MP3 Audio Format",
@@ -240,13 +264,15 @@
     "file_name": "enumerations.1.yaml"
   },
   {
-    "_id": "687c1ec933dbea58030d8b17",
+    "_id": "687c3597c0e0768e5aa3a319",
     "version": 0,
     "_locked": false,
     "enumerators": {
       "default_status": {
         "active": "Not Deleted",
-        "archived": "Soft Delete Indicator"
+        "archived": "Soft Delete Indicator",
+        "draft": "Draft Status",
+        "published": "Published Status"
       }
     },
     "file_name": "enumerations.0.yaml"

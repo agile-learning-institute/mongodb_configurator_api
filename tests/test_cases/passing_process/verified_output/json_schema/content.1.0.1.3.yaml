@@ -8,7 +8,7 @@ properties:
   title:
     description: Content title
     type: string
-    pattern: ^\S{1,40}$
+    pattern: ^[^\t\n\r]{0,255}$
   subtitle:
     description: Content subtitle
     type: string
@@ -72,6 +72,9 @@ properties:
               - personal
               - project
               - reference
+              - education
+              - technology
+              - news
             tags:
               description: Category tags
               type: array

@@ -48,6 +48,7 @@
     },
     "tags": ["art", "painting"],
     "metadata": {
+      "image_url": "https://example.com/images/mona-lisa.jpg",
       "width": 77,
       "height": 53,
       "format": "jpg"

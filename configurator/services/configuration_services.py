@@ -88,28 +88,22 @@ class Configuration:
         event = ConfiguratorEvent("CFG-ROUTES-02", "PROCESS_ALL_CONFIGURATIONS")
         
         for file in files:
+            sub_event = ConfiguratorEvent(f"CFG-{file.file_name}", "PROCESS_CONFIGURATION")
+            event.append_events([sub_event])
+            
             try:
-                sub_event = ConfiguratorEvent(f"CFG-{file.file_name}", "PROCESS_CONFIGURATION")
-                event.append_events([sub_event])
                 configuration = Configuration(file.file_name)
                 process_event = configuration.process()
-                sub_event.data = process_event.data
                 sub_event.append_events([process_event])
                 sub_event.record_success()
             except ConfiguratorException as ce:
-                sub_event.record_failure(f"ConfiguratorException processing configuration {file.file_name}")
-                event.append_events([ce.event])
-                event.record_failure(f"ConfiguratorException processing configuration {file.file_name}")
-                raise ConfiguratorException(f"ConfiguratorException processing configuration {file.file_name}", event)
+                sub_event.record_failure(f"ConfiguratorException processing configuration {file.file_name}: {str(ce)}")
+                sub_event.append_events([ce.event])
             except Exception as e:
-                sub_event.record_failure(f"Failed to process configuration {file.file_name}: {str(e)}")
-                event.record_failure(f"Unexpected error processing configuration {file.file_name}")
-                raise ConfiguratorException(f"Unexpected error processing configuration {file.file_name}", event)
+                sub_event.record_failure(f"Unexpected error processing configuration {file.file_name}: {str(e)}")
         
         event.record_success()
         return event
-    
-
     
     def delete(self):
         if self._locked:
@@ -227,7 +221,6 @@ class Version:
     def process(self, mongo_io: MongoIO) -> ConfiguratorEvent:
         """Process this version with proper event nesting."""
         event = ConfiguratorEvent(event_id=f"{self.collection_name}.{self.version_str}", event_type="PROCESS")
-        sub_event = None
         
         try:
             # Check if this version is already implemented
@@ -309,10 +302,8 @@ class Version:
         
         except ConfiguratorException as e:
             event.append_events([e.event])
-            sub_event.record_failure(f"ConfiguratorException processing version {self.version_str}: {str(e)}")
-            event.record_failure("error processing version")
+            event.record_failure(f"ConfiguratorException processing version {self.version_str}: {str(e)}")
             raise ConfiguratorException(f"ConfiguratorException processing version {self.version_str}: {str(e)}", event)
         except Exception as e:
-            sub_event.record_failure(f"ConfiguratorException processing version {self.version_str}: {str(e)}")
-            event.record_failure("unexpected error processing version", {"error": str(e)})
-            raise ConfiguratorException(f"ConfiguratorException processing version {self.version_str}: {str(e)}", event)
+            event.record_failure(f"Unexpected error processing version {self.version_str}: {str(e)}")
+            raise ConfiguratorException(f"Unexpected error processing version {self.version_str}: {str(e)}", event)

@@ -21,11 +21,14 @@ enumerators:
     tv_show: TV Show
     documentary: Documentary
     short: Short Film
+    image: Image
+    audio: Audio
   media_format:
     bluray: Blu-ray
     dvd: DVD
     digital: Digital
     streaming: Streaming
+    jpg: JPEG Image Format
   media_tags:
     action: Action
     sci_fi: Science Fiction
@@ -33,6 +36,10 @@ enumerators:
     drama: Drama
     comedy: Comedy
     thriller: Thriller
+    art: Art
+    painting: Painting
+    music: Music
+    song: Song
   audio_format:
     mp3: MP3 Audio Format
     wav: WAV Audio Format

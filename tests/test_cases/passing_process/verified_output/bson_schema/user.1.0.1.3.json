@@ -15,9 +15,11 @@
     "status": {
       "bsonType": "string",
       "enum": [
-        "draft",
         "active",
-        "archived"
+        "archived",
+        "published",
+        "draft",
+        "scheduled"
       ]
     },
     "categories": {
@@ -35,7 +37,10 @@
               "work",
               "personal",
               "project",
-              "reference"
+              "reference",
+              "education",
+              "technology",
+              "news"
             ]
           },
           "tags": {

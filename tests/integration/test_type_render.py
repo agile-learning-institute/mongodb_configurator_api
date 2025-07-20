@@ -4,8 +4,6 @@ from configurator.utils.file_io import FileIO
 import unittest
 import os
 import json
-import tempfile
-import shutil
 import yaml
 from bson import json_util
 
@@ -23,15 +21,10 @@ class TestTypeRender(unittest.TestCase):
         if 'INPUT_FOLDER' in os.environ:
             del os.environ['INPUT_FOLDER']
         
-        # Create temporary directory for test output
-        self.temp_dir = tempfile.mkdtemp(prefix="test_type_render_")
+
 
     def tearDown(self):
         """Clean up after tests."""
-        # Clean up temporary directory
-        if os.path.exists(self.temp_dir):
-            shutil.rmtree(self.temp_dir)
-        
         Config._instance = None
 
     def test_type_rendering(self):

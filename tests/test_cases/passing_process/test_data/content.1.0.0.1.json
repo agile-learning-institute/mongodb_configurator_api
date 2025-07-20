@@ -23,7 +23,7 @@
     "title": "Advanced Schema Design",
     "subtitle": "Best practices for complex data modeling",
     "content_type": "video",
-    "status": "draft",
+    "status": "archived",
     "author_id": {"$oid": "A00000000000000000000002"},
     "metadata": {
       "created_at": {"$date": "2024-01-18T09:00:00Z"},
@@ -41,7 +41,7 @@
     "title": "Weekly Tech Roundup",
     "subtitle": "Latest developments in the tech world",
     "content_type": "podcast",
-    "status": "published",
+    "status": "active",
     "author_id": {"$oid": "A00000000000000000000003"},
     "metadata": {
       "created_at": {"$date": "2024-01-22T08:00:00Z"},

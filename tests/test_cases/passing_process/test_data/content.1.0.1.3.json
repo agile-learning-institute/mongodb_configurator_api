@@ -13,7 +13,7 @@
       "published_at": {"$date": "2024-02-02T14:30:00Z"},
       "categories": [
         {
-          "name": "Advanced Topics",
+          "name": "AdvancedTopics",
           "type": "education",
           "tags": ["important", "normal"]
         }
@@ -40,7 +40,7 @@
       "published_at": {"$date": "2024-02-06T16:00:00Z"},
       "categories": [
         {
-          "name": "Real-time Systems",
+          "name": "RealTimeSystems",
           "type": "technology",
           "tags": ["urgent", "important"]
         }

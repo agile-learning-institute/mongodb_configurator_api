@@ -7,8 +7,6 @@ from configurator.utils.configurator_exception import ConfiguratorEvent
 import unittest
 import os
 import json
-import tempfile
-import shutil
 import yaml
 import datetime
 from bson import json_util
@@ -51,46 +49,66 @@ class TestProcessingAndRendering(unittest.TestCase):
         mongo_io.drop_database()
         mongo_io.disconnect()
         
-        # Create temporary directory for test output
-        self.temp_dir = tempfile.mkdtemp(prefix="test_processing_")
-        
         # Initialize MongoDB connection
         self.mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
         
 
     def tearDown(self):
         """Clean up after tests."""
-        # Clean up temporary directory
-        if os.path.exists(self.temp_dir):
-            shutil.rmtree(self.temp_dir)
-        
         Config._instance = None
 
     def test_processing(self):
-        """Test processing of configuration files and verify all PRO* events succeeded, ENU-05 success, and PRO* count matches expected."""
+        """Test processing of configuration files and verify all events succeeded, ENU-05 success, and PRO* count matches expected."""
         # Process all configurations
         results = Configuration.process_all()
 
         # Assert processing was successful
         self.assertEqual(results.status, "SUCCESS", f"Processing failed: {results.to_dict()}")
 
-        # Recursively check all PRO* events for SUCCESS status, count them, and check ENU-05
+        # Recursively check all events for SUCCESS status, count PRO* events, and check ENU-05
         pro_count = 0
         enu_05_success = False
+        failure_events = []
+        
         def check_events(event):
-            nonlocal pro_count, enu_05_success
+            nonlocal pro_count, enu_05_success, failure_events
             if isinstance(event, dict):
                 eid = str(event.get("id", ""))
+                status = event.get("status", "")
+                
+                # Check for any FAILURE status in the entire event tree
+                if status == "FAILURE":
+                    failure_events.append({
+                        "id": eid,
+                        "type": event.get("type", ""),
+                        "data": event.get("data", {}),
+                        "event": event
+                    })
+                
+                # Count PRO* events and check their status
                 if eid.startswith("PRO"):
                     pro_count += 1
-                    self.assertEqual(event.get("status"), "SUCCESS", f"Event {eid} did not succeed: {event}")
-                if eid == "ENU-05" and event.get("status") == "SUCCESS":
+                    self.assertEqual(status, "SUCCESS", f"Event {eid} did not succeed: {event}")
+                
+                # Check for ENU-05 success
+                if eid == "ENU-05" and status == "SUCCESS":
                     enu_05_success = True
+                
+                # Recursively check sub-events
                 for sub in event.get("sub_events", []):
                     check_events(sub)
             elif hasattr(event, 'to_dict'):
                 check_events(event.to_dict())
+        
         check_events(results.to_dict())
+
+        # Fail the test if any sub-events had FAILURE status
+        if failure_events:
+            failure_details = "\n".join([
+                f"- {event['id']} ({event['type']}): {event['data']}"
+                for event in failure_events
+            ])
+            self.fail(f"Processing completed with {len(failure_events)} failure events:\n{failure_details}")
 
         # Check ENU-05 if required
         if self.expect_enu_05_success and (self.expected_pro_count is None or self.expected_pro_count > 0):
@@ -259,28 +277,7 @@ class TestProcessingAndRendering(unittest.TestCase):
         """No-op: event comparison is now handled in test_processing."""
         pass
 
-    def _harvest_processing_events(self, results, events_path):
-        """Harvest processing events and save to verified output file, sanitizing non-primitive types."""
-        def sanitize(obj):
-            if isinstance(obj, dict):
-                return {k: sanitize(v) for k, v in obj.items()}
-            elif isinstance(obj, list):
-                return [sanitize(v) for v in obj]
-            elif isinstance(obj, (str, int, float, bool, type(None))):
-                return obj
-            else:
-                return str(obj)
 
-        events = []
-        for event in results:
-            events.append(sanitize(event.to_dict()))
-        
-        # Save to verified output
-        with open(events_path, 'w') as f:
-            yaml.dump(events, f, default_flow_style=False)
-        
-        print(f"Harvested processing events to: {events_path}")
-        print("Please review the harvested events and update if needed.")
 
     def _compare_bson_schemas(self, verified_output_dir: str):
         """Compare BSON schemas against verified output."""

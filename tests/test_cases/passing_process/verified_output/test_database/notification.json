@@ -1,1 +1,138 @@
-[]
+[
+  {
+    "_id": "ff0000000000000000000001",
+    "user_id": "a00000000000000000000001",
+    "title": "Welcome to the Platform",
+    "message": "Thank you for joining our platform!",
+    "status": "active",
+    "last_saved": {
+      "from_ip": "192.168.1.100",
+      "by_user": "system",
+      "at_time": "2024-01-15 10:05:00",
+      "correlation_id": "corr_001"
+    }
+  },
+  {
+    "_id": "ff0000000000000000000002",
+    "user_id": "a00000000000000000000002",
+    "title": "New Content Available",
+    "message": "A new article has been published that matches your interests.",
+    "status": "archived",
+    "last_saved": {
+      "from_ip": "192.168.1.101",
+      "by_user": "system",
+      "at_time": "2024-01-20 14:35:00",
+      "correlation_id": "corr_002"
+    }
+  },
+  {
+    "_id": "ff0000000000000000000003",
+    "user_id": "a00000000000000000000003",
+    "title": "Reminder: Weekly Meeting",
+    "message": "Your weekly team meeting starts in 30 minutes.",
+    "status": "active",
+    "last_saved": {
+      "from_ip": "192.168.1.102",
+      "by_user": "system",
+      "at_time": "2024-01-22 09:30:00",
+      "correlation_id": "corr_003"
+    }
+  },
+  {
+    "_id": "ff0000000000000000000004",
+    "user_id": "a00000000000000000000001",
+    "title": "Profile Update Required",
+    "message": "Please update your profile information to continue using the platform.",
+    "status": "draft",
+    "last_saved": {
+      "from_ip": "192.168.1.103",
+      "by_user": "system",
+      "at_time": "2024-01-25 11:05:00",
+      "correlation_id": "corr_004"
+    }
+  },
+  {
+    "_id": "ff0000000000000000000005",
+    "user_id": "a00000000000000000000002",
+    "title": "New Video Available",
+    "message": "A new video tutorial has been published in your area of interest.",
+    "status": "published",
+    "last_saved": {
+      "from_ip": "192.168.1.104",
+      "by_user": "system",
+      "at_time": "2024-01-28 15:05:00",
+      "correlation_id": "corr_005"
+    }
+  },
+  {
+    "_id": "ff0000000000000000000006",
+    "user_id": "a00000000000000000000001",
+    "title": "System Maintenance",
+    "message": "Scheduled maintenance will begin in 2 hours.",
+    "notification_type": "system",
+    "status": "active",
+    "priority": "critical",
+    "tags": [
+      "urgent"
+    ],
+    "categories": [
+      "work"
+    ],
+    "channels": [
+      "email",
+      "sms",
+      "push",
+      "in_app"
+    ],
+    "metadata": {
+      "created_at": "2024-02-01 08:00:00",
+      "sent_at": "2024-02-01 08:05:00",
+      "expires_at": "2024-02-01 10:00:00",
+      "source": {
+        "collection": "system",
+        "document_id": "dd0000000000000000000001",
+        "action": "created"
+      }
+    },
+    "last_saved": {
+      "from_ip": "192.168.1.105",
+      "by_user": "system",
+      "at_time": "2024-02-01 08:05:00",
+      "correlation_id": "corr_006"
+    }
+  },
+  {
+    "_id": "ff0000000000000000000007",
+    "user_id": "a00000000000000000000003",
+    "title": "New Podcast Episode",
+    "message": "Episode 16 of Weekly Tech Roundup is now available.",
+    "notification_type": "content",
+    "status": "active",
+    "priority": "medium",
+    "tags": [
+      "normal"
+    ],
+    "categories": [
+      "news"
+    ],
+    "channels": [
+      "email",
+      "push"
+    ],
+    "metadata": {
+      "created_at": "2024-02-05 12:00:00",
+      "sent_at": "2024-02-05 12:05:00",
+      "source": {
+        "collection": "content",
+        "document_id": "c00000000000000000000007",
+        "action": "published"
+      }
+    },
+    "last_saved": {
+      "from_ip": "192.168.1.106",
+      "by_user": "system",
+      "at_time": "2024-02-05 12:05:00",
+      "correlation_id": "corr_007"
+    }
+  }
+]
