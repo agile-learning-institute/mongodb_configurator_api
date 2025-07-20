@@ -1000,7 +1000,68 @@ components:
                 type: boolean
                 default: false 
     dictionary:
-      description: A Simple Schema Dictionary
+      description: A Dictionary with root property wrapper
+      type: object
+      properties:
+        file_name:
+          description: The name of the dictionary file
+          type: string
+        _locked:
+          description: Whether the dictionary is locked from modification
+          type: boolean
+          default: false
+        root:
+          description: The root property containing the dictionary schema
+          type: object
+          properties:
+            'ref': 
+              description: Reference to another dictionary
+              type: string
+            name:
+              description: The name of the property
+              type: string
+            description:
+              description: A description of the property
+              type: string
+            type:
+              description: The type of the property
+              type: string
+              enum: 
+                - object
+                - array
+                - enum
+                - enum_array
+                - TYPE
+            required:
+              description: Whether the property is required
+              type: boolean
+              default: false
+            properties:
+              description: Properties of an Object type
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/dictionary_property'
+            additional_properties:
+              description: Should the object type allow additional properties
+              type: boolean
+            items:
+              description: Items of an Array type
+              type: array
+              items:
+                $ref: '#/components/schemas/dictionary_property'
+            enum:
+              description: Enum name for enum or enum_array types
+              type: string
+          required:
+            - description
+            - name
+            - type
+      required:
+        - file_name
+        - _locked
+        - root
+    dictionary_property:
+      description: A Dictionary Property (for nested properties)
       type: object
       properties:
         'ref': 
@@ -1029,15 +1090,15 @@ components:
           description: Properties of an Object type
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/dictionary'
-        additionalProperties:
+            $ref: '#/components/schemas/dictionary_property'
+        additional_properties:
           description: Should the object type allow additional properties
           type: boolean
         items:
           description: Items of an Array type
           type: array
           items:
-            $ref: '#/components/schemas/dictionary'
+            $ref: '#/components/schemas/dictionary_property'
         enum:
           description: Enum name for enum or enum_array types
           type: string
@@ -1046,7 +1107,66 @@ components:
         - name
         - type
     type:
-      description: A Type definition - must be one of three valid forms
+      description: A Type with root property wrapper
+      type: object
+      properties:
+        file_name:
+          description: The name of the type file
+          type: string
+        _locked:
+          description: Whether the type is locked from modification
+          type: boolean
+          default: false
+        root:
+          description: The root property containing the type definition
+          type: object
+          properties:
+            description:
+              description: A description of the type
+              type: string
+            # Universal Primitive - schema only
+            schema:
+              description: Universal primitive schema (mutually exclusive with json_type/bson_type)
+              type: object
+              additionalProperties: true
+            # Typed Primitive - json_type/bson_type only  
+            json_type:
+              description: JSON schema definition (mutually exclusive with schema)
+              type: object
+              additionalProperties: true
+            bson_type:
+              description: BSON schema definition (mutually exclusive with schema)
+              type: object
+              additionalProperties: true
+            # Complex Type - object or array
+            type:
+              description: Type of complex type (object or array)
+              type: string
+              enum: [object, array]
+            properties:
+              description: Properties for object types
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/type_property'
+            items:
+              description: Items definition for array types
+              $ref: '#/components/schemas/type_property'
+            required:
+              description: Whether the type is required
+              type: boolean
+              default: false
+            additional_properties:
+              description: Whether additional properties are allowed (for object types)
+              type: boolean
+              default: false
+          required:
+            - description
+      required:
+        - file_name
+        - _locked
+        - root
+    type_property:
+      description: A Type Property (for nested properties)
       type: object
       properties:
         description:
@@ -1075,15 +1195,15 @@ components:
           description: Properties for object types
           type: object
           additionalProperties:
-            $ref: '#/components/schemas/type'
+            $ref: '#/components/schemas/type_property'
         items:
           description: Items definition for array types
-          $ref: '#/components/schemas/type'
+          $ref: '#/components/schemas/type_property'
         required:
           description: Whether the type is required
           type: boolean
           default: false
-        additionalProperties:
+        additional_properties:
           description: Whether additional properties are allowed (for object types)
           type: boolean
           default: false

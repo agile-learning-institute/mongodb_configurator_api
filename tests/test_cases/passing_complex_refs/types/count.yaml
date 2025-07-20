@@ -1,0 +1,6 @@
+root:
+  description: A numeric count value
+  json_type:
+    type: integer
+  bson_type:
+    bsonType: int

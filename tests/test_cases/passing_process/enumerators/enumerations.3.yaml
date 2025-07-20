@@ -6,6 +6,38 @@ enumerators:
     published: Published Content
     draft: Draft Content
     scheduled: Scheduled Content
+  content_type:
+    article: Written content
+    video: Video content
+    podcast: Audio content
+  content_tags:
+    technology: Technology related content
+    business: Business related content
+    entertainment: Entertainment content
+    education: Educational content
+    news: News content
+  category_type:
+    work: Work related items
+    personal: Personal items
+    project: Project specific items
+    reference: Reference materials
+    education: Educational items
+    technology: Technology related items
+    news: News related items
+  category_tags:
+    urgent: Requires immediate attention
+    important: High priority
+    normal: Standard priority
+    low: Low priority
+    completed: Task is done
+    in_progress: Currently being worked on
+    blocked: Cannot proceed
+    review: Needs review
+  media_quality:
+    hd: High Definition
+    uhd: Ultra High Definition
+    sd: Standard Definition
+    fhd: Full High Definition
   media_status:
     published: Published Media
     draft: Draft Media
@@ -17,16 +49,14 @@ enumerators:
     tv_show: TV Show
     documentary: Documentary
     short: Short Film
+    image: Image
+    audio: Audio
   media_format:
     bluray: Blu-ray
     dvd: DVD
     digital: Digital
     streaming: Streaming
-  media_quality:
-    hd: High Definition
-    uhd: Ultra High Definition
-    sd: Standard Definition
-    fhd: Full High Definition
+    jpg: JPEG Image Format
   media_tags:
     action: Action
     sci_fi: Science Fiction
@@ -34,20 +64,22 @@ enumerators:
     drama: Drama
     comedy: Comedy
     thriller: Thriller
-  category_type:
-    work: Work related items
-    personal: Personal items
-    project: Project specific items
-    reference: Reference materials
-  category_tags:
-    urgent: Requires immediate attention
-    important: High priority
-    normal: Standard priority
-    low: Low priority
-    completed: Task is done
-    in_progress: Currently being worked on
-    blocked: Cannot proceed
-    review: Needs review
+    art: Art
+    painting: Painting
+    music: Music
+    song: Song
+  audio_format:
+    mp3: MP3 Audio Format
+    wav: WAV Audio Format
+    aac: AAC Audio Format
+    ogg: OGG Audio Format
+    flac: FLAC Audio Format
+  image_format:
+    jpg: JPEG Image Format
+    png: PNG Image Format
+    gif: GIF Image Format
+    webp: WebP Image Format
+    svg: SVG Image Format
   notification_type:
     system: System notification
     user: User notification
@@ -68,16 +100,6 @@ enumerators:
     sms: SMS delivery
     push: Push notification
     in_app: In-app notification
-  content_type:
-    article: Written content
-    video: Video content
-    podcast: Audio content
-  content_tags:
-    technology: Technology related content
-    business: Business related content
-    entertainment: Entertainment content
-    education: Educational content
-    news: News content
   notification_action:
     created: Document created
     updated: Document updated

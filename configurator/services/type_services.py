@@ -31,25 +31,25 @@ class Type:
     def __init__(self, file_name: str, document: dict = {}):
         self.config = Config.get_instance()
         self.file_name = file_name
-        self.type_property = {}
-        self._locked = False  # Default to unlocked
+        self._locked = False
+        self.root = None
 
         try:
             if document:
-                self.property = TypeProperty(file_name.replace('.yaml', ''), document)
-                # Extract _locked from document if present
                 self._locked = document.get("_locked", False)
+                self.root = TypeProperty("root", document["root"])
             else:
                 document_data = FileIO.get_document(self.config.TYPE_FOLDER, file_name)
-                self.property = TypeProperty(file_name.replace('.yaml', ''), document_data)
-                # Extract _locked from loaded document if present
                 self._locked = document_data.get("_locked", False)
+                self.root = TypeProperty("root", document_data["root"])
         except ConfiguratorException as e:
             # Re-raise with additional context about the type file
-            event = ConfiguratorEvent(event_id=f"TYP-CONSTRUCTOR-{file_name}", event_type="TYPE_CONSTRUCTOR")
-            event.record_failure(f"Failed to construct type from {file_name}")
-            event.append_events([e.event])
-            raise ConfiguratorException(f"Failed to construct type from {file_name}: {str(e)}", event)
+            event = ConfiguratorEvent(
+                event_type="TYPE_CONSTRUCTOR",
+                event_id=f"TYP-CONSTRUCTOR-{file_name}",
+                event_data={"error": f"Unexpected error constructing type from {file_name}: {str(e)}"}
+            )
+            raise ConfiguratorException(f"Unexpected error constructing type from {file_name}: {str(e)}", event)
         except Exception as e:
             # Handle unexpected errors during construction
             event = ConfiguratorEvent(event_id=f"TYP-CONSTRUCTOR-{file_name}", event_type="TYPE_CONSTRUCTOR")
@@ -100,19 +100,25 @@ class Type:
     def get_json_schema(self, type_stack: list = None):
         if type_stack is None:
             type_stack = []
-        return self.property.get_json_schema(type_stack)
+        return self.root.get_json_schema(type_stack)
     
     def get_bson_schema(self, type_stack: list = None):
         if type_stack is None:
             type_stack = []
-        return self.property.get_bson_schema(type_stack)
+        return self.root.get_bson_schema(type_stack)
     
     def to_dict(self):
-        return {
+        """Convert the Type to a dictionary representation"""
+        result = {
             "file_name": self.file_name,
-            "_locked": self._locked,  # Always include _locked
-            **self.property.to_dict()
+            "_locked": self._locked,
         }
+        
+        # If we have root data, include it
+        if self.root:
+            result["root"] = self.root.to_dict()
+        
+        return result
                 
     def delete(self):
         if self._locked:
@@ -143,9 +149,15 @@ class TypeProperty:
         self.schema = property.get("schema", None)
         self.json_type = property.get("json_type", None)
         self.bson_type = property.get("bson_type", None)
-        self.additional_properties = property.get("additionalProperties", False)
+        self.additional_properties = property.get("additional_properties", False)
         self.is_primitive = False
         self.is_universal = False
+
+        # Track which fields were present in original data
+        if "required" in property:
+            self._original_required = True
+        if "additional_properties" in property:
+            self._original_additional_properties = True
 
         if self.schema is not None:
             self.is_primitive = True
@@ -165,48 +177,58 @@ class TypeProperty:
             self.properties = {}
             for name, prop in property.get("properties", {}).items():
                 self.properties[name] = TypeProperty(name, prop)
-            self.additional_properties = property.get("additionalProperties", False)
             return
 
     def to_dict(self):
         if self.is_universal:
-            return {
+            result = {
                 "description": self.description,
-                "required": self.required,
                 "schema": self.schema,
             }
+            if hasattr(self, '_original_required'):
+                result["required"] = self.required
+            return result
 
         elif self.is_primitive:
-            return {
+            result = {
                 "description": self.description,
-                "required": self.required,
                 "json_type": self.json_type or {},
                 "bson_type": self.bson_type or {},
             }
+            if hasattr(self, '_original_required'):
+                result["required"] = self.required
+            return result
 
         elif self.type == "array":
-            return {
+            result = {
                 "description": self.description,
-                "required": self.required,
                 "type": self.type,
                 "items": self.items.to_dict(),
             }
+            if hasattr(self, '_original_required'):
+                result["required"] = self.required
+            return result
 
         elif self.type == "object":
-            return {
+            result = {
                 "description": self.description,
-                "required": self.required,
                 "type": self.type,
                 "properties": {name: property.to_dict() for name, property in self.properties.items()},
-                "additionalProperties": self.additional_properties
             }
+            if hasattr(self, '_original_required'):
+                result["required"] = self.required
+            if hasattr(self, '_original_additional_properties'):
+                result["additional_properties"] = self.additional_properties
+            return result
         
         else: # custom type
-            return {
+            result = {
                 "description": self.description,
-                "required": self.required,
                 "type": self.type
             }
+            if hasattr(self, '_original_required'):
+                result["required"] = self.required
+            return result
     
     def get_json_schema(self, type_stack: list = None):
         if type_stack is None:
@@ -320,9 +342,9 @@ class TypeProperty:
         try:
             custom_type = Type(type_name)
             if schema_type == "json":
-                custom_schema = custom_type.property.get_json_schema(type_stack)
+                custom_schema = custom_type.root.get_json_schema(type_stack)
             else:
-                custom_schema = custom_type.property.get_bson_schema(type_stack)
+                custom_schema = custom_type.root.get_bson_schema(type_stack)
             return custom_schema
         finally:
             type_stack.pop()

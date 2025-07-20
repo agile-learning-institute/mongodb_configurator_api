@@ -34,5 +34,42 @@
       "format": "bluray",
       "quality": "hd"
     }
+  },
+  {
+    "_id": {"$oid": "C00000000000000000000003"},
+    "title": "The Mona Lisa",
+    "type": "image",
+    "status": "published",
+    "last_saved": {
+      "from_ip": "127.0.0.1",
+      "by_user": "system",
+      "at_time": {"$date": "2024-01-02T00:00:00Z"},
+      "correlation_id": "corr_006"
+    },
+    "tags": ["art", "painting"],
+    "metadata": {
+      "image_url": "https://example.com/images/mona-lisa.jpg",
+      "width": 77,
+      "height": 53,
+      "format": "jpg"
+    }
+  },
+  {
+    "_id": {"$oid": "C00000000000000000000004"},
+    "title": "The sound of silence",
+    "type": "audio",
+    "status": "published",
+    "last_saved": {
+      "from_ip": "127.0.0.1",
+      "by_user": "system",
+      "at_time": {"$date": "2024-01-02T00:00:00Z"},
+      "correlation_id": "corr_006"
+    },
+    "tags": ["music", "song"],
+    "metadata": {
+      "audio_url": "https://example.com/audio/the-sound-of-silence.mp3",
+      "duration": 180,
+      "format": "mp3"
+    }
   }
 ]

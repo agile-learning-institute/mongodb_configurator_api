@@ -84,7 +84,7 @@ class TestTypeProperty(unittest.TestCase):
         property_data = {
             "description": "Object with properties",
             "type": "object",
-            "additionalProperties": True,
+            "additional_properties": True,
             "properties": {
                 "name": {
                     "description": "Name property",
@@ -158,7 +158,7 @@ class TestTypeProperty(unittest.TestCase):
         property_data = {
             "description": "Object with properties",
             "type": "object",
-            "additionalProperties": True,
+            "additional_properties": True,
             "required": False,
             "properties": {
                 "name": {
@@ -172,7 +172,7 @@ class TestTypeProperty(unittest.TestCase):
         
         self.assertEqual(result["description"], "Object with properties")
         self.assertEqual(result["type"], "object")
-        self.assertTrue(result["additionalProperties"])
+        self.assertTrue(result["additional_properties"])
         self.assertFalse(result["required"])
         self.assertIn("properties", result)
         self.assertIn("name", result["properties"])
@@ -188,8 +188,7 @@ class TestTypeProperty(unittest.TestCase):
         
         self.assertEqual(result["description"], "Test description")
         self.assertEqual(result["schema"], {"type": "string", "format": "email"})
-        self.assertIn("required", result)
-        self.assertFalse(result["required"])
+        # required is not included because it wasn't in the original data
 
 
 class TestType(unittest.TestCase):
@@ -204,17 +203,19 @@ class TestType(unittest.TestCase):
         mock_config.TYPE_FOLDER = "/test/types"
         
         mock_file_io.get_document.return_value = {
-            "description": "Test type description",
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"}
+            "root": {
+                "description": "Test type description",
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"}
+                }
             }
         }
         
         type_instance = Type("test_type.yaml")
         
         self.assertEqual(type_instance.file_name, "test_type.yaml")
-        self.assertEqual(type_instance.property.description, "Test type description")
+        self.assertEqual(type_instance.root.description, "Test type description")
         mock_file_io.get_document.assert_called_once_with("/test/types", "test_type.yaml")
 
     @patch('configurator.services.type_services.Config')
@@ -224,18 +225,20 @@ class TestType(unittest.TestCase):
         mock_config_class.get_instance.return_value = mock_config
         
         document = {
-            "description": "Test type description",
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"}
+            "root": {
+                "description": "Test type description",
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"}
+                }
             }
         }
         
         type_instance = Type("test_type.yaml", document)
         
         self.assertEqual(type_instance.file_name, "test_type.yaml")
-        self.assertEqual(type_instance.property.description, "Test type description")
-        self.assertIn("name", type_instance.property.properties)
+        self.assertEqual(type_instance.root.description, "Test type description")
+        self.assertIn("name", type_instance.root.properties)
 
     @patch('configurator.services.type_services.Config')
     def test_to_dict(self, mock_config_class):
@@ -244,15 +247,17 @@ class TestType(unittest.TestCase):
         mock_config_class.get_instance.return_value = mock_config
         
         document = {
-            "description": "Test type description",
-            "type": "object",
-            "properties": {
-                "name": {"type": "string"}
+            "root": {
+                "description": "Test type description",
+                "type": "object",
+                "properties": {
+                    "name": {"type": "string"}
+                }
             }
         }
         
         type_instance = Type("test_type", document)
-        result = type_instance.property.to_dict()
+        result = type_instance.root.to_dict()
         
         self.assertEqual(result["description"], "Test type description")
         self.assertEqual(result["type"], "object")
@@ -268,7 +273,7 @@ class TestTypePropertyCanonical(unittest.TestCase):
         property_data = {
             "description": "Object with properties",
             "type": "object",
-            "additionalProperties": True,
+            "additional_properties": True,
             "properties": {
                 "name": {
                     "description": "Name property",
@@ -292,7 +297,7 @@ class TestTypePropertyCanonical(unittest.TestCase):
         result = type_prop.to_dict()
         self.assertEqual(result["description"], "Object with properties")
         self.assertEqual(result["type"], "object")
-        self.assertTrue(result["additionalProperties"])
+        self.assertTrue(result["additional_properties"])
         self.assertIn("properties", result)
 
     def test_array_type(self):
@@ -350,16 +355,18 @@ class TestTypeCanonical(unittest.TestCase):
     def test_type_object(self):
         """Test object type initialization and to_dict"""
         type_data = {
-            "description": "Test object type description",
-            "type": "object",
-            "properties": {
-                "name": {
-                    "description": "Name property",
-                    "type": "string"
-                },
-                "age": {
-                    "description": "Age property",
-                    "type": "number"
+            "root": {
+                "description": "Test object type description",
+                "type": "object",
+                "properties": {
+                    "name": {
+                        "description": "Name property",
+                        "type": "string"
+                    },
+                    "age": {
+                        "description": "Age property",
+                        "type": "number"
+                    }
                 }
             }
         }
@@ -367,13 +374,13 @@ class TestTypeCanonical(unittest.TestCase):
         
         # Test initialization
         self.assertEqual(type_instance.file_name, "test_object.yaml")
-        self.assertEqual(type_instance.property.description, "Test object type description")
-        self.assertEqual(type_instance.property.type, "object")
-        self.assertIn("name", type_instance.property.properties)
-        self.assertIn("age", type_instance.property.properties)
+        self.assertEqual(type_instance.root.description, "Test object type description")
+        self.assertEqual(type_instance.root.type, "object")
+        self.assertIn("name", type_instance.root.properties)
+        self.assertIn("age", type_instance.root.properties)
         
         # Test to_dict
-        result = type_instance.property.to_dict()
+        result = type_instance.root.to_dict()
         self.assertEqual(result["description"], "Test object type description")
         self.assertEqual(result["type"], "object")
         self.assertIn("properties", result)
@@ -384,28 +391,29 @@ class TestTypeCanonical(unittest.TestCase):
         full_result = type_instance.to_dict()
         self.assertEqual(full_result["file_name"], "test_object.yaml")
         self.assertEqual(full_result["_locked"], False)
-        self.assertIn("description", full_result)
-        self.assertIn("type", full_result)
+        self.assertIn("root", full_result)
 
     def test_type_array(self):
         """Test array type initialization and to_dict"""
         type_data = {
-            "description": "Test array type description",
-            "type": "array",
-            "items": {
-                "type": "string"
+            "root": {
+                "description": "Test array type description",
+                "type": "array",
+                "items": {
+                    "type": "string"
+                }
             }
         }
         type_instance = Type("test_array.yaml", type_data)
         
         # Test initialization
         self.assertEqual(type_instance.file_name, "test_array.yaml")
-        self.assertEqual(type_instance.property.description, "Test array type description")
-        self.assertEqual(type_instance.property.type, "array")
-        self.assertIsNotNone(type_instance.property.items)
+        self.assertEqual(type_instance.root.description, "Test array type description")
+        self.assertEqual(type_instance.root.type, "array")
+        self.assertIsNotNone(type_instance.root.items)
         
         # Test to_dict
-        result = type_instance.property.to_dict()
+        result = type_instance.root.to_dict()
         self.assertEqual(result["description"], "Test array type description")
         self.assertEqual(result["type"], "array")
         self.assertIn("items", result)
@@ -418,20 +426,22 @@ class TestTypeCanonical(unittest.TestCase):
     def test_type_primitive_schema(self):
         """Test primitive type with json_type/bson_type initialization and to_dict"""
         type_data = {
-            "description": "Test primitive type description",
-            "json_type": {"type": "string", "format": "email"},
-            "bson_type": {"bsonType": "string"}
+            "root": {
+                "description": "Test primitive type description",
+                "json_type": {"type": "string", "format": "email"},
+                "bson_type": {"bsonType": "string"}
+            }
         }
         type_instance = Type("test_primitive.yaml", type_data)
         
         # Test initialization
         self.assertEqual(type_instance.file_name, "test_primitive.yaml")
-        self.assertEqual(type_instance.property.description, "Test primitive type description")
-        self.assertTrue(type_instance.property.is_primitive)
-        self.assertFalse(type_instance.property.is_universal)
+        self.assertEqual(type_instance.root.description, "Test primitive type description")
+        self.assertTrue(type_instance.root.is_primitive)
+        self.assertFalse(type_instance.root.is_universal)
         
         # Test to_dict
-        result = type_instance.property.to_dict()
+        result = type_instance.root.to_dict()
         self.assertEqual(result["description"], "Test primitive type description")
         self.assertIn("json_type", result)
         self.assertIn("bson_type", result)
@@ -440,6 +450,161 @@ class TestTypeCanonical(unittest.TestCase):
         full_result = type_instance.to_dict()
         self.assertEqual(full_result["file_name"], "test_primitive.yaml")
         self.assertEqual(full_result["_locked"], False)
+
+
+class TestTypeToDict(unittest.TestCase):
+    """Test Type to_dict method with various data structures"""
+
+    def test_to_dict_roundtrip_basic(self):
+        """Test that Type.to_dict() returns the same data used to create it - basic case"""
+        type_data = {
+            "root": {
+                "description": "Basic test type",
+                "type": "string"
+            }
+        }
+        type_instance = Type("test_basic.yaml", type_data)
+        result = type_instance.to_dict()
+        
+        # Remove file_name and _locked for comparison
+        expected = type_data.copy()
+        expected["file_name"] = "test_basic.yaml"
+        expected["_locked"] = False
+        
+        self.assertEqual(result, expected)
+
+    def test_to_dict_roundtrip_complex_nested(self):
+        """Test that Type.to_dict() returns the same data used to create it - complex nested structure"""
+        type_data = {
+            "root": {
+                "description": "Complex nested type",
+                "type": "object",
+                "additional_properties": True,
+                "properties": {
+                    "name": {
+                        "description": "Name field",
+                        "type": "string"
+                    },
+                    "address": {
+                        "description": "Address object",
+                        "type": "object",
+                        "properties": {
+                            "street": {
+                                "description": "Street address",
+                                "type": "string"
+                            },
+                            "city": {
+                                "description": "City name",
+                                "type": "string"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        type_instance = Type("test_complex.yaml", type_data)
+        result = type_instance.to_dict()
+        
+        # Remove file_name and _locked for comparison
+        expected = type_data.copy()
+        expected["file_name"] = "test_complex.yaml"
+        expected["_locked"] = False
+        
+        self.maxDiff = None
+        self.assertEqual(result, expected)
+
+    def test_to_dict_roundtrip_with_arrays(self):
+        """Test that Type.to_dict() returns the same data used to create it - with arrays"""
+        type_data = {
+            "root": {
+                "description": "Array type",
+                "type": "array",
+                "items": {
+                    "description": "String item",
+                    "type": "string"
+                }
+            }
+        }
+        type_instance = Type("test_array.yaml", type_data)
+        result = type_instance.to_dict()
+        
+        # Remove file_name and _locked for comparison
+        expected = type_data.copy()
+        expected["file_name"] = "test_array.yaml"
+        expected["_locked"] = False
+        
+        self.assertEqual(result, expected)
+
+    def test_to_dict_roundtrip_with_primitive(self):
+        """Test that Type.to_dict() returns the same data used to create it - with primitive types"""
+        type_data = {
+            "root": {
+                "description": "Primitive type",
+                "json_type": {"type": "string", "format": "email"},
+                "bson_type": {"bsonType": "string"}
+            }
+        }
+        type_instance = Type("test_primitive.yaml", type_data)
+        result = type_instance.to_dict()
+        
+        # Remove file_name and _locked for comparison
+        expected = type_data.copy()
+        expected["file_name"] = "test_primitive.yaml"
+        expected["_locked"] = False
+        
+        self.assertEqual(result, expected)
+
+    def test_to_dict_roundtrip_with_universal(self):
+        """Test that Type.to_dict() returns the same data used to create it - with universal schema"""
+        type_data = {
+            "root": {
+                "description": "Universal type",
+                "schema": {"type": "string", "format": "email"}
+            }
+        }
+        type_instance = Type("test_universal.yaml", type_data)
+        result = type_instance.to_dict()
+        
+        # Remove file_name and _locked for comparison
+        expected = type_data.copy()
+        expected["file_name"] = "test_universal.yaml"
+        expected["_locked"] = False
+        
+        self.assertEqual(result, expected)
+
+    def test_to_dict_roundtrip_with_missing_values(self):
+        """Test that Type.to_dict() returns the same data used to create it - with missing values"""
+        type_data = {
+            "root": {
+                "description": "Type with missing values",
+                "type": "string"
+            }
+        }
+        type_instance = Type("test_missing.yaml", type_data)
+        result = type_instance.to_dict()
+        
+        # Remove file_name and _locked for comparison
+        expected = type_data.copy()
+        expected["file_name"] = "test_missing.yaml"
+        expected["_locked"] = False
+        
+        self.assertEqual(result, expected)
+
+    def test_to_dict_with_locked_true(self):
+        """Test to_dict method with _locked set to True"""
+        type_data = {
+            "root": {
+                "description": "Locked type",
+                "type": "string"
+            }
+        }
+        type_instance = Type("test_locked.yaml", type_data)
+        type_instance._locked = True
+        result = type_instance.to_dict()
+        
+        self.assertEqual(result["_locked"], True)
+        self.assertEqual(result["file_name"], "test_locked.yaml")
+        self.assertIn("root", result)
 
 
 if __name__ == '__main__':

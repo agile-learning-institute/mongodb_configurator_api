@@ -17,13 +17,17 @@ properties:
     - tv_show
     - documentary
     - short
+    - image
+    - audio
   status:
     description: The current status of the media
     type: string
     enum:
-    - draft
     - published
+    - draft
+    - processing
     - archived
+    - scheduled
   last_saved:
     description: When the media was last updated
     type: object
@@ -59,119 +63,98 @@ properties:
       type: string
       enum:
       - action
-      - comedy
-      - drama
       - sci_fi
       - documentary
+      - drama
+      - comedy
+      - thriller
+      - art
+      - painting
+      - music
+      - song
   metadata:
-    description: Additional metadata about the media
-    type: object
-    properties:
-      duration:
-        description: Duration in minutes
-        type: number
-        minimum: 1
-        multipleOf: 1
-      format:
-        description: Media format
-        type: string
-        enum:
-        - dvd
-        - bluray
-        - digital
-        - streaming
-      quality:
-        description: Quality rating
-        type: string
-        enum:
-        - sd
-        - hd
-        - uhd
-      content_data:
-        description: Media-specific content data
-        type: object
-        properties: {}
-        additionalProperties: false
-        oneOf:
-        - description: Movie-specific metadata
-          type: object
-          properties:
-            director:
-              description: Movie director
-              type: string
-              pattern: ^\S{1,40}$
-            cast:
-              description: Movie cast members
-              type: array
-              items:
-                description: Cast member
-                type: string
-                pattern: ^\S{1,40}$
-            genre:
-              description: Movie genre
-              type: array
-              items:
-                type: string
-                enum:
-                - action
-                - comedy
-                - drama
-                - sci_fi
-                - documentary
-          required:
-          - director
-          additionalProperties: false
-        - description: TV show-specific metadata
-          type: object
-          properties:
-            season:
-              description: Season number
-              type: number
-              minimum: 1
-              multipleOf: 1
-            episode:
-              description: Episode number
-              type: number
-              minimum: 1
-              multipleOf: 1
-            network:
-              description: Broadcasting network
-              type: string
-              pattern: ^\S{1,40}$
-          required:
-          - season
-          - episode
-          additionalProperties: false
-        - description: Documentary-specific metadata
-          type: object
-          properties:
-            subject:
-              description: Documentary subject
-              type: string
-              pattern: ^[^\t\n\r]{0,255}$
-            narrator:
-              description: Documentary narrator
-              type: string
-              pattern: ^\S{1,40}$
-          required:
-          - subject
-          additionalProperties: false
-        - description: Short film-specific metadata
-          type: object
-          properties:
-            festival:
-              description: Film festival
-              type: string
-              pattern: ^\S{1,40}$
-            awards:
-              description: Awards received
-              type: array
-              items:
-                description: Award name
-                type: string
-                pattern: ^\S{1,40}$
-          additionalProperties: false
-    additionalProperties: false
+    oneOf:
+    - description: Video content structure
+      type: object
+      properties:
+        duration:
+          description: Video duration in seconds
+          type: number
+          minimum: 1
+          multipleOf: 1
+        format:
+          description: Video format
+          type: string
+          enum:
+          - bluray
+          - dvd
+          - digital
+          - streaming
+          - jpg
+        quality:
+          description: Video quality
+          type: string
+          enum:
+          - hd
+          - uhd
+          - sd
+          - fhd
+      required:
+      - format
+      additionalProperties: false
+    - description: Audio content structure
+      type: object
+      properties:
+        audio_url:
+          description: Audio file URL
+          type: string
+          pattern: ^https?://[^\s]+$
+        duration:
+          description: Audio duration in seconds
+          type: number
+          minimum: 1
+          multipleOf: 1
+        format:
+          description: Audio format
+          type: string
+          enum:
+          - mp3
+          - wav
+          - aac
+          - ogg
+          - flac
+      required:
+      - audio_url
+      additionalProperties: false
+    - description: Image content structure
+      type: object
+      properties:
+        image_url:
+          description: Image URL
+          type: string
+          pattern: ^https?://[^\s]+$
+        width:
+          description: Image width in pixels
+          type: number
+          minimum: 1
+          multipleOf: 1
+        height:
+          description: Image height in pixels
+          type: number
+          minimum: 1
+          multipleOf: 1
+        format:
+          description: Image format
+          type: string
+          enum:
+          - jpg
+          - png
+          - gif
+          - webp
+          - svg
+      required:
+      - image_url
+      additionalProperties: false
 required:
 - _id
 - title

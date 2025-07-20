@@ -41,6 +41,9 @@ properties:
           - personal
           - project
           - reference
+          - education
+          - technology
+          - news
         tags:
           description: A list of enumerated values assigned by the user
           type: array

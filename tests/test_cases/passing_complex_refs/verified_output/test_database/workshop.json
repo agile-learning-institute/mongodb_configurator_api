@@ -1,6 +1,6 @@
 [
   {
-    "_id": {"$oid": "000000000000000000000000"},
+    "_id": "000000000000000000000000",
     "status": "pending",
     "channel_id": "workshop-channel-001",
     "channel_name": "pendingEmpty",
@@ -8,19 +8,19 @@
     "guild": "Agile Learning Institute",
     "purpose": "Practice design thinking exercises",
     "when": {
-      "from": {"$date": "2025-01-02T12:00:00"},
-      "to": {"$date": "2025-01-02T13:00:00"}
+      "from": "2025-01-02 12:00:00",
+      "to": "2025-01-02 13:00:00"
     },
     "current_exercise": 4,
     "exercises": [
       {
-        "exercise_id": {"$oid": "E00000000000000000000001"},
-        "conversation_id": {"$oid": "C00000000000000000000001"},
+        "exercise_id": "e00000000000000000000001",
+        "conversation_id": "c00000000000000000000001",
         "exercise_name": "stakeholders",
         "status": "complete",
         "duration": {
-          "from": {"$date": "2025-01-02T12:10:00"},
-          "to": {"$date": "2025-01-02T12:15:00"}
+          "from": "2025-01-02 12:10:00",
+          "to": "2025-01-02 12:15:00"
         },
         "observations": [
           {
@@ -47,11 +47,14 @@
         ]
       },
       {
-        "exercise_id": {"$oid": "E00000000000000000000002"},
-        "conversation_id": {"$oid": "C00000000000000000000002"},
+        "exercise_id": "e00000000000000000000002",
+        "conversation_id": "c00000000000000000000002",
         "exercise_name": "empathy",
         "status": "complete",
-        "duration": {"from": {"$date": "2025-01-02T12:15:00"}, "to": {"$date": "2025-01-02T12:20:00"}},
+        "duration": {
+          "from": "2025-01-02 12:15:00",
+          "to": "2025-01-02 12:20:00"
+        },
         "persona": {
           "name": "Claire",
           "age": 35,
@@ -84,11 +87,14 @@
         ]
       },
       {
-        "exercise_id": {"$oid": "E00000000000000000000003"},
-        "conversation_id": {"$oid": "C00000000000000000000003"},
+        "exercise_id": "e00000000000000000000003",
+        "conversation_id": "c00000000000000000000003",
         "exercise_name": "hills",
         "status": "complete",
-        "duration": {"from": {"$date": "2025-01-02T12:20:00"}, "to": {"$date": "2025-01-02T12:25:00"}},
+        "duration": {
+          "from": "2025-01-02 12:20:00",
+          "to": "2025-01-02 12:25:00"
+        },
         "observations": [
           {
             "users": ["fred", "amy"],
@@ -111,11 +117,14 @@
         ]
       },
       {
-        "exercise_id": {"$oid": "E00000000000000000000004"},
-        "conversation_id": {"$oid": "C00000000000000000000004"},
+        "exercise_id": "e00000000000000000000004",
+        "conversation_id": "c00000000000000000000004",
         "exercise_name": "priority",
         "status": "complete",
-        "duration": {"from": {"$date": "2025-01-02T12:25:00"}, "to": {"$date": "2025-01-02T12:30:00"}},
+        "duration": {
+          "from": "2025-01-02 12:25:00",
+          "to": "2025-01-02 12:30:00"
+        },
         "observations": [
           {
             "user": "fred",
@@ -130,11 +139,14 @@
         ]
       },
       {
-        "exercise_id": {"$oid": "E00000000000000000000005"},
-        "conversation_id": {"$oid": "C00000000000000000000005"},
+        "exercise_id": "e00000000000000000000005",
+        "conversation_id": "c00000000000000000000005",
         "exercise_name": "retrospective",
         "status": "observe",
-        "duration": {"from": {"$date": "2025-01-02T12:30:00"}, "to": {"$date": "2025-01-02T12:35:00"}},
+        "duration": {
+          "from": "2025-01-02 12:30:00",
+          "to": "2025-01-02 12:35:00"
+        },
         "observations": [
           {
             "users": ["fred", "amy"],
@@ -162,12 +174,12 @@
     "last_saved": {
       "from_ip": "192.168.1.100",
       "by_user": "fred",
-      "at_time": {"$date": "2025-01-01T12:34:56"},
+      "at_time": "2025-01-01 12:34:56",
       "correlation_id": "corr-001"
     }
   },
   {
-    "_id": {"$oid": "000000000000000000000001"},
+    "_id": "000000000000000000000001",
     "status": "archived",
     "channel_id": "workshop-channel-002",
     "channel_name": "WorkshopName1",
@@ -175,19 +187,19 @@
     "guild": "Agile Learning Institute",
     "purpose": "Advanced design thinking workshop",
     "when": {
-      "from": {"$date": "2025-01-02T12:00:00"},
-      "to": {"$date": "2025-01-02T13:00:00"}
+      "from": "2025-01-02 12:00:00",
+      "to": "2025-01-02 13:00:00"
     },
     "current_exercise": 0,
     "exercises": [
       {
-        "exercise_id": {"$oid": "E00000000000000000000003"},
-        "conversation_id": {"$oid": "C00000000000000000000003"},
+        "exercise_id": "e00000000000000000000003",
+        "conversation_id": "c00000000000000000000003",
         "exercise_name": "hills",
         "status": "pending",
         "duration": {
-          "from": {"$date": "2025-01-02T12:10:00"},
-          "to": {"$date": "2025-01-02T12:15:00"}
+          "from": "2025-01-02 12:10:00",
+          "to": "2025-01-02 12:15:00"
         },
         "observations": [
           {
@@ -205,13 +217,13 @@
         ]
       },
       {
-        "exercise_id": {"$oid": "E00000000000000000000004"},
-        "conversation_id": {"$oid": "C00000000000000000000004"},
+        "exercise_id": "e00000000000000000000004",
+        "conversation_id": "c00000000000000000000004",
         "exercise_name": "priority",
         "status": "pending",
         "duration": {
-          "from": {"$date": "2025-01-02T12:10:00"},
-          "to": {"$date": "2025-01-02T12:15:00"}
+          "from": "2025-01-02 12:10:00",
+          "to": "2025-01-02 12:15:00"
         },
         "observations": [
           {
@@ -230,12 +242,12 @@
     "last_saved": {
       "from_ip": "192.168.1.101",
       "by_user": "bob",
-      "at_time": {"$date": "2025-01-01T12:34:56"},
+      "at_time": "2025-01-01 12:34:56",
       "correlation_id": "corr-002"
     }
   },
   {
-    "_id": {"$oid": "000000000000000000000002"},
+    "_id": "000000000000000000000002",
     "status": "pending",
     "channel_id": "workshop-channel-003",
     "channel_name": "anotherPendingWorkshop",
@@ -243,38 +255,38 @@
     "guild": "Agile Learning Institute",
     "purpose": "New design thinking workshop",
     "when": {
-      "from": {"$date": "2026-01-02T12:00:00"},
-      "to": {"$date": "2026-01-02T13:00:00"}
+      "from": "2026-01-02 12:00:00",
+      "to": "2026-01-02 13:00:00"
     },
     "current_exercise": 0,
     "exercises": [
       {
-        "exercise_id": {"$oid": "E00000000000000000000001"},
-        "conversation_id": {"$oid": "C00000000000000000000001"},
+        "exercise_id": "e00000000000000000000001",
+        "conversation_id": "c00000000000000000000001",
         "exercise_name": "stakeholders",
         "status": "pending"
       },
       {
-        "exercise_id": {"$oid": "E00000000000000000000002"},
-        "conversation_id": {"$oid": "C00000000000000000000002"},
+        "exercise_id": "e00000000000000000000002",
+        "conversation_id": "c00000000000000000000002",
         "exercise_name": "empathy",
         "status": "pending"
       },
       {
-        "exercise_id": {"$oid": "E00000000000000000000003"},
-        "conversation_id": {"$oid": "C00000000000000000000003"},
+        "exercise_id": "e00000000000000000000003",
+        "conversation_id": "c00000000000000000000003",
         "exercise_name": "hills",
         "status": "pending"
       },
       {
-        "exercise_id": {"$oid": "E00000000000000000000004"},
-        "conversation_id": {"$oid": "C00000000000000000000004"},
+        "exercise_id": "e00000000000000000000004",
+        "conversation_id": "c00000000000000000000004",
         "exercise_name": "priority",
         "status": "pending"
       },
       {
-        "exercise_id": {"$oid": "E00000000000000000000005"},
-        "conversation_id": {"$oid": "C00000000000000000000005"},
+        "exercise_id": "e00000000000000000000005",
+        "conversation_id": "c00000000000000000000005",
         "exercise_name": "retrospective",
         "status": "pending"
       }
@@ -282,7 +294,7 @@
     "last_saved": {
       "from_ip": "192.168.1.102",
       "by_user": "dave",
-      "at_time": {"$date": "2025-01-01T12:34:56"},
+      "at_time": "2025-01-01 12:34:56",
       "correlation_id": "corr-003"
     }
   }

@@ -1,24 +1,25 @@
-from configurator.services.type_services import Type
-from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
-from configurator.utils.file_io import FileIO
-from configurator.utils.config import Config
 import os
+from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+from configurator.utils.file_io import FileIO
+from configurator.services.type_services import Type
+from configurator.services.enumerator_service import Enumerators
+from configurator.utils.config import Config
 
 class Dictionary:
-    def __init__(self, file_name: str = "", document: dict = {}):
+    def __init__(self, file_name: str = "", document: dict = None):
         self.config = Config.get_instance()
         self.file_name = file_name
         self._locked = False
-        self.property = None
+        self.root = None
 
         try:
-            if document:
+            if document is not None:
                 self._locked = document.get("_locked", False)
-                self.property = Property("root", document)
+                self.root = Property("root", document["root"])
             else:
                 document_data = FileIO.get_document(self.config.DICTIONARY_FOLDER, file_name)
                 self._locked = document_data.get("_locked", False)
-                self.property = Property("root", document_data)
+                self.root = Property("root", document_data["root"])
         except ConfiguratorException as e:
             # Re-raise with additional context about the dictionary file
             event = ConfiguratorEvent(event_id=f"DIC-CONSTRUCTOR-{file_name}", event_type="DICTIONARY_CONSTRUCTOR")
@@ -32,9 +33,10 @@ class Dictionary:
             raise ConfiguratorException(f"Unexpected error constructing dictionary from {file_name}: {str(e)}", event)
 
     def to_dict(self):
-        result = self.property.to_dict()
+        result = {}
         result["file_name"] = self.file_name
         result["_locked"] = self._locked
+        result["root"] = self.root.to_dict()
         return result
 
     def save(self):
@@ -54,12 +56,29 @@ class Dictionary:
     def get_json_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
-        return self.property.get_json_schema(enumerations, ref_stack)
+        return self.root.get_json_schema(enumerations, ref_stack)
 
     def get_bson_schema(self, enumerations, ref_stack: list = None):
         if ref_stack is None:
             ref_stack = []
-        return self.property.get_bson_schema(enumerations, ref_stack)
+        return self.root.get_bson_schema(enumerations, ref_stack)
+
+    def delete(self):
+        if self._locked:
+            event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY", event_data={"error": "Dictionary is locked"})
+            raise ConfiguratorException("Cannot delete locked dictionary", event)
+        event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY")
+        try:
+            event.append_events(FileIO.delete_document(self.config.DICTIONARY_FOLDER, self.file_name))
+            event.record_success()
+            return event
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure("error deleting dictionary")
+            return event
+        except Exception as e:
+            event.record_failure("unexpected error deleting dictionary", {"error": str(e)})
+            return event
 
     @staticmethod
     def lock_all():
@@ -86,52 +105,44 @@ class Dictionary:
             event.record_failure(f"Unexpected error locking dictionary {file.file_name}")
             raise ConfiguratorException(f"Unexpected error locking dictionary {file.file_name}", event)
 
-
-        
-
-    def delete(self):
-        if self._locked:
-            event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY", event_data={"error": "Dictionary is locked"})
-            raise ConfiguratorException("Cannot delete locked dictionary", event)
-        event = ConfiguratorEvent(event_id="DIC-05", event_type="DELETE_DICTIONARY")
-        try:
-            event.append_events(FileIO.delete_document(self.config.DICTIONARY_FOLDER, self.file_name))
-            event.record_success()
-            return event
-        except ConfiguratorException as e:
-            event.append_events([e.event])
-            event.record_failure("error deleting dictionary")
-            return event
-        except Exception as e:
-            event.record_failure("unexpected error deleting dictionary", {"error": str(e)})
-            return event
-
-
 class Property:
+    """
+    Property class is used to represent a property in a dictionary.
+
+    Properties have 5 type specific forms. 
+    A ref property is a reference to another property file and is a solo format with only this property
+    All other properties have a name, and description, type, and required properties boolean.
+    type: object properties have properties, additional_properties boolean, and optionally one_of
+    type: list properties have items
+    type: enum and enum_array properties have enums
+    type: Anything else is considered a custom type 
+    """
     def __init__(self, name: str, property: dict):
         self.config = Config.get_instance()
         self.name = name
         self.ref = property.get("ref", None)
+        self.one_of = property.get("one_of", None)
+        
+        # Solo properties - handle one at a time
+        if self.ref is not None:
+            return
+        elif self.one_of is not None:
+            self.one_of = OneOf(self.one_of)
+            return
+            
+        # Normal properties (type, description, etc.)
         self.description = property.get("description", "Missing Required Description")
         self.type = property.get("type", "void")
         self.required = property.get("required", False)
         self.enums = property.get("enums", None)
-        self.additional_properties = property.get("additionalProperties", False)
+        self.additional_properties = property.get("additional_properties", False)
         self.properties = {}
         self.items = None
-        self.one_of = None
-
-        properties_data = property.get("properties", {})
 
         # Initialize properties if this is an object type
         if self.type == "object":
-            for prop_name, prop_data in properties_data.items():
+            for prop_name, prop_data in property.get("properties", {}).items():
                 self.properties[prop_name] = Property(prop_name, prop_data)
-
-            # Initialize one_of if present
-            one_of_data = property.get("one_of", None)
-            if one_of_data:
-                self.one_of = OneOf(one_of_data)
 
         # Initialize items if this is an array type
         if self.type == "array":
@@ -145,20 +156,19 @@ class Property:
     def to_dict(self):
         if self.ref:
             return {"ref": self.ref}
+        elif self.one_of:
+            return {"one_of": self.one_of.to_dict()}
+        
         result = {}
         result["description"] = self.description
         result["type"] = self.type
         result["required"] = self.required
 
         if self.type == "object":
+            result["additional_properties"] = self.additional_properties
             result["properties"] = {}
             for prop_name, prop in self.properties.items():
                 result["properties"][prop_name] = prop.to_dict()
-            result["additionalProperties"] = self.additional_properties
-
-            # Add one_of if present
-            if self.one_of:
-                result["one_of"] = self.one_of.to_dict()
 
         elif self.type == "array":
             result["items"] = self.items.to_dict()
@@ -174,6 +184,8 @@ class Property:
 
         if self.ref:
             return self._handle_ref_schema(enumerations, ref_stack, "json")
+        elif self.one_of:
+            return {"oneOf": self.one_of.get_json_schema(enumerations, ref_stack)}
 
         if self.type == "object":
             schema = {}
@@ -186,10 +198,6 @@ class Property:
             if required_props:
                 schema["required"] = required_props
             schema["additionalProperties"] = self.additional_properties
-
-            # Handle one_of structure
-            if self.one_of:
-                schema["oneOf"] = self.one_of.get_json_schema(enumerations, ref_stack)
 
             return schema
 
@@ -233,6 +241,8 @@ class Property:
 
         if self.ref:
             return self._handle_ref_schema(enumerations, ref_stack, "bson")
+        elif self.one_of:
+            return {"oneOf": self.one_of.get_bson_schema(enumerations, ref_stack)}
 
         if self.type == "object":
             schema = {}
@@ -244,10 +254,6 @@ class Property:
             if required_props:
                 schema["required"] = required_props
             schema["additionalProperties"] = self.additional_properties
-
-            # Handle one_of structure
-            if self.one_of:
-                schema["oneOf"] = self.one_of.get_bson_schema(enumerations, ref_stack)
 
             return schema
 
@@ -318,24 +324,26 @@ class Property:
     def _get_required(self):
         required = []
         for prop_name, prop in self.properties.items():
-            if prop.required:
+            # Skip ref and one_of properties as they don't have required attribute
+            if hasattr(prop, 'required') and prop.required:
                 required.append(prop_name)
         return required
 
 
 class OneOf:
-    def __init__(self, one_of_data: dict):
-        self.schemas = {}
-        for schema_name, schema_data in one_of_data.get("schemas", {}).items():
-            self.schemas[schema_name] = Property(schema_name, schema_data)
+    def __init__(self, one_of_data):
+        self.schemas = []
+        
+        # Each item in one_of_data becomes a Property object
+        for i, item_data in enumerate(one_of_data):
+            # Create Property object - will validate during construction
+            self.schemas.append(Property(f"oneOf_item_{i}", item_data))
 
     def to_dict(self):
-        return {
-            "schemas": {name: schema.to_dict() for name, schema in self.schemas.items()}
-        }
+        return [prop.to_dict() for prop in self.schemas]
 
     def get_json_schema(self, enumerations, ref_stack: list = None):
-        return [schema.get_json_schema(enumerations, ref_stack) for schema in self.schemas.values()]
+        return [prop.get_json_schema(enumerations, ref_stack) for prop in self.schemas]
 
     def get_bson_schema(self, enumerations, ref_stack: list = None):
-        return [schema.get_bson_schema(enumerations, ref_stack) for schema in self.schemas.values()]
+        return [prop.get_bson_schema(enumerations, ref_stack) for prop in self.schemas]

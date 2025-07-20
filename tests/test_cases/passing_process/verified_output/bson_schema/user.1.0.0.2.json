@@ -21,7 +21,8 @@
       "enum": [
         "draft",
         "active",
-        "archived"
+        "archived",
+        "published"
       ]
     },
     "last_saved": {

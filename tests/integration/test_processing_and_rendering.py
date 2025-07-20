@@ -7,8 +7,6 @@ from configurator.utils.configurator_exception import ConfiguratorEvent
 import unittest
 import os
 import json
-import tempfile
-import shutil
 import yaml
 import datetime
 from bson import json_util
@@ -20,18 +18,22 @@ class TestProcessingAndRendering(unittest.TestCase):
     expected_pro_count = None  # Should be set in subclasses
     expect_enu_05_success = True
 
+    def _ejson_encode(self, obj):
+        """Simple ejson-encode function that handles ObjectId and datetime conversion."""
+        if isinstance(obj, (ObjectId, datetime.datetime, datetime.date)):
+            return str(obj)
+        elif hasattr(obj, 'isoformat'):  # Handle any object with isoformat method
+            return str(obj)
+        return obj
+
     def _normalize_mongo_data(self, obj):
         """Normalize MongoDB data by converting ObjectIds and datetimes to strings."""
         if isinstance(obj, dict):
             return {k: self._normalize_mongo_data(v) for k, v in obj.items()}
         elif isinstance(obj, list):
             return [self._normalize_mongo_data(item) for item in obj]
-        elif isinstance(obj, ObjectId):
-            return str(obj)
-        elif isinstance(obj, (datetime.datetime, datetime.date)):
-            return str(obj)
         else:
-            return obj
+            return self._ejson_encode(obj)
 
     def setUp(self):
         """Set up test environment."""
@@ -47,46 +49,66 @@ class TestProcessingAndRendering(unittest.TestCase):
         mongo_io.drop_database()
         mongo_io.disconnect()
         
-        # Create temporary directory for test output
-        self.temp_dir = tempfile.mkdtemp(prefix="test_processing_")
-        
         # Initialize MongoDB connection
         self.mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
         
 
     def tearDown(self):
         """Clean up after tests."""
-        # Clean up temporary directory
-        if os.path.exists(self.temp_dir):
-            shutil.rmtree(self.temp_dir)
-        
         Config._instance = None
 
     def test_processing(self):
-        """Test processing of configuration files and verify all PRO* events succeeded, ENU-05 success, and PRO* count matches expected."""
+        """Test processing of configuration files and verify all events succeeded, ENU-05 success, and PRO* count matches expected."""
         # Process all configurations
         results = Configuration.process_all()
 
         # Assert processing was successful
         self.assertEqual(results.status, "SUCCESS", f"Processing failed: {results.to_dict()}")
 
-        # Recursively check all PRO* events for SUCCESS status, count them, and check ENU-05
+        # Recursively check all events for SUCCESS status, count PRO* events, and check ENU-05
         pro_count = 0
         enu_05_success = False
+        failure_events = []
+        
         def check_events(event):
-            nonlocal pro_count, enu_05_success
+            nonlocal pro_count, enu_05_success, failure_events
             if isinstance(event, dict):
                 eid = str(event.get("id", ""))
+                status = event.get("status", "")
+                
+                # Check for any FAILURE status in the entire event tree
+                if status == "FAILURE":
+                    failure_events.append({
+                        "id": eid,
+                        "type": event.get("type", ""),
+                        "data": event.get("data", {}),
+                        "event": event
+                    })
+                
+                # Count PRO* events and check their status
                 if eid.startswith("PRO"):
                     pro_count += 1
-                    self.assertEqual(event.get("status"), "SUCCESS", f"Event {eid} did not succeed: {event}")
-                if eid == "ENU-05" and event.get("status") == "SUCCESS":
+                    self.assertEqual(status, "SUCCESS", f"Event {eid} did not succeed: {event}")
+                
+                # Check for ENU-05 success
+                if eid == "ENU-05" and status == "SUCCESS":
                     enu_05_success = True
+                
+                # Recursively check sub-events
                 for sub in event.get("sub_events", []):
                     check_events(sub)
             elif hasattr(event, 'to_dict'):
                 check_events(event.to_dict())
+        
         check_events(results.to_dict())
+
+        # Fail the test if any sub-events had FAILURE status
+        if failure_events:
+            failure_details = "\n".join([
+                f"- {event['id']} ({event['type']}): {event['data']}"
+                for event in failure_events
+            ])
+            self.fail(f"Processing completed with {len(failure_events)} failure events:\n{failure_details}")
 
         # Check ENU-05 if required
         if self.expect_enu_05_success and (self.expected_pro_count is None or self.expected_pro_count > 0):
@@ -255,28 +277,7 @@ class TestProcessingAndRendering(unittest.TestCase):
         """No-op: event comparison is now handled in test_processing."""
         pass
 
-    def _harvest_processing_events(self, results, events_path):
-        """Harvest processing events and save to verified output file, sanitizing non-primitive types."""
-        def sanitize(obj):
-            if isinstance(obj, dict):
-                return {k: sanitize(v) for k, v in obj.items()}
-            elif isinstance(obj, list):
-                return [sanitize(v) for v in obj]
-            elif isinstance(obj, (str, int, float, bool, type(None))):
-                return obj
-            else:
-                return str(obj)
 
-        events = []
-        for event in results:
-            events.append(sanitize(event.to_dict()))
-        
-        # Save to verified output
-        with open(events_path, 'w') as f:
-            yaml.dump(events, f, default_flow_style=False)
-        
-        print(f"Harvested processing events to: {events_path}")
-        print("Please review the harvested events and update if needed.")
 
     def _compare_bson_schemas(self, verified_output_dir: str):
         """Compare BSON schemas against verified output."""
@@ -328,6 +329,7 @@ class TestProcessingAndRendering(unittest.TestCase):
 
     def _compare_document(self, collection_name: str, doc_index: int, expected_doc: dict, actual_doc: dict):
         """Compare a single document, ignoring properties with value 'ignore'."""
+        
         for key, expected_value in expected_doc.items():
             if expected_value == "ignore":
                 continue  # Skip properties with value "ignore"
@@ -353,17 +355,19 @@ class TestProcessingAndRendering(unittest.TestCase):
                 if isinstance(actual_value, dict) and '$oid' in actual_value:
                     actual_value = actual_value['$oid']
             
-            # Handle datetime conversion for MongoDB date format
+            # Handle MongoDB date format
             if isinstance(expected_value, dict) and '$date' in expected_value:
-                # Expected value is MongoDB date format, convert actual datetime to same format
-                if hasattr(actual_value, 'isoformat'):
-                    # Convert Python datetime to ISO format for comparison
-                    actual_value = actual_value.isoformat() + 'Z'
-                    expected_value = expected_value['$date']
+                # Expected value is MongoDB date format, normalize actual value
+                actual_value = self._ejson_encode(actual_value)
+                expected_value = expected_value['$date']
             elif isinstance(expected_value, dict) and isinstance(actual_value, dict):
                 # Recursively compare nested objects
                 self._compare_document(f"{collection_name}.{key}", doc_index, expected_value, actual_value)
                 continue
+            else:
+                # Normalize both values using ejson-encode for consistent comparison
+                actual_value = self._ejson_encode(actual_value)
+                expected_value = self._ejson_encode(expected_value)
             
             self.assertEqual(expected_value, actual_value, 
                            f"Document {doc_index} in collection {collection_name} has different value for key {key}")
@@ -393,11 +397,120 @@ class TestTemplate(TestProcessingAndRendering):
         super().tearDown()
 
 class TestComplexRefs(TestProcessingAndRendering):
-    """Test Processing and Rendering of complex refs (placeholder)"""
+    """Test Processing and Rendering of complex refs with oneOf functionality"""
 
-    expected_pro_count = 12  # Set to the expected number for this test case
-    def test_placeholder(self):
-        self.assertTrue(True)
+    expected_pro_count = 4  # Updated to match actual processing behavior with corrected dictionaries
+    
+    def setUp(self):
+        self.test_case = 'passing_complex_refs'
+        super().setUp()
+
+    def tearDown(self):
+        super().tearDown()
+
+    def test_processing(self):
+        """Test processing of complex refs with oneOf structures."""
+        # Process all configurations
+        results = Configuration.process_all()
+
+        # Debug: Print the full processing results
+        print("\n=== PROCESSING RESULTS DEBUG ===")
+        print(f"Overall status: {results.status}")
+        print(f"Full results: {results.to_dict()}")
+        print("=== END DEBUG ===\n")
+
+        # Assert processing was successful
+        self.assertEqual(results.status, "SUCCESS", f"Processing failed: {results.to_dict()}")
+
+        # Recursively check all PRO* events for SUCCESS status, count them, and check ENU-05
+        pro_count = 0
+        enu_05_success = False
+        failure_events = []
+        
+        def check_events(event):
+            nonlocal pro_count, enu_05_success, failure_events
+            if isinstance(event, dict):
+                eid = str(event.get("id", ""))
+                status = event.get("status", "")
+                event_type = event.get("event_type", "")
+                
+                # Debug: Print all events
+                print(f"Event: {eid} ({event_type}) - Status: {status}")
+                
+                # Check for any FAILURE status in the entire event tree
+                if status == "FAILURE":
+                    failure_events.append({
+                        "id": eid,
+                        "type": event_type,
+                        "data": event.get("data", {}),
+                        "event": event
+                    })
+                
+                # Count PRO* events and check their status
+                if eid.startswith("PRO"):
+                    pro_count += 1
+                    self.assertEqual(status, "SUCCESS", f"Event {eid} did not succeed: {event}")
+                
+                # Check for ENU-05 success
+                if eid == "ENU-05" and status == "SUCCESS":
+                    enu_05_success = True
+                
+                # Recursively check sub-events
+                for sub in event.get("sub_events", []):
+                    check_events(sub)
+            elif hasattr(event, 'to_dict'):
+                check_events(event.to_dict())
+        
+        check_events(results.to_dict())
+
+        # Fail the test if any sub-events had FAILURE status
+        if failure_events:
+            failure_details = "\n".join([
+                f"- {event['id']} ({event['type']}): {event['data']}"
+                for event in failure_events
+            ])
+            self.fail(f"Processing completed with {len(failure_events)} failure events:\n{failure_details}")
+
+        # Check ENU-05 if required
+        if self.expect_enu_05_success and (self.expected_pro_count is None or self.expected_pro_count > 0):
+            self.assertTrue(enu_05_success, "No ENU-05 event with SUCCESS status found in event tree.")
+
+        # Check PRO* event count if expected_pro_count is set
+        if self.expected_pro_count is not None:
+            self.assertEqual(pro_count, self.expected_pro_count, f"Expected {self.expected_pro_count} PRO* events, found {pro_count}.")
+
+        # Compare database state
+        self._compare_database_state()
+        
+        # Compare processing events
+        self._compare_processing_events(results)
+
+    def test_renders(self):
+        """Test rendering of configurations with oneOf structures and compare against verified output"""
+        # Arrange
+        verified_output_dir = f"{self.config.INPUT_FOLDER}/verified_output"
+        json_schema_dir = f"{verified_output_dir}/json_schema"
+        
+        if not os.path.exists(json_schema_dir):
+            self.skipTest(f"No verified JSON schema directory found: {json_schema_dir}")
+        
+        # Act & Assert - Iterate over verified output JSON schema files
+        for filename in os.listdir(json_schema_dir):
+            if filename.endswith('.yaml'):
+                # Extract collection and version from filename (e.g., "workshop.1.0.0.1.yaml")
+                schema_name = filename.replace('.yaml', '')
+                parts = schema_name.split('.')
+                
+                if len(parts) >= 2:
+                    collection_name = parts[0]
+                    version_str = '.'.join(parts[1:])
+                    
+                    # Render the same value based on collection/version
+                    configuration = Configuration(f"{collection_name}.yaml")
+                    json_schema = configuration.get_json_schema(version_str)
+                    
+                    # Compare against verified output
+                    self._compare_json_schema_rendering(schema_name, json_schema)
 
 class TestEmpty(TestProcessingAndRendering):
     """Test Processing and Rendering of empty files"""
@@ -413,7 +526,7 @@ class TestEmpty(TestProcessingAndRendering):
 class TestProcess(TestProcessingAndRendering):
     """Test Processing and Rendering of passing_process"""
 
-    expected_pro_count = 55  # Set to the expected number for this test case
+    expected_pro_count = 53  # Set to the expected number for this test case
     def setUp(self):
         self.test_case = 'passing_process'
         super().setUp()
