@@ -37,17 +37,29 @@ class Type:
         try:
             if document:
                 self._locked = document.get("_locked", False)
-                self.root = TypeProperty("root", document["root"])
+                # Handle both old format (direct data) and new format (with root wrapper)
+                if "root" in document:
+                    self.root = TypeProperty("root", document["root"])
+                else:
+                    # Old format - wrap the data in a root property
+                    self.root = TypeProperty("root", document)
             else:
                 document_data = FileIO.get_document(self.config.TYPE_FOLDER, file_name)
                 self._locked = document_data.get("_locked", False)
-                self.root = TypeProperty("root", document_data["root"])
+                # Handle both old format (direct data) and new format (with root wrapper)
+                if "root" in document_data:
+                    self.root = TypeProperty("root", document_data["root"])
+                else:
+                    # Old format - wrap the data in a root property
+                    self.root = TypeProperty("root", document_data)
         except ConfiguratorException as e:
             # Re-raise with additional context about the type file
-            event = ConfiguratorEvent(event_id=f"TYP-CONSTRUCTOR-{file_name}", event_type="TYPE_CONSTRUCTOR")
-            event.record_failure(f"Failed to construct type from {file_name}")
-            event.append_events([e.event])
-            raise ConfiguratorException(f"Failed to construct type from {file_name}: {str(e)}", event)
+            event = ConfiguratorEvent(
+                event_type="TYPE_CONSTRUCTOR",
+                event_id=f"TYP-CONSTRUCTOR-{file_name}",
+                data={"error": f"Unexpected error constructing type from {file_name}: {str(e)}"}
+            )
+            raise ConfiguratorException(f"Unexpected error constructing type from {file_name}: {str(e)}", event)
         except Exception as e:
             # Handle unexpected errors during construction
             event = ConfiguratorEvent(event_id=f"TYP-CONSTRUCTOR-{file_name}", event_type="TYPE_CONSTRUCTOR")
@@ -106,10 +118,19 @@ class Type:
         return self.root.get_bson_schema(type_stack)
     
     def to_dict(self):
-        result = {}
-        result["file_name"] = self.file_name
-        result["_locked"] = self._locked
-        result["root"] = self.root.to_dict()
+        """Convert the Type to a dictionary representation"""
+        result = {
+            "file_name": self.file_name,
+            "_locked": self._locked,
+        }
+        
+        # If we have root data, include it
+        if self.root:
+            # Check if the original data had a root wrapper
+            # For backward compatibility, we'll return the data without root wrapper
+            # since that's what the API endpoints expect
+            result.update(self.root.to_dict())
+        
         return result
                 
     def delete(self):

@@ -16,9 +16,11 @@ tests:
             Content-Type: application/json
           body: |
             {
-              "description": "Test type for stepCI testing",
-              "type": "string",
-              "required": false
+              "root": {
+                "description": "Test type for stepCI testing",
+                "type": "string",
+                "required": false
+              }
             }
           check:
             status: /200/
@@ -36,9 +38,10 @@ tests:
           check:
             status: /200/
             jsonpath:
-              description: "Test type for stepCI testing"
-              type: "string"
-              required: false
+              root:
+                description: "Test type for stepCI testing"
+                type: "string"
+                required: false
 
       # Update - PUT to modify the type
       - name: Update Test Type
@@ -49,9 +52,11 @@ tests:
             Content-Type: application/json
           body: |
             {
-              "description": "Updated test type for stepCI testing",
-              "type": "string",
-              "required": true
+              "root": {
+                "description": "Updated test type for stepCI testing",
+                "type": "string",
+                "required": true
+              }
             }
           check:
             status: /200/
