@@ -1,15 +1,16 @@
-file_name: appointment.yaml
-_locked: true
-description: A date/time range
-required: false
-type: object
-properties:
-  from:
-    description: Starting Date/Time
-    required: true
-    type: date-time
-  to:
-    description: Ending Date/Time
-    required: true
-    type: date-time
-additional_properties: false
+root:
+  file_name: appointment.yaml
+  _locked: true
+  description: A date/time range
+  required: false
+  type: object
+  properties:
+    from:
+      description: Starting Date/Time
+      required: true
+      type: date-time
+    to:
+      description: Ending Date/Time
+      required: true
+      type: date-time
+  additional_properties: false
