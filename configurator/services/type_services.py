@@ -37,27 +37,17 @@ class Type:
         try:
             if document:
                 self._locked = document.get("_locked", False)
-                # Handle both old format (direct data) and new format (with root wrapper)
-                if "root" in document:
-                    self.root = TypeProperty("root", document["root"])
-                else:
-                    # Old format - wrap the data in a root property
-                    self.root = TypeProperty("root", document)
+                self.root = TypeProperty("root", document["root"])
             else:
                 document_data = FileIO.get_document(self.config.TYPE_FOLDER, file_name)
                 self._locked = document_data.get("_locked", False)
-                # Handle both old format (direct data) and new format (with root wrapper)
-                if "root" in document_data:
-                    self.root = TypeProperty("root", document_data["root"])
-                else:
-                    # Old format - wrap the data in a root property
-                    self.root = TypeProperty("root", document_data)
+                self.root = TypeProperty("root", document_data["root"])
         except ConfiguratorException as e:
             # Re-raise with additional context about the type file
             event = ConfiguratorEvent(
                 event_type="TYPE_CONSTRUCTOR",
                 event_id=f"TYP-CONSTRUCTOR-{file_name}",
-                data={"error": f"Unexpected error constructing type from {file_name}: {str(e)}"}
+                event_data={"error": f"Unexpected error constructing type from {file_name}: {str(e)}"}
             )
             raise ConfiguratorException(f"Unexpected error constructing type from {file_name}: {str(e)}", event)
         except Exception as e:
@@ -126,10 +116,7 @@ class Type:
         
         # If we have root data, include it
         if self.root:
-            # Check if the original data had a root wrapper
-            # For backward compatibility, we'll return the data without root wrapper
-            # since that's what the API endpoints expect
-            result.update(self.root.to_dict())
+            result["root"] = self.root.to_dict()
         
         return result
                 
