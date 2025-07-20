@@ -108,7 +108,7 @@ class TestProperty(unittest.TestCase):
         property_data = {
             "description": "Object with properties",
             "type": "object",
-            "additionalProperties": True,
+            "additional_properties": True,
             "properties": {
                 "name": {
                     "description": "Name property",
@@ -197,7 +197,7 @@ class TestProperty(unittest.TestCase):
             "properties": {
                 "name": {"description": "Name property", "type": "string"}
             },
-            "additionalProperties": True
+            "additional_properties": True
         }
         prop = Property("test_object", property_data)
         result = prop.to_dict()
@@ -396,7 +396,7 @@ class TestDictionary(unittest.TestCase):
                     "required": False
                 }
             },
-            "additionalProperties": False
+            "additional_properties": False
         }
         self.assertEqual(result["root"], expected_root)
 
@@ -415,7 +415,7 @@ class TestDictionary(unittest.TestCase):
                         "type": "object",
                         "required": True,
                         "properties": {},
-                        "additionalProperties": False,
+                        "additional_properties": False,
                         "one_of": [
                             {
                                 "description": "Article content",
@@ -428,7 +428,7 @@ class TestDictionary(unittest.TestCase):
                                     }
                                 },
                                 "required": ["body"],
-                                "additionalProperties": False
+                                "additional_properties": False
                             },
                             {
                                 "description": "Video content",
@@ -441,7 +441,7 @@ class TestDictionary(unittest.TestCase):
                                     }
                                 },
                                 "required": ["url"],
-                                "additionalProperties": False
+                                "additional_properties": False
                             }
                         ]
                     }
@@ -476,7 +476,7 @@ class TestDictionary(unittest.TestCase):
                                 }
                             },
                             "required": ["body"],
-                            "additionalProperties": False
+                            "additional_properties": False
                         },
                         {
                             "description": "Video content",
@@ -489,12 +489,12 @@ class TestDictionary(unittest.TestCase):
                                 }
                             },
                             "required": ["url"],
-                            "additionalProperties": False
+                            "additional_properties": False
                         }
                     ]
                 }
             },
-            "additionalProperties": False
+            "additional_properties": False
         }
         self.assertEqual(result["root"], expected_root)
 
@@ -539,7 +539,7 @@ class TestDictionary(unittest.TestCase):
                     "ref": "settings.1.0.0.yaml"
                 }
             },
-            "additionalProperties": False
+            "additional_properties": False
         }
         self.assertEqual(result["root"], expected_root)
 
@@ -596,7 +596,7 @@ class TestDictionary(unittest.TestCase):
                     "required": False
                 }
             },
-            "additionalProperties": False
+            "additional_properties": False
         }
         self.assertEqual(result["root"], expected_root)
 
@@ -674,7 +674,7 @@ class TestDictionary(unittest.TestCase):
                         "description": "Metadata item",
                         "type": "object",
                         "required": False,
-                        "additionalProperties": False,
+                        "additional_properties": False,
                         "properties": {
                             "key": {
                                 "type": "string",
@@ -690,7 +690,7 @@ class TestDictionary(unittest.TestCase):
                     }
                 }
             },
-            "additionalProperties": False
+            "additional_properties": False
         }
         self.assertEqual(result["root"], expected_root)
 
@@ -769,13 +769,13 @@ class TestDictionary(unittest.TestCase):
                                         }
                                     }
                                 },
-                                "additionalProperties": False
+                                "additional_properties": False
                             },
                             "settings": {
                                 "ref": "settings.1.0.0.yaml"
                             }
                         },
-                        "additionalProperties": False
+                        "additional_properties": False
                     },
                     "content": {
                         "type": "object",
@@ -784,7 +784,7 @@ class TestDictionary(unittest.TestCase):
                             "title": {"type": "string", "required": True, "description": "Missing Required Description"},
                             "body": {"type": "string", "required": True, "description": "Missing Required Description"}
                         },
-                        "additionalProperties": False
+                        "additional_properties": False
                     },
                     "media": {
                         "type": "object",
@@ -793,10 +793,10 @@ class TestDictionary(unittest.TestCase):
                             "url": {"type": "string", "required": True, "description": "Missing Required Description"},
                             "duration": {"type": "number", "required": False, "description": "Missing Required Description"}
                         },
-                        "additionalProperties": False
+                        "additional_properties": False
                     }
                 },
-                "additionalProperties": False
+                "additional_properties": False
             }
         }
         
@@ -833,13 +833,13 @@ class TestDictionary(unittest.TestCase):
                                     }
                                 }
                             },
-                            "additionalProperties": False
+                            "additional_properties": False
                         },
                         "settings": {
                             "ref": "settings.1.0.0.yaml"
                         }
                     },
-                    "additionalProperties": False
+                    "additional_properties": False
                 },
                 "content": {
                     "type": "object",
@@ -849,7 +849,7 @@ class TestDictionary(unittest.TestCase):
                         "title": {"type": "string", "required": True, "description": "Missing Required Description"},
                         "body": {"type": "string", "required": True, "description": "Missing Required Description"}
                     },
-                    "additionalProperties": False
+                    "additional_properties": False
                 },
                 "media": {
                     "type": "object",
@@ -859,10 +859,10 @@ class TestDictionary(unittest.TestCase):
                         "url": {"type": "string", "required": True, "description": "Missing Required Description"},
                         "duration": {"type": "number", "required": False, "description": "Missing Required Description"}
                     },
-                    "additionalProperties": False
+                    "additional_properties": False
                 }
             },
-            "additionalProperties": False
+            "additional_properties": False
         }
         self.assertEqual(result["root"], expected_root)
 

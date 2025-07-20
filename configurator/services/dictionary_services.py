@@ -135,7 +135,7 @@ class Property:
         self.type = property.get("type", "void")
         self.required = property.get("required", False)
         self.enums = property.get("enums", None)
-        self.additional_properties = property.get("additionalProperties", False)
+        self.additional_properties = property.get("additional_properties", False)
         self.properties = {}
         self.items = None
 
@@ -165,7 +165,7 @@ class Property:
         result["required"] = self.required
 
         if self.type == "object":
-            result["additionalProperties"] = self.additional_properties
+            result["additional_properties"] = self.additional_properties
             result["properties"] = {}
             for prop_name, prop in self.properties.items():
                 result["properties"][prop_name] = prop.to_dict()

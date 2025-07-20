@@ -30,4 +30,4 @@ root:
       description: Last saved breadcrumb
       type: breadcrumb
       required: true
-  additionalProperties: false
+  additional_properties: false

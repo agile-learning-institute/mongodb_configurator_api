@@ -84,7 +84,7 @@ class TestTypeProperty(unittest.TestCase):
         property_data = {
             "description": "Object with properties",
             "type": "object",
-            "additionalProperties": True,
+            "additional_properties": True,
             "properties": {
                 "name": {
                     "description": "Name property",
@@ -158,7 +158,7 @@ class TestTypeProperty(unittest.TestCase):
         property_data = {
             "description": "Object with properties",
             "type": "object",
-            "additionalProperties": True,
+            "additional_properties": True,
             "required": False,
             "properties": {
                 "name": {
@@ -172,7 +172,7 @@ class TestTypeProperty(unittest.TestCase):
         
         self.assertEqual(result["description"], "Object with properties")
         self.assertEqual(result["type"], "object")
-        self.assertTrue(result["additionalProperties"])
+        self.assertTrue(result["additional_properties"])
         self.assertFalse(result["required"])
         self.assertIn("properties", result)
         self.assertIn("name", result["properties"])
@@ -268,7 +268,7 @@ class TestTypePropertyCanonical(unittest.TestCase):
         property_data = {
             "description": "Object with properties",
             "type": "object",
-            "additionalProperties": True,
+            "additional_properties": True,
             "properties": {
                 "name": {
                     "description": "Name property",
@@ -292,7 +292,7 @@ class TestTypePropertyCanonical(unittest.TestCase):
         result = type_prop.to_dict()
         self.assertEqual(result["description"], "Object with properties")
         self.assertEqual(result["type"], "object")
-        self.assertTrue(result["additionalProperties"])
+        self.assertTrue(result["additional_properties"])
         self.assertIn("properties", result)
 
     def test_array_type(self):

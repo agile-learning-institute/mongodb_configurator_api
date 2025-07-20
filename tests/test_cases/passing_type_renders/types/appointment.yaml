@@ -9,4 +9,4 @@ properties:
     description: Ending Date/Time
     type: date-time
     required: true
-additionalProperties: false 
+additional_properties: false 

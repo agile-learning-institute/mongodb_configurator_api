@@ -4,7 +4,7 @@ root:
   description: A media item in the system
   type: object
   required: false
-  additionalProperties: false
+  additional_properties: false
   properties:
     _id:
       description: The unique identifier for the media
@@ -39,7 +39,7 @@ root:
         - description: Video content structure
           type: object
           required: false
-          additionalProperties: false
+          additional_properties: false
           properties:
             duration:
               description: Video duration in seconds
@@ -58,7 +58,7 @@ root:
         - description: Audio content structure
           type: object
           required: false
-          additionalProperties: false
+          additional_properties: false
           properties:
             audio_url:
               description: Audio file URL
@@ -76,7 +76,7 @@ root:
         - description: Image content structure
           type: object
           required: false
-          additionalProperties: false
+          additional_properties: false
           properties:
             image_url:
               description: Image URL

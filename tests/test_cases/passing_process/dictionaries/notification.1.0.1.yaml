@@ -4,7 +4,7 @@ root:
   description: A notification collection 
   type: object
   required: false
-  additionalProperties: false
+  additional_properties: false
   properties:
     _id:
       description: The unique identifier for notification
@@ -56,7 +56,7 @@ root:
       description: Additional notification metadata
       type: object
       required: false
-      additionalProperties: false
+      additional_properties: false
       properties:
         created_at:
           description: When the notification was created
@@ -78,7 +78,7 @@ root:
           description: Source of the notification
           type: object
           required: false
-          additionalProperties: false
+          additional_properties: false
           properties:
             collection:
               description: Source collection name

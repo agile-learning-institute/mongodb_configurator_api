@@ -4,7 +4,7 @@ root:
   description: An organization in the system
   type: object
   required: false
-  additionalProperties: false
+  additional_properties: false
   properties:
     _id:
       description: The unique identifier for the organization

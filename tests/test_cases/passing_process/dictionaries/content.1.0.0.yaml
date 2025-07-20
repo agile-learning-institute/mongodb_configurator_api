@@ -34,7 +34,7 @@ root:
       description: Additional metadata for the content
       type: object
       required: false
-      additionalProperties: false
+      additional_properties: false
       properties:
         created_at:
           description: When the content was created
@@ -52,4 +52,4 @@ root:
       description: Last saved breadcrumb
       type: breadcrumb
       required: true
-  additionalProperties: false
+  additional_properties: false

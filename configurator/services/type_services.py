@@ -143,7 +143,7 @@ class TypeProperty:
         self.schema = property.get("schema", None)
         self.json_type = property.get("json_type", None)
         self.bson_type = property.get("bson_type", None)
-        self.additional_properties = property.get("additionalProperties", False)
+        self.additional_properties = property.get("additional_properties", False)
         self.is_primitive = False
         self.is_universal = False
 
@@ -165,7 +165,7 @@ class TypeProperty:
             self.properties = {}
             for name, prop in property.get("properties", {}).items():
                 self.properties[name] = TypeProperty(name, prop)
-            self.additional_properties = property.get("additionalProperties", False)
+            self.additional_properties = property.get("additional_properties", False)
             return
 
     def to_dict(self):
@@ -198,7 +198,7 @@ class TypeProperty:
                 "required": self.required,
                 "type": self.type,
                 "properties": {name: property.to_dict() for name, property in self.properties.items()},
-                "additionalProperties": self.additional_properties
+                "additional_properties": self.additional_properties
             }
         
         else: # custom type

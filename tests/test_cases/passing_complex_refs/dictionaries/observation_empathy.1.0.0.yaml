@@ -16,7 +16,7 @@ root:
       type: object
       required: true
       properties: {}
-      additionalProperties: false
+      additional_properties: false
       one_of:
         - type: object
           properties:

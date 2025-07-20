@@ -75,10 +75,10 @@ root:
                 type: enum_array
                 required: false
                 enums: category_tags
-            additionalProperties: false
-      additionalProperties: false
+            additional_properties: false
+      additional_properties: false
     last_saved:
       description: Last saved breadcrumb
       type: breadcrumb
       required: true
-  additionalProperties: false
+  additional_properties: false

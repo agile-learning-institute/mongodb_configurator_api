@@ -20,4 +20,4 @@ properties:
     description: The logging correlation ID of the update transaction
     required: true
     type: word
-additionalProperties: false
+additional_properties: false
