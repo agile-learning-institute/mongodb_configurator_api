@@ -4,6 +4,7 @@ root:
   description: A simple collection for testing
   type: object
   required: false
+  additional_properties: false
   properties:
     _id:
       description: The unique identifier for the media
@@ -22,4 +23,3 @@ root:
       type: enum
       required: true
       enums: default_status
-  additionalProperties: false
