@@ -146,7 +146,7 @@ class Property:
 
         # Initialize items if this is an array type
         if self.type == "array":
-            items_data = property.get("items", {})
+            items_data = property.get("items", {"type": "void"})
             if items_data:
                 self.items = Property("items", items_data)
 
