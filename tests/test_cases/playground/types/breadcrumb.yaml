@@ -21,3 +21,4 @@ root:
       type: word
       required: true
   required: false
+  additional_properties: false

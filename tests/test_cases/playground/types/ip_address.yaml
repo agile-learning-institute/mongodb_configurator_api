@@ -6,3 +6,4 @@ root:
   schema:
     type: string
     format: ip
+  required: false

@@ -6,3 +6,4 @@ root:
   schema:
     type: string
     pattern: ^\S{1,40}$
+  required: false

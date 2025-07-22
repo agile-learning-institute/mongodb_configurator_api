@@ -6,3 +6,4 @@ root:
   schema:
     type: string
     maxLength: 4096
+  required: false

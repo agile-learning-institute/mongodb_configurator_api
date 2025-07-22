@@ -12,4 +12,5 @@ root:
       description: Ending Date/Time
       type: date-time
       required: true
+  additional_properties: false
   required: false

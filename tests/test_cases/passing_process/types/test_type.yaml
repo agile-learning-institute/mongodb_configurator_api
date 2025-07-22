@@ -3,3 +3,4 @@ root:
   _locked: true
   description: Updated test type for stepCI testing
   type: void
+  required: false
