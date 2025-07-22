@@ -2,7 +2,7 @@ file_name: url.yaml
 _locked: true
 root:
   description: A valid URL
+  type: simple_primitive
   schema:
     type: string
-    pattern: ^https?://[^\s]+$
-  required: false
+    format: uri

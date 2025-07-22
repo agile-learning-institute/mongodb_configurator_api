@@ -1,8 +1,9 @@
 file_name: sentence.yaml
 _locked: true
 root:
-  description: A String of text, 0 to 255 characters with no special characters
+  description: A sentence of text, 1 to 200 characters
+  type: simple_primitive
   schema:
     type: string
-    pattern: ^[^\t\n\r]{0,255}$
-  required: false
+    minLength: 1
+    maxLength: 200
