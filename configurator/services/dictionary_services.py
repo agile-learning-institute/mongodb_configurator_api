@@ -137,7 +137,7 @@ class Property:
         self.enums = property.get("enums", None)
         self.additional_properties = property.get("additional_properties", False)
         self.properties = {}
-        self.items = {"type": "void"}
+        self.items = {}
 
         # Initialize properties if this is an object type
         if self.type == "object":
@@ -146,7 +146,7 @@ class Property:
 
         # Initialize items if this is an array type
         if self.type == "array":
-            items_data = property.get("items", {})
+            items_data = property.get("items", {"type": "void"})
             if items_data:
                 self.items = Property("items", items_data)
 
