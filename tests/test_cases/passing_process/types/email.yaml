@@ -3,5 +3,5 @@ root:
   type: simple_primitive
   schema:
     type: string
-    pattern: ^[^\s@]+@[^\s@]+\.[^\s@]+$
+    pattern: ^[^ \t\n\r@]+@[^ \t\n\r@]+\.[^ \t\n\r@]+$
   required: false

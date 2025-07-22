@@ -17,7 +17,7 @@
       }
     ],
     "email": "john.doe@example.com",
-    "phone": "+15551234567",
+    "phone": "555-123-4567",
     "preferences": {
       "notification_types": ["system", "content", "reminder"],
       "delivery_channels": ["email", "in_app"],
@@ -49,7 +49,7 @@
       }
     ],
     "email": "sarah.johnson@techcorp.com",
-    "phone": "+15559876543",
+    "phone": "555-987-6543",
     "preferences": {
       "notification_types": ["system", "user", "content"],
       "delivery_channels": ["email", "push", "in_app"],
@@ -81,7 +81,7 @@
       }
     ],
     "email": "mike.chen@designstudio.com",
-    "phone": "+15551234568",
+    "phone": "555-123-4568",
     "preferences": {
       "notification_types": ["content", "reminder"],
       "delivery_channels": ["email", "push"],

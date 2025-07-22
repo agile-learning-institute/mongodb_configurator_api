@@ -102,7 +102,7 @@ properties:
           collection:
             description: Source collection name
             type: string
-            pattern: ^\S{1,40}$
+            pattern: ^[^ \t\n\r]{1,40}$
           document_id:
             description: Source document ID
             type: string
@@ -127,14 +127,14 @@ properties:
     type: object
     properties:
       from_ip:
-        description: A valid IP Address
+        description: An IPv4 or IPv6 address
         type: string
-        pattern: ^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$
+        format: ip
       by_user:
         description: A String of text, 1 to 40 characters with no spaces, or special
           characters like /t or /n
         type: string
-        pattern: ^\S{1,40}$
+        pattern: ^[^ \t\n\r]{1,40}$
       at_time:
         description: An ISO 8601 formatted date-time string
         type: string
@@ -143,7 +143,7 @@ properties:
         description: A String of text, 1 to 40 characters with no spaces, or special
           characters like /t or /n
         type: string
-        pattern: ^\S{1,40}$
+        pattern: ^[^ \t\n\r]{1,40}$
     additionalProperties: false
     required:
     - from_ip

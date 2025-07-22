@@ -9,7 +9,7 @@ properties:
     description: A String of text, 1 to 40 characters with no spaces, or special characters
       like /t or /n
     type: string
-    pattern: ^\S{1,40}$
+    pattern: ^[^ \t\n\r]{1,40}$
   at_time:
     description: An ISO 8601 formatted date-time string
     type: string
@@ -18,7 +18,7 @@ properties:
     description: A String of text, 1 to 40 characters with no spaces, or special characters
       like /t or /n
     type: string
-    pattern: ^\S{1,40}$
+    pattern: ^[^ \t\n\r]{1,40}$
 additionalProperties: false
 required:
 - from_ip
