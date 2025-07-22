@@ -140,7 +140,7 @@ class TestProperty(unittest.TestCase):
         self.assertFalse(prop.required)
         self.assertFalse(prop.additional_properties)
         self.assertEqual(prop.properties, {})
-        self.assertIsNone(prop.items)
+        self.assertEqual(prop.items, {})
 
     def test_to_dict_with_ref(self):
         """Test to_dict method for ref property"""

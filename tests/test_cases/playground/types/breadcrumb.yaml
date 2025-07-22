@@ -1,24 +1,23 @@
+file_name: breadcrumb.yaml
+_locked: true
 root:
-  file_name: breadcrumb.yaml
-  _locked: true
   description: A tracking breadcrumb
-  required: false
   type: object
   properties:
     from_ip:
       description: Http Request remote IP address
-      required: true
       type: ip_address
+      required: true
     by_user:
       description: ID Of User
-      required: true
       type: word
+      required: true
     at_time:
       description: The date-time when last updated
-      required: true
       type: date-time
+      required: true
     correlation_id:
       description: The logging correlation ID of the update transaction
-      required: true
       type: word
-  additionalProperties: false
+      required: true
+  required: false
