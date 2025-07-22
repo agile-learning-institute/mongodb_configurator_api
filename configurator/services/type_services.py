@@ -170,7 +170,7 @@ class TypeProperty:
             return
 
         if self.type == "array":
-            self.items = TypeProperty("items", property.get("items", {}))
+            self.items = TypeProperty("items", property.get("items", {"type": "void"}))
             return
 
         if self.type == "object":
