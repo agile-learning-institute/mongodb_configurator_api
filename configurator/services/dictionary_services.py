@@ -137,7 +137,7 @@ class Property:
         self.enums = property.get("enums", None)
         self.additional_properties = property.get("additional_properties", False)
         self.properties = {}
-        self.items = {}
+        self.items = {"type": "void"}
 
         # Initialize properties if this is an object type
         if self.type == "object":
