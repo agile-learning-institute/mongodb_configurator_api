@@ -1,0 +1,3 @@
+description: A valid URL
+type: string
+format: uri

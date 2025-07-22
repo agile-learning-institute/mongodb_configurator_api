@@ -1,0 +1,3 @@
+description: A US state code
+type: string
+pattern: ^[A-Z]{2}$

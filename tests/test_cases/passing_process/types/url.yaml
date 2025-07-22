@@ -1,8 +1,10 @@
 root:
-  file_name: url.yaml
-  _locked: true
   description: A valid URL
-  type: simple_primitive
-  schema:
+  type: complex_primitive
+  json_type:
     type: string
     format: uri
+  bson_type:
+    bsonType: string
+    pattern: ^https?://[^\s]+$
+  required: false

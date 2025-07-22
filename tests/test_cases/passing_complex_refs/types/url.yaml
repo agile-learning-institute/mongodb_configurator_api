@@ -1,5 +1,3 @@
-file_name: url.yaml
-_locked: true
 root:
   description: A valid URL
   type: complex_primitive
@@ -9,4 +7,4 @@ root:
   bson_type:
     bsonType: string
     pattern: ^https?://[^\s]+$
-  required: false
+  required: false 
