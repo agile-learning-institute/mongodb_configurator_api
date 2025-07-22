@@ -38,6 +38,9 @@ class TestProcessingAndRendering(unittest.TestCase):
     def setUp(self):
         """Set up test environment."""
         self.test_case = getattr(self, 'test_case', 'passing_template')
+        # Do not allow passing_type_renders as a test_case for process_and_render tests
+        if self.test_case == 'passing_type_renders':
+            self.skipTest('passing_type_renders should only be used in type rendering integration tests, not process_and_render tests.')
         os.environ['INPUT_FOLDER'] = f"./tests/test_cases/{self.test_case}"
         Config._instance = None
         self.config = Config.get_instance()

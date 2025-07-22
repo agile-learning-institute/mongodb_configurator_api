@@ -180,15 +180,14 @@ class TypeProperty:
     def to_dict(self):
         result = {
             "description": self.description,
-            "type": self.type
+            "type": self.type,
+            "required": self.required
         }
         if self.type == "object":
             result["properties"] = {n: p.to_dict() for n, p in self.properties.items()}
             result["additional_properties"] = self.additional_properties
-            result["required"] = self.required
         elif self.type == "array":
             result["items"] = self.items.to_dict() if self.items else TypeProperty("items", {"type": "void"}).to_dict()
-            result["required"] = self.required
         elif self.type == "simple_primitive":
             result["schema"] = self.schema
         elif self.type == "complex_primitive":
