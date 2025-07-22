@@ -145,110 +145,61 @@ class TypeProperty:
         self.name = name
         self.description = property.get("description", "Missing Required Description")
         self.type = property.get("type", "void")
-        self.required = property.get("required", False)
-        self.schema = property.get("schema", None)
-        self.json_type = property.get("json_type", None)
-        self.bson_type = property.get("bson_type", None)
+
+        # Defaults for all schema-related fields
+        self.schema = property.get("schema", {})
+        self.json_type = property.get("json_type", {})
+        self.bson_type = property.get("bson_type", {})
+
+        # Defaults for object/array
         self.additional_properties = property.get("additional_properties", False)
-        self.is_primitive = False
-        self.is_universal = False
+        self.required = property.get("required", False)
+        self.properties = {}
+        self.items = None
 
-        # Track which fields were present in original data
-        if "required" in property:
-            self._original_required = True
-        if "additional_properties" in property:
-            self._original_additional_properties = True
-
-        if self.schema is not None:
-            self.is_primitive = True
-            self.is_universal = True
-            return
-
-        if self.json_type is not None or self.bson_type is not None:
-            self.is_primitive = True
-            self.is_universal = False
-            return
-
-        if self.type == "array":
-            self.items = TypeProperty("items", property.get("items", {"type": "void"}))
-            return
-
+        # Determine type kind
         if self.type == "object":
-            self.properties = {}
-            for name, prop in property.get("properties", {}).items():
-                self.properties[name] = TypeProperty(name, prop)
-            return
+            self.type = "object"
+            self.properties = {
+                n: TypeProperty(n, p) for n, p in property.get("properties", {}).items()
+            }
+            self.additional_properties = property.get("additional_properties", False)
+            self.required = property.get("required", False)
+        elif self.type == "array":
+            self.type = "array"
+            self.items = TypeProperty("items", property.get("items", {"type": "void"}))
+            self.required = property.get("required", False)
+        elif self.schema:
+            self.type = "simple_primitive"
+        elif self.json_type or self.bson_type:
+            self.type = "complex_primitive"
+        else:
+            # Custom type (string name)
+            pass
 
     def to_dict(self):
-        if self.is_universal:
-            result = {
-                "description": self.description,
-                "schema": self.schema,
-            }
-            if hasattr(self, '_original_required'):
-                result["required"] = self.required
-            return result
-
-        elif self.is_primitive:
-            result = {
-                "description": self.description,
-                "json_type": self.json_type or {},
-                "bson_type": self.bson_type or {},
-            }
-            if hasattr(self, '_original_required'):
-                result["required"] = self.required
-            return result
-
+        result = {
+            "description": self.description,
+            "type": self.type
+        }
+        if self.type == "object":
+            result["properties"] = {n: p.to_dict() for n, p in self.properties.items()}
+            result["additional_properties"] = self.additional_properties
+            result["required"] = self.required
         elif self.type == "array":
-            result = {
-                "description": self.description,
-                "type": self.type,
-                "items": self.items.to_dict(),
-            }
-            if hasattr(self, '_original_required'):
-                result["required"] = self.required
-            return result
-
-        elif self.type == "object":
-            result = {
-                "description": self.description,
-                "type": self.type,
-                "properties": {name: property.to_dict() for name, property in self.properties.items()},
-            }
-            if hasattr(self, '_original_required'):
-                result["required"] = self.required
-            if hasattr(self, '_original_additional_properties'):
-                result["additional_properties"] = self.additional_properties
-            return result
-        
-        else: # custom type
-            result = {
-                "description": self.description,
-                "type": self.type
-            }
-            if hasattr(self, '_original_required'):
-                result["required"] = self.required
-            return result
+            result["items"] = self.items.to_dict() if self.items else TypeProperty("items", {"type": "void"}).to_dict()
+            result["required"] = self.required
+        elif self.type == "simple_primitive":
+            result["schema"] = self.schema
+        elif self.type == "complex_primitive":
+            result["json_type"] = self.json_type
+            result["bson_type"] = self.bson_type
+        # For custom types, just core fields
+        return result
     
     def get_json_schema(self, type_stack: list = None):
         if type_stack is None:
             type_stack = []
-        if self.is_universal:
-            return {
-                "description": self.description,
-                **self.schema
-            }
-        if self.is_primitive:
-            return {
-                "description": self.description,
-                **self.json_type
-            }
-        if self.type == "array":
-            return {
-                "description": self.description,
-                "type": "array",
-                "items": self.items.get_json_schema(type_stack)
-            }
         if self.type == "object":
             properties = {}
             required_properties = []
@@ -269,6 +220,22 @@ class TypeProperty:
                 result["required"] = required_properties
                 
             return result
+        if self.type == "array":
+            return {
+                "description": self.description,
+                "type": "array",
+                "items": self.items.get_json_schema(type_stack)
+            }
+        if self.type == "simple_primitive":
+            return {
+                "description": self.description,
+                **self.schema
+            }
+        if self.type == "complex_primitive":
+            return {
+                "description": self.description,
+                **self.json_type
+            }
         if self.type:
             return self._handle_type_reference(type_stack, "json")
 
@@ -277,22 +244,6 @@ class TypeProperty:
     def get_bson_schema(self, type_stack: list = None):
         if type_stack is None:
             type_stack = []
-        if self.is_universal:
-            schema = self.schema.copy()
-            schema["bsonType"] = schema["type"]
-            del schema["type"]
-            return {
-                **schema
-            }
-        if self.is_primitive:
-            return {
-                **self.bson_type
-            }
-        if self.type == "array":
-            return {
-                "bsonType": "array",
-                "items": self.items.get_bson_schema(type_stack)
-            }
         if self.type == "object":
             properties = {}
             required_properties = []
@@ -312,6 +263,22 @@ class TypeProperty:
                 result["required"] = required_properties
                 
             return result
+        if self.type == "array":
+            return {
+                "bsonType": "array",
+                "items": self.items.get_bson_schema(type_stack)
+            }
+        if self.type == "simple_primitive":
+            schema = self.schema.copy()
+            schema["bsonType"] = schema["type"]
+            del schema["type"]
+            return {
+                **schema
+            }
+        if self.type == "complex_primitive":
+            return {
+                **self.bson_type
+            }
         if self.type:
             return self._handle_type_reference(type_stack, "bson")
 
