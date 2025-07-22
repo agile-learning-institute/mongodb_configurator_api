@@ -6,5 +6,5 @@ root:
     format: uri
   bson_type:
     bsonType: string
-    pattern: ^https?://[^\s]+$
+    pattern: ^https?://[^ \t\n\r]+$
   required: false 

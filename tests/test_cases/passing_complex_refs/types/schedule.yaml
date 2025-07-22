@@ -1,0 +1,8 @@
+root:
+  description: A list of appointments
+  type: array
+  items:
+    description: An appointment
+    type: appointment
+    required: false
+  required: false
