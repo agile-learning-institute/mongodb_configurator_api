@@ -4,3 +4,5 @@ root:
   items:
     description: An appointment
     type: appointment
+    required: false
+  required: false

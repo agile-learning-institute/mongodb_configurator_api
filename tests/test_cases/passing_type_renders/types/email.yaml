@@ -1,5 +1,7 @@
 root:
   description: A valid email address
+  type: simple_primitive
   schema:
     type: string
     pattern: ^[^\s@]+@[^\s@]+\.[^\s@]+$
+  required: false
