@@ -1119,115 +1119,106 @@ components:
           default: false
         root:
           description: The root property containing the type definition
-          type: object
-          properties:
-            description:
-              description: A description of the type
-              type: string
-            # Universal Primitive - schema only
-            schema:
-              description: Universal primitive schema (mutually exclusive with json_type/bson_type)
-              type: object
-              additionalProperties: true
-            # Typed Primitive - json_type/bson_type only  
-            json_type:
-              description: JSON schema definition (mutually exclusive with schema)
-              type: object
-              additionalProperties: true
-            bson_type:
-              description: BSON schema definition (mutually exclusive with schema)
-              type: object
-              additionalProperties: true
-            # Complex Type - object or array
-            type:
-              description: Type of complex type (object or array)
-              type: string
-              enum: [object, array]
-            properties:
-              description: Properties for object types
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/type_property'
-            items:
-              description: Items definition for array types
-              $ref: '#/components/schemas/type_property'
-            required:
-              description: Whether the type is required
-              type: boolean
-              default: false
-            additional_properties:
-              description: Whether additional properties are allowed (for object types)
-              type: boolean
-              default: false
-          required:
-            - description
+          $ref: '#/components/schemas/type_property'
       required:
         - file_name
         - _locked
         - root
     type_property:
-      description: A Type Property (for nested properties)
+      description: A Type Property with consistent structure based on type
       type: object
+      required:
+        - description
+        - type
+        - required
       properties:
+        name:
+          description: The name of the property
+          type: string
         description:
           description: A description of the type
           type: string
-        # Universal Primitive - schema only
-        schema:
-          description: Universal primitive schema (mutually exclusive with json_type/bson_type)
-          type: object
-          additionalProperties: true
-        # Typed Primitive - json_type/bson_type only  
-        json_type:
-          description: JSON schema definition (mutually exclusive with schema)
-          type: object
-          additionalProperties: true
-        bson_type:
-          description: BSON schema definition (mutually exclusive with schema)
-          type: object
-          additionalProperties: true
-        # Complex Type - object or array
         type:
-          description: Type of complex type (object or array)
+          description: The type of the property
           type: string
-          enum: [object, array]
-        properties:
-          description: Properties for object types
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/type_property'
-        items:
-          description: Items definition for array types
-          $ref: '#/components/schemas/type_property'
+          enum: [object, array, simple_primitive, complex_primitive, void]
         required:
-          description: Whether the type is required
+          description: Whether the property is required
           type: boolean
           default: false
-        additional_properties:
-          description: Whether additional properties are allowed (for object types)
-          type: boolean
-          default: false
-      required:
-        - description
-    primitive_type:
-      description: A Simple Schema Primitive Type
-      type: object
-      properties:
-        title:
-          description: The name of the type
-          type: string
-        type:
-          description: A Universal Type 
+      oneOf:
+        - title: Object Type
+          description: Object type with properties and additional_properties
           type: object
-          additionalProperties: true
-        json_type:
-          description: Type rendered as JSON Schema
+          properties:
+            type:
+              const: object
+            properties:
+              description: Properties of the object
+              type: object
+              additionalProperties:
+                $ref: '#/components/schemas/type_property'
+            additional_properties:
+              description: Whether additional properties are allowed
+              type: boolean
+              default: false
+          required:
+            - type
+            - properties
+            - additional_properties
+        - title: Array Type
+          description: Array type with items definition
           type: object
-          additionalProperties: true
-        bson_type:
-          description: Type rendered as BSON Schema
+          properties:
+            type:
+              const: array
+            items:
+              description: Definition of array items
+              $ref: '#/components/schemas/type_property'
+          required:
+            - type
+            - items
+        - title: Simple Primitive Type
+          description: Simple primitive with schema definition
           type: object
-          additionalProperties: true
+          properties:
+            type:
+              const: simple_primitive
+            schema:
+              description: Schema definition for simple primitive
+              type: object
+              additionalProperties: true
+          required:
+            - type
+            - schema
+        - title: Complex Primitive Type
+          description: Complex primitive with separate JSON and BSON type definitions
+          type: object
+          properties:
+            type:
+              const: complex_primitive
+            json_type:
+              description: JSON schema definition
+              type: object
+              additionalProperties: true
+            bson_type:
+              description: BSON schema definition
+              type: object
+              additionalProperties: true
+          required:
+            - type
+            - json_type
+            - bson_type
+        - title: Custom Type
+          description: Custom type with just core attributes
+          type: object
+          properties:
+            type:
+              description: Custom type name (e.g., 'string', 'email', etc.)
+              type: string
+              not:
+                enum: [object, array, simple_primitive, complex_primitive, void]
+
     events:
       description: Array of processing or validation events
       type: array

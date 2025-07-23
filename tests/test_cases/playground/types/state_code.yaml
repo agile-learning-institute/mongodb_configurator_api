@@ -1,7 +1,8 @@
 file_name: state_code.yaml
 _locked: true
 root:
-  description: A two character state code
+  description: A US state code
+  type: simple_primitive
   schema:
     type: string
     pattern: ^[A-Z]{2}$

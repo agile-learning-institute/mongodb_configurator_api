@@ -11,3 +11,4 @@ root:
       type: date-time
       required: true
   additional_properties: false
+  required: false

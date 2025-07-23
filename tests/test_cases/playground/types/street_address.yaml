@@ -1,23 +1,10 @@
 file_name: street_address.yaml
 _locked: true
 root:
-  description: A street address
-  type: object
-  properties:
-    street:
-      description: Street address
-      type: sentence
-      required: true
-    city:
-      description: City
-      type: word
-      required: false
-    state:
-      description: State or province
-      type: state_code
-      required: false
-    postal_code:
-      description: Postal code
-      type: word
-      required: true
+  description: A US street address
+  type: simple_primitive
+  schema:
+    type: string
+    minLength: 1
+    maxLength: 100
   required: false

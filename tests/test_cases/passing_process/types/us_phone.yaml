@@ -1,8 +1,11 @@
 root:
   file_name: us_phone.yaml
   _locked: true
-  description: A US phone number in E.164 format
-  required: false
-  schema:
+  description: A US phone number
+  type: complex_primitive
+  json_type:
     type: string
-    pattern: ^\+1[2-9][0-9]{9}$
+    pattern: ^(\+1[0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$
+  bson_type:
+    bsonType: string
+    pattern: ^(\+1[0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$

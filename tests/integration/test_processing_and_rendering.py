@@ -38,10 +38,16 @@ class TestProcessingAndRendering(unittest.TestCase):
     def setUp(self):
         """Set up test environment."""
         self.test_case = getattr(self, 'test_case', 'passing_template')
+        # Do not allow passing_type_renders as a test_case for process_and_render tests
+        if self.test_case == 'passing_type_renders':
+            self.skipTest('passing_type_renders should only be used in type rendering integration tests, not process_and_render tests.')
         os.environ['INPUT_FOLDER'] = f"./tests/test_cases/{self.test_case}"
+        # Set MongoDB connection string for local development
+        os.environ['MONGO_CONNECTION_STRING'] = "mongodb://localhost:27017/"
         Config._instance = None
         self.config = Config.get_instance()
         del os.environ['INPUT_FOLDER']
+        del os.environ['MONGO_CONNECTION_STRING']
         
         # Ensure the database is dropped before any test runs
         # This guarantees a clean state for every test

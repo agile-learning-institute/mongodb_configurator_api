@@ -1,0 +1,4 @@
+{
+  "maxLength": 4096,
+  "bsonType": "string"
+}

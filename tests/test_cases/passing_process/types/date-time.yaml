@@ -1,10 +1,9 @@
 root:
-  file_name: date-time.yaml
-  _locked: true
   description: An ISO 8601 formatted date-time string
-  required: false
+  type: complex_primitive
   json_type:
     type: string
     format: date-time
   bson_type:
     bsonType: date
+  required: false

@@ -1,0 +1,8 @@
+root:
+  description: A US street address
+  type: simple_primitive
+  schema:
+    type: string
+    minLength: 1
+    maxLength: 100
+  required: false 

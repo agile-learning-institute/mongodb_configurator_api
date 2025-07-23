@@ -1,0 +1,7 @@
+root:
+  description: A US state code
+  type: simple_primitive
+  schema:
+    type: string
+    pattern: ^[A-Z]{2}$
+  required: false 

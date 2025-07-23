@@ -44,7 +44,7 @@ class TestTypeRender(unittest.TestCase):
             # Render BSON schema
             bson_schema = type_service.get_bson_schema()
             self.assertIsNotNone(bson_schema)
-            
+
             # Compare against verified output
             self._compare_json_schema(type_name, json_schema)
             self._compare_bson_schema(type_name, bson_schema)

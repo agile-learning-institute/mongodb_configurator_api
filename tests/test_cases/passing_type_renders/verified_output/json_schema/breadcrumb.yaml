@@ -1,0 +1,27 @@
+description: A tracking breadcrumb
+type: object
+properties:
+  from_ip:
+    description: An IPv4 or IPv6 address
+    type: string
+    format: ip
+  by_user:
+    description: A String of text, 1 to 40 characters with no spaces, or special characters
+      like /t or /n
+    type: string
+    pattern: ^[^ \t\n\r]{1,40}$
+  at_time:
+    description: An ISO 8601 formatted date-time string
+    type: string
+    format: date-time
+  correlation_id:
+    description: A String of text, 1 to 40 characters with no spaces, or special characters
+      like /t or /n
+    type: string
+    pattern: ^[^ \t\n\r]{1,40}$
+additionalProperties: false
+required:
+- from_ip
+- by_user
+- at_time
+- correlation_id
