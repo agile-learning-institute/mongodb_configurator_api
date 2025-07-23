@@ -123,16 +123,24 @@ class TestEnumerations(unittest.TestCase):
         with patch('configurator.services.enumerator_service.FileIO.get_document') as mock_get_document:
             mock_get_document.return_value = {
                 "version": 1,
-                "enumerators": {"test_enum": {"value1": True, "value2": False}},
+                "enumerators": [
+                    {"name": "test_enum", "values": [
+                        {"value": "value1", "description": "desc1"},
+                        {"value": "value2", "description": "desc2"}
+                    ]}
+                ],
                 "_locked": True
             }
-            
             # Act
             enum = Enumerations(data=None, file_name="test.yaml")
-            
             # Assert
             self.assertEqual(enum.version, 1)
-            self.assertEqual(enum.enumerators, {"test_enum": {"value1": True, "value2": False}})
+            self.assertEqual(enum.enumerators, [
+                {"name": "test_enum", "values": [
+                    {"value": "value1", "description": "desc1"},
+                    {"value": "value2", "description": "desc2"}
+                ]}
+            ])
             self.assertTrue(enum._locked)
 
     def test_init_with_invalid_data_raises(self):
@@ -146,76 +154,96 @@ class TestEnumerations(unittest.TestCase):
         # Arrange
         data = {
             "version": 1,
-            "enumerators": {"test_enum": {"value1": True, "value2": False}},
+            "enumerators": [
+                {"name": "test_enum", "values": [
+                    {"value": "value1", "description": "desc1"},
+                    {"value": "value2", "description": "desc2"}
+                ]}
+            ],
             "_locked": True
         }
-        
         # Act
         enum = Enumerations(data=data)
-        
         # Assert
         self.assertEqual(enum.version, 1)
-        self.assertEqual(enum.enumerators, {"test_enum": {"value1": True, "value2": False}})
+        self.assertEqual(enum.enumerators, [
+            {"name": "test_enum", "values": [
+                {"value": "value1", "description": "desc1"},
+                {"value": "value2", "description": "desc2"}
+            ]}
+        ])
         self.assertTrue(enum._locked)
 
-    def test_get_enum_values(self):
-        """Test get_enum_values method."""
-        # Arrange
+    def test_get_enum_dict(self):
+        """Test get_enum_dict returns correct dict-of-dicts."""
         data = {
             "version": 1,
-            "enumerators": {"test_enum": {"value1": True, "value2": False}}
+            "enumerators": [
+                {"name": "test_enum", "values": [
+                    {"value": "value1", "description": "desc1"},
+                    {"value": "value2", "description": "desc2"}
+                ]},
+                {"name": "other_enum", "values": [
+                    {"value": "foo", "description": "bar"}
+                ]}
+            ]
         }
         enum = Enumerations(data=data)
-        
-        # Act
-        values = enum.get_enum_values("test_enum")
-        
-        # Assert
-        self.assertEqual(values, ["value1", "value2"])
+        expected = {
+            "test_enum": {"value1": "desc1", "value2": "desc2"},
+            "other_enum": {"foo": "bar"}
+        }
+        self.assertEqual(enum.get_enum_dict(), expected)
 
-    def test_get_enum_values_none_enumerators(self):
-        """Test get_enum_values when enumerators is None."""
-        # Arrange
+    def test_get_enum_values(self):
+        """Test get_enum_values method returns string array."""
         data = {
             "version": 1,
-            "enumerators": None
+            "enumerators": [
+                {"name": "test_enum", "values": [
+                    {"value": "value1", "description": "desc1"},
+                    {"value": "value2", "description": "desc2"}
+                ]}
+            ]
         }
         enum = Enumerations(data=data)
-        
-        # Act & Assert
-        with self.assertRaises(TypeError):
-            enum.get_enum_values("test_enum")
+        values = enum.get_enum_values("test_enum")
+        self.assertEqual(values, ["value1", "value2"])
 
     def test_get_enum_values_enum_not_found(self):
         """Test get_enum_values when enum is not found."""
-        # Arrange
         data = {
             "version": 1,
-            "enumerators": {"test_enum": {"value1": True}}
+            "enumerators": [
+                {"name": "test_enum", "values": [
+                    {"value": "value1", "description": "desc1"}
+                ]}
+            ]
         }
         enum = Enumerations(data=data)
-        
-        # Act & Assert
         with self.assertRaises(ConfiguratorException):
             enum.get_enum_values("nonexistent_enum")
 
     def test_to_dict(self):
-        """Test to_dict method."""
-        # Arrange
+        """Test to_dict method returns correct structure."""
         data = {
             "version": 1,
-            "enumerators": {"test_enum": {"value1": True}},
+            "enumerators": [
+                {"name": "test_enum", "values": [
+                    {"value": "value1", "description": "desc1"}
+                ]}
+            ],
             "_locked": True
         }
         enum = Enumerations(data=data)
-        
-        # Act
         result = enum.to_dict()
-        
-        # Assert
         expected = {
             "version": 1,
-            "enumerators": {"test_enum": {"value1": True}},
+            "enumerators": [
+                {"name": "test_enum", "values": [
+                    {"value": "value1", "description": "desc1"}
+                ]}
+            ],
             "_locked": True
         }
         self.assertEqual(result, expected)
