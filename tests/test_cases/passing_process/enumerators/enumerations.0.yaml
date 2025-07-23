@@ -2,8 +2,13 @@ version: 0
 file_name: enumerations.0.yaml
 _locked: false
 enumerators:
-  default_status:
-    active: Not Deleted
-    archived: Soft Delete Indicator
-    draft: Draft Status
-    published: Published Status
+  - name: default_status
+    values:
+      - value: active
+        description: Not Deleted
+      - value: archived
+        description: Soft Delete Indicator
+      - value: draft
+        description: Draft Status
+      - value: published
+        description: Published Status
