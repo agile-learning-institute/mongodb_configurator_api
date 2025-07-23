@@ -45,17 +45,6 @@ class TestTypeRender(unittest.TestCase):
             bson_schema = type_service.get_bson_schema()
             self.assertIsNotNone(bson_schema)
 
-            # --- TEMPORARY: Save rendered schemas to verified output ---
-            verified_json_path = f"{self.config.INPUT_FOLDER}/verified_output/json_schema/{type_name}.yaml"
-            verified_bson_path = f"{self.config.INPUT_FOLDER}/verified_output/bson_schema/{type_name}.json"
-            os.makedirs(os.path.dirname(verified_json_path), exist_ok=True)
-            os.makedirs(os.path.dirname(verified_bson_path), exist_ok=True)
-            with open(verified_json_path, 'w') as f_json:
-                yaml.safe_dump(json_schema, f_json, sort_keys=False)
-            with open(verified_bson_path, 'w') as f_bson:
-                json.dump(bson_schema, f_bson, indent=2, default=str)
-            # --- END TEMPORARY ---
-
             # Compare against verified output
             self._compare_json_schema(type_name, json_schema)
             self._compare_bson_schema(type_name, bson_schema)
