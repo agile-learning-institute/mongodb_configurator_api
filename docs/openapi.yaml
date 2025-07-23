@@ -933,7 +933,19 @@ components:
     enumerators:
       type: array
       items:
-        $ref: '#/components/schemas/enumerations'
+        type: object
+        properties:
+          name:
+            type: string
+          values:
+            type: array
+            items:
+              type: object
+              properties:
+                value:
+                  type: string
+                description:
+                  type: string
       description: Array of enumeration objects
     enumerations:
       type: object
