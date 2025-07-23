@@ -2,30 +2,39 @@
   {
     "_id": "ignore",
     "version": 0,
-    "enumerators": {}
+    "enumerators": []
   },
   {
     "_id": "ignore",
     "version": 1,
-    "enumerators": {
-      "default_status": {
-        "active": "Not Deleted",
-        "archived": "Soft Delete Indicator"
+    "enumerators": [
+      {
+        "name": "default_status",
+        "values": [
+          {"value": "active", "description": "Not Deleted"},
+          {"value": "archived", "description": "Soft Delete Indicator"}
+        ]
       },
-      "test_enum": {
-        "foo": "bar"
+      {
+        "name": "test_enum",
+        "values": [
+          {"value": "foo", "description": "bar"}
+        ]
       }
-    }
+    ]
   },
   {
     "_id": "ignore",
     "version": 2,
-    "enumerators": {
-      "default_status": {
-        "draft": "Draft",
-        "active": "Not Deleted",
-        "archived": "Soft Delete Indicator"
+    "enumerators": [
+      {
+        "name": "default_status",
+        "values": [
+          {"value": "draft", "description": "Draft"},
+          {"value": "active", "description": "Not Deleted"},
+          {"value": "archived", "description": "Soft Delete Indicator"}
+        ]
       }
-    }
+    ]
   }
 ] 

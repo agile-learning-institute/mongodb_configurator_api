@@ -3,6 +3,7 @@ from configurator.utils.file_io import FileIO, File
 from configurator.utils.config import Config
 from configurator.utils.mongo_io import MongoIO
 import os
+from typing import List, Dict, Any, Optional
 
 class Enumerators:
     """A list of versioned Enumerations - loads enumerations on demand"""
@@ -83,56 +84,79 @@ class Enumerators:
         return self.getVersion(version_number)
 
 class Enumerations:
-    """A versioned collection of enumerations with file operations"""
+    """A versioned collection of enumerations with file operations (now array-of-objects)"""
     def __init__(self, data: dict = None, file_name: str = None):
         self.config = Config.get_instance()
         self._locked = False
         self.file_name = file_name
-
+        self.version = 0
+        self.enumerators: List[Dict[str, Any]] = []
         try:
             if data:
                 self._load_from_document(data)
             else:
                 document = FileIO.get_document(self.config.ENUMERATOR_FOLDER, file_name)
                 self._load_from_document(document)
+            self._validate_uniqueness()
         except ConfiguratorException as e:
-            # Re-raise with additional context about the enumerations file
             event = ConfiguratorEvent(event_id=f"ENU-CONSTRUCTOR-{file_name}", event_type="ENUMERATIONS_CONSTRUCTOR")
             event.record_failure(f"Failed to construct enumerations from {file_name}")
             event.append_events([e.event])
             raise ConfiguratorException(f"Failed to construct enumerations from {file_name}: {str(e)}", event)
 
     def _load_from_document(self, data: dict):
-        """Load enumerations data from document"""
+        """Load enumerations data from document (expects array-of-objects)"""
         self.version = data.get("version", 0)
-        self.enumerators = data.get("enumerators", {})
+        self.enumerators = data.get("enumerators", [])
         self._locked = data.get("_locked", False)
 
-    def get_enum_values(self, enum_name: str):
-        """Get the values for a specific enum"""
-        if enum_name not in self.enumerators:
-            event = ConfiguratorEvent("ENU-02", "GET_ENUM_VALUES", {"error": f"Enum '{enum_name}' not found"})
-            raise ConfiguratorException(f"Enum '{enum_name}' not found", event)
-        return list(self.enumerators[enum_name].keys())
+    def _validate_uniqueness(self):
+        """Ensure enumerator names and value fields are unique."""
+        names = set()
+        for enum in self.enumerators:
+            name = enum.get("name")
+            if name in names:
+                event = ConfiguratorEvent("ENU-VALIDATE", "DUPLICATE_ENUM_NAME", {"name": name})
+                raise ConfiguratorException(f"Duplicate enumerator name: {name}", event)
+            names.add(name)
+            value_set = set()
+            for v in enum.get("values", []):
+                val = v.get("value")
+                if val in value_set:
+                    event = ConfiguratorEvent("ENU-VALIDATE", "DUPLICATE_ENUM_VALUE", {"enum": name, "value": val})
+                    raise ConfiguratorException(f"Duplicate value '{val}' in enumerator '{name}'", event)
+                value_set.add(val)
 
     def to_dict(self):
-        """Return the enumerations data"""
+        """Return the enumerations data in the new array-of-objects format"""
         result = {
             "version": self.version,
             "enumerators": self.enumerators,
             "_locked": self._locked
         }
-        # Only include file_name if it's not None
         if self.file_name is not None:
             result["file_name"] = self.file_name
         return result
 
+    def get_enum_dict(self) -> Dict[str, Dict[str, str]]:
+        """Return enumerators as a dict-of-dicts for downstream consumers (legacy interface)."""
+        enum_dict = {}
+        for enum in self.enumerators:
+            name = enum.get("name")
+            values = enum.get("values", [])
+            enum_dict[name] = {v["value"]: v.get("description", "") for v in values}
+        return enum_dict
+
+    def get_enum_values(self, enum_name: str) -> List[str]:
+        """Get the values for a specific enum as a string array (legacy interface)."""
+        for enum in self.enumerators:
+            if enum.get("name") == enum_name:
+                return [v["value"] for v in enum.get("values", [])]
+        event = ConfiguratorEvent("ENU-02", "GET_ENUM_VALUES", {"error": f"Enum '{enum_name}' not found"})
+        raise ConfiguratorException(f"Enum '{enum_name}' not found", event)
+
     def upsert(self, mongo_io: MongoIO):
-        """Upsert this enumeration to the database using to_dict() to create the document."""
-        # Create document for database using to_dict()
         doc = self.to_dict()
-        
-        # Upsert to database
         return mongo_io.upsert(
             self.config.ENUMERATORS_COLLECTION_NAME,
             {"version": self.version},
@@ -140,7 +164,6 @@ class Enumerations:
         )
 
     def save(self):
-        """Save the enumerations to its file and return the File object."""
         try:
             file_obj = FileIO.put_document(self.config.ENUMERATOR_FOLDER, self.file_name, self.to_dict())
             return file_obj

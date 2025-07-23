@@ -2,55 +2,107 @@ version: 2
 file_name: enumerations.2.yaml
 _locked: false
 enumerators:
-  default_status:
-    draft: Draft Media
-    active: Not Deleted
-    archived: Soft Delete Indicator
-    published: Published Media
-  media_quality:
-    hd: High Definition
-    uhd: Ultra High Definition
-    sd: Standard Definition
-    fhd: Full High Definition
-  media_status:
-    published: Published Media
-    draft: Draft Media
-    processing: Media Being Processed
-    archived: Archived Media
-    scheduled: Scheduled Media
-  media_type:
-    movie: Movie
-    tv_show: TV Show
-    documentary: Documentary
-    short: Short Film
-    image: Image
-    audio: Audio
-  media_format:
-    bluray: Blu-ray
-    dvd: DVD
-    digital: Digital
-    streaming: Streaming
-    jpg: JPEG Image Format
-  media_tags:
-    action: Action
-    sci_fi: Science Fiction
-    documentary: Documentary
-    drama: Drama
-    comedy: Comedy
-    thriller: Thriller
-    art: Art
-    painting: Painting
-    music: Music
-    song: Song
-  audio_format:
-    mp3: MP3 Audio Format
-    wav: WAV Audio Format
-    aac: AAC Audio Format
-    ogg: OGG Audio Format
-    flac: FLAC Audio Format
-  image_format:
-    jpg: JPEG Image Format
-    png: PNG Image Format
-    gif: GIF Image Format
-    webp: WebP Image Format
-    svg: SVG Image Format
+  - name: default_status
+    values:
+      - value: draft
+        description: Draft Media
+      - value: active
+        description: Not Deleted
+      - value: archived
+        description: Soft Delete Indicator
+      - value: published
+        description: Published Media
+  - name: media_quality
+    values:
+      - value: hd
+        description: High Definition
+      - value: uhd
+        description: Ultra High Definition
+      - value: sd
+        description: Standard Definition
+      - value: fhd
+        description: Full High Definition
+  - name: media_status
+    values:
+      - value: published
+        description: Published Media
+      - value: draft
+        description: Draft Media
+      - value: processing
+        description: Media Being Processed
+      - value: archived
+        description: Archived Media
+      - value: scheduled
+        description: Scheduled Media
+  - name: media_type
+    values:
+      - value: movie
+        description: Movie
+      - value: tv_show
+        description: TV Show
+      - value: documentary
+        description: Documentary
+      - value: short
+        description: Short Film
+      - value: image
+        description: Image
+      - value: audio
+        description: Audio
+  - name: media_format
+    values:
+      - value: bluray
+        description: Blu-ray
+      - value: dvd
+        description: DVD
+      - value: digital
+        description: Digital
+      - value: streaming
+        description: Streaming
+      - value: jpg
+        description: JPEG Image Format
+  - name: media_tags
+    values:
+      - value: action
+        description: Action
+      - value: sci_fi
+        description: Science Fiction
+      - value: documentary
+        description: Documentary
+      - value: drama
+        description: Drama
+      - value: comedy
+        description: Comedy
+      - value: thriller
+        description: Thriller
+      - value: art
+        description: Art
+      - value: painting
+        description: Painting
+      - value: music
+        description: Music
+      - value: song
+        description: Song
+  - name: audio_format
+    values:
+      - value: mp3
+        description: MP3 Audio Format
+      - value: wav
+        description: WAV Audio Format
+      - value: aac
+        description: AAC Audio Format
+      - value: ogg
+        description: OGG Audio Format
+      - value: flac
+        description: FLAC Audio Format
+  - name: image_format
+    values:
+      - value: jpg
+        description: JPEG Image Format
+      - value: png
+        description: PNG Image Format
+      - value: gif
+        description: GIF Image Format
+      - value: webp
+        description: WebP Image Format
+      - value: svg
+        description: SVG Image Format
