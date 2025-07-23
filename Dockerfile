@@ -15,8 +15,13 @@ COPY Pipfile Pipfile.lock ./
 # Install pipenv
 RUN pip install pipenv
 
-# Copy application code 
-COPY . .
+# Copy only the application code and necessary files
+COPY configurator/ ./configurator/
+COPY docs/ ./docs/
+COPY README.md LICENSE ./
+
+# Copy playground test cases for development/testing
+COPY tests/test_cases/passing_template /playground
 
 # Install dependencies
 RUN pipenv install --deploy --system
