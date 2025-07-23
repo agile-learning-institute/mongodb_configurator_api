@@ -17,7 +17,7 @@ tests:
           body: |
             {
               "version": 0,
-              "enumerators": {}
+              "enumerators": []
             }
           check:
             status: /200/
@@ -36,15 +36,21 @@ tests:
           body: |
             {
               "version": 1,
-              "enumerators": {
-                "default_status": {
-                  "active": "Not Deleted",
-                  "archived": "Soft Delete Indicator"
+              "enumerators": [
+                {
+                  "name": "default_status",
+                  "values": [
+                    {"value": "active", "description": "Not Deleted"},
+                    {"value": "archived", "description": "Soft Delete Indicator"}
+                  ]
                 },
-                "test_enum": {
-                  "foo": "bar"
+                {
+                  "name": "test_enum",
+                  "values": [
+                    {"value": "foo", "description": "bar"}
+                  ]
                 }
-              }
+              ]
             }
           check:
             status: /200/
@@ -63,7 +69,7 @@ tests:
           body: |
             {
               "version": 2,
-              "enumerators": {}
+              "enumerators": []
             }
           check:
             status: /200/
@@ -81,8 +87,12 @@ tests:
           check:
             status: /200/
             jsonpath:
-              enumerators.test_enum.foo: "bar"
-              enumerators.default_status.active: "Not Deleted"
+              enumerators[1].name: test_enum
+              enumerators[1].values[0].value: foo
+              enumerators[1].values[0].description: bar
+              enumerators[0].name: default_status
+              enumerators[0].values[0].value: active
+              enumerators[0].values[0].description: Not Deleted
 
       # Restore to original state
       - name: Restore Original Enumerations 1
@@ -94,15 +104,21 @@ tests:
           body: |
             {
               "version": 1,
-              "enumerators": {
-                "default_status": {
-                  "active": "Not Deleted",
-                  "archived": "Soft Delete Indicator"
+              "enumerators": [
+                {
+                  "name": "default_status",
+                  "values": [
+                    {"value": "active", "description": "Not Deleted"},
+                    {"value": "archived", "description": "Soft Delete Indicator"}
+                  ]
                 },
-                "test_enum": {
-                  "foo": "bar"
+                {
+                  "name": "test_enum",
+                  "values": [
+                    {"value": "foo", "description": "bar"}
+                  ]
                 }
-              }
+              ]
             }
           check:
             status: /200/
