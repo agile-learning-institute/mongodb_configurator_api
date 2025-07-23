@@ -51,6 +51,7 @@ Thumbs.db
 
 # Project specific
 tests/
+!tests/test_cases/passing_template/
 *.egg-info/
 .pytest_cache/
 .coverage

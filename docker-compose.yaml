@@ -37,6 +37,7 @@ services:
       MONGO_DB_NAME: test_database
       API_PORT: 8081
       SPA_PORT: 8082
+      INPUT_FOLDER: /input
     volumes:
       - ${INPUT_FOLDER:-./tests/test_cases/playground}:/input
     depends_on:
