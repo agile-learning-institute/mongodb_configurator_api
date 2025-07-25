@@ -1,10 +1,11 @@
 from configurator.services.enumerator_service import Enumerations
+from .base import BaseProperty
 from .property import Property
 
-class ArrayType(Property):
+class ArrayType(BaseProperty):
     def __init__(self, data: dict):
         super().__init__(data)
-        self.items = Property(data.get('items'))
+        self.items = Property(data.get("items", {}))
 
     def to_dict(self):
         the_dict = super().to_dict()

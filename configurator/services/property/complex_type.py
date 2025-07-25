@@ -1,7 +1,7 @@
 from configurator.services.enumerator_service import Enumerations
-from .property import Property
+from .base import BaseProperty
 
-class ComplexType(Property):
+class ComplexType(BaseProperty):
     def __init__(self, data: dict):
         super().__init__(data)
         self.bson_schema = data.get("bson_schema", {})

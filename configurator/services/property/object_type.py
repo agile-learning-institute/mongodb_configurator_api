@@ -1,5 +1,6 @@
 from configurator.services.enumerator_service import Enumerations
-from .property import BaseProperty, create_property
+from .base import BaseProperty
+from .property import Property
 
 class ObjectType(BaseProperty):
     def __init__(self, data: dict):
@@ -7,7 +8,7 @@ class ObjectType(BaseProperty):
         self.additional_properties = data.get("additionalProperties", False)
         self.properties = []
         for property in data.get("properties", []):
-            self.properties.append(create_property(property))
+            self.properties.append(Property(property))
 
     def to_dict(self):
         the_dict = super().to_dict()
@@ -27,4 +28,4 @@ class ObjectType(BaseProperty):
         the_schema['additionalProperties'] = self.additional_properties
         the_schema['properties'] = {prop.name: prop.to_bson_schema(enumerations, ref_stack) for prop in self.properties}
         the_schema['required'] = [prop.name for prop in self.properties if prop.required]
-        return the_schema
+        return the_schema 

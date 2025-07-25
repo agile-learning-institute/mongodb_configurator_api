@@ -165,9 +165,8 @@ class TestFileIO(unittest.TestCase):
         """Test put_document with YAML file"""
         result = self.file_io.put_document("", "test.yaml", self.yaml_data)
         
-        self.assertIsInstance(result, File)
-        self.assertEqual(result.file_name, "test.yaml")
-        self.assertGreaterEqual(result.size, 0)
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result, self.yaml_data)
         
         # Verify file content
         with open(self.test_yaml_path, 'r') as f:
@@ -178,9 +177,8 @@ class TestFileIO(unittest.TestCase):
         """Test put_document with JSON file"""
         result = self.file_io.put_document("", "test.json", self.json_data)
         
-        self.assertIsInstance(result, File)
-        self.assertEqual(result.file_name, "test.json")
-        self.assertGreaterEqual(result.size, 0)
+        self.assertIsInstance(result, dict)
+        self.assertEqual(result, self.json_data)
         
         # Verify file content
         with open(self.test_json_path, 'r') as f:

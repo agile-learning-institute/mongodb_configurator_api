@@ -1,7 +1,7 @@
 from configurator.services.enumerator_service import Enumerations
-from .property import Property
+from .base import BaseProperty
 
-class SimpleType(Property):
+class SimpleType(BaseProperty):
     def __init__(self, data: dict):
         super().__init__(data)
         self.schema = data.get("schema", {})

@@ -1,24 +1,25 @@
 from configurator.services.enumerator_service import Enumerations
-from .property import BaseProperty, create_property
+from .base import BaseProperty
+from .property import Property
 
 class OneOfType(BaseProperty):
     def __init__(self, data: dict):
         super().__init__(data)
-        self.one_of = []
-        for property in data.get("oneOf", []):
-            self.one_of.append(create_property(property))
+        self.properties = []
+        for property in data.get("properties", []):
+            self.one_of.append(Property(property))
 
     def to_dict(self):
         the_dict = super().to_dict()
-        the_dict['oneOf'] = [property.to_dict() for property in self.one_of]
+        the_dict['properties'] = [property.to_dict() for property in self.properties]
         return the_dict
 
     def to_json_schema(self, enumerations: Enumerations, ref_stack: list = []):
         the_schema = super().to_json_schema(enumerations, ref_stack)
-        the_schema['oneOf'] = [property.to_json_schema(enumerations, ref_stack) for property in self.one_of]
+        the_schema['oneOf'] = [property.to_json_schema(enumerations, ref_stack) for property in self.properties]
         return the_schema
 
     def to_bson_schema(self, enumerations: Enumerations, ref_stack: list = []):
         the_schema = super().to_bson_schema(enumerations, ref_stack)
-        the_schema['oneOf'] = [property.to_bson_schema(enumerations, ref_stack) for property in self.one_of]
+        the_schema['oneOf'] = [property.to_bson_schema(enumerations, ref_stack) for property in self.properties]
         return the_schema
