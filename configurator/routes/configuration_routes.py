@@ -81,7 +81,7 @@ def create_configuration_routes():
     @event_route("CFG-ROUTES-11", "GET_BSON_SCHEMA", "getting BSON schema")
     def get_bson_schema(file_name, version):
         configuration = Configuration(file_name)
-        schema = configuration.get_bson_schema_for_version(version)
+        schema = configuration.get_bson_schema(version)
         return jsonify(schema)
 
     logger.info("configuration Flask Routes Registered")
