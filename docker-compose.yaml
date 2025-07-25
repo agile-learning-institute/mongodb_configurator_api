@@ -21,9 +21,10 @@ services:
       - mongodb
       - configurator
       - configurator-api
+      - playground
 
   ##################################
-  # MongoDB configuration Service
+  # MongoDB Configurator Service - Mounts /input to $INPUT_FOLDER
   ##################################
   configurator_api:
     image: ghcr.io/agile-learning-institute/mongodb_configurator_api:latest
@@ -60,3 +61,35 @@ services:
       - configurator_api
     profiles:
       - configurator
+
+##################################
+# MongoDB configuration Service - Sets Input to /playground
+##################################
+  playground_api:
+    image: ghcr.io/agile-learning-institute/mongodb_configurator_api:latest
+    restart: no
+    ports:
+      - 8081:8081
+    environment:
+      API_PORT: 8081
+      SPA_PORT: 8082
+      INPUT_FOLDER: /playground
+    depends_on:
+      mongodb:
+        condition: service_healthy
+    profiles:
+      - playground
+
+  playground_spa:
+    image: ghcr.io/agile-learning-institute/mongodb_configurator_spa:latest
+    restart: no
+    environment:
+      API_HOST: playground_api
+      API_PORT: 8081
+      SPA_PORT: 8082
+    ports:
+      - 8082:8082
+    depends_on:
+      - playground_api
+    profiles:
+      - playground

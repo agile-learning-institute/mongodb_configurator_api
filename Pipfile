@@ -13,8 +13,8 @@ container = "docker build --tag ghcr.io/agile-learning-institute/mongodb_configu
 database = "sh -c 'pipenv run down && docker compose --profile mongodb up --detach'"
 api = "sh -c 'pipenv run down && docker compose --profile configurator-api up --detach'"
 service = "sh -c 'pipenv run down && docker compose --profile configurator up --detach && echo `Visit http://localhost:8082/`'"
+playground = "sh -c 'pipenv run down && docker compose --profile playground up --detach && echo `Visit http://localhost:8082/`'"
 down = "docker compose down mongodb configurator_api configurator_spa"
-drop = "curl -X DELETE http://localhost:8081/api/database/"
 
 [packages]
 python-dotenv = "*"

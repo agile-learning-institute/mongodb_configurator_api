@@ -9,7 +9,7 @@ This project builds a the [MongoDB Configurator](https://github.com/agile-learni
 - [Python](https://www.python.org/downloads/) 3.12 or later
 - [Pipenv](https://pipenv.pypa.io/en/latest/installation.html)
 - [StepCI](https://github.com/stepci/stepci/blob/main/README.md)
-- [Docker Desktop](https://github.com/agile-learning-institute/stage0/tree/main/developer_edition)
+- [Docker Desktop](https://docs.docker.com/get-started/get-docker/)
 - [MongoDB Compass](https://www.mongodb.com/products/compass) *optional*
 
 ### Quick Start
@@ -17,23 +17,17 @@ This project builds a the [MongoDB Configurator](https://github.com/agile-learni
 # Clone the repository
 git clone git@github.com:agile-learning-institute/mongodb_configurator_api.git
 cd mongodb_configurator_api
+pipenv install --dev
 pipenv run service
 # Open http://localhost:8082/
-```
-
-### Developer Setup
-```bash
-# Install dependencies
-pipenv install
-
-# Run tests to verify setup
-pipenv run test
-
 ```
 
 ### Developer Commands
 
 ```bash
+# Run unit tests
+pipenv run test
+
 # Select a test_case for the server
 export INPUT_FOLDER=./tests/test_cases/small_sample
 export INPUT_FOLDER=./tests/test_cases/large_sample
@@ -42,31 +36,26 @@ export INPUT_FOLDER=./tests/test_cases/playground
 # Set Debug Mode if needed
 export LOGGING_LEVEL=DEBUG
 
-# Install dependencies
-pipenv install --dev
-
 #####################
 # Running test server  - uses INPUT_FOLDER setting# 
 pipenv run database     # Start the backing mongo database
-pipenv run local        # Start the server locally
+pipenv run dev          # Start the server locally - expects database to be running
 pipenv run debug        # Start locally with DEBUG logging
 pipenv run batch        # Run locally in Batch mode (process and exit)
-
-# Drop the Testing Database - Live - Real Drop Database!!!
-pipenv run drop
 
 #####################
 # Building and Testing the container (before a PR)
 pipenv run container    # Build the container
 pipenv run api          # Run the DB and API containers
 pipenv run service      # Run the DB, API, and SPA containers
-# visit http://localhost:8082 and "process all"
+# visit http://localhost:8082 
 
 pipenv run down         # Stops all testing containers
 
 ################################
 # Black Box Testing with StepCI 
 export INPUT_FOLDER=./tests/test_cases/stepci
+pipenv run api
 pipenv run stepci
 
 ```
@@ -115,20 +104,20 @@ tests/
 ├── stepci/                 # API Black Box testing
 ├── test_cases/             # Test data 
 │   ├── failing_*/          # Integration Test data for failure use cases
-│   ├── failing_empty/          # Empty input folder
 │   ├── failing_not_parsable/   # Non yaml/json files
 │   ├── failing_refs/           # Circular/Missing Refs
 │   ├── passing_*/          # Integration Test data for success use cases
-│   ├── passing_config_files/   # API Config file testing
-│   ├── passing_type_renders/   # Custom type render testing
-│   ├── passing_empty/          # Minimum valid input
-│   ├── passing_template/       # New project input template 
-│   ├── passing_process/        # More complex processing
 │   ├── passing_complex_refs/   # one_of plus refs
-│   ├── playground/         # Playground for SPA - not used in integration testing
+│   ├── passing_config_files/   # API Config file testing
+│   ├── passing_empty/          # Minimum valid input
+│   ├── passing_process/        # More complex processing
+│   ├── passing_template/       # Playground / new project template
+│   ├── passing_type_renders/   # Custom type render testing
+│   ├── playground/         # Playground for interactive testing
 │   ├── stepci/             # Configuration for step ci testing - setup/tear down in tests
 
 ```
+The Docker build will package passing_template into the containers /playground folder to support playground deployments.
 
 ## API Documentation
 
