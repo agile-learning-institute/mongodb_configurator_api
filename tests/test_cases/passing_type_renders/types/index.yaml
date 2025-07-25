@@ -1,6 +1,6 @@
 root:
   description: A zero-based array index
-  type: complex_primitive
+  type: complex
   json_type:
     type: number
     minimum: 0

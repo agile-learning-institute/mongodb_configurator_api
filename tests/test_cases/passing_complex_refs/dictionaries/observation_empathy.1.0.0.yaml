@@ -5,7 +5,7 @@ root:
   one_of:
     - type: object
       properties:
-        users:
+        - users:
           description: Users who made the observation
           required: true
           type: array
@@ -18,7 +18,7 @@ root:
           required: true
     - type: object
       properties:
-        users:
+        - users:
           description: Users who made the observation
           required: true
           type: array
@@ -31,27 +31,27 @@ root:
           required: true
     - type: object
       properties:
-        users:
+        - users:
           description: Users who made the observation
           required: true
           type: array
           items:
             description: User Name
             type: word
-        thinks:
+        - thinks:
           description: Things the user thinks
           type: sentence
           required: true
     - type: object
       properties:
-        users:
+        - users:
           description: Users who made the observation
           required: true
           type: array
           items:
             description: User Name
             type: word
-        feels:
+        - feels:
           description: Things the user feels
           type: sentence
           required: true

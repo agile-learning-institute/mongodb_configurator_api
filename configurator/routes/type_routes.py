@@ -26,30 +26,27 @@ def create_type_routes():
         result = Type.lock_all()
         return jsonify(result.to_dict())
 
-
     # GET /api/types/<file_name>/ - Return a type file
     @type_routes.route('/<file_name>/', methods=['GET'])
     @event_route("TYP-02", "GET_TYPE", "getting type")
     def get_type(file_name):
-        type_obj = Type(file_name)
-        return jsonify(type_obj.to_dict())
+        type = Type(file_name)
+        return jsonify(type.to_dict())
     
     # PUT /api/types/<file_name> - Update a type file
     @type_routes.route('/<file_name>/', methods=['PUT'])
     @event_route("TYP-03", "PUT_TYPE", "updating type")
     def update_type(file_name):
-        type_obj = Type(file_name, request.json)
-        file_obj = type_obj.save()
-        return jsonify(file_obj.to_dict())
+        type = Type(file_name, request.json)
+        results = type.save()
+        return jsonify(results.to_dict())
     
     @type_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("TYP-05", "DELETE_TYPE", "deleting type")
     def delete_type(file_name):
-        type_obj = Type(file_name)
-        deleted = type_obj.delete()
-        return jsonify(deleted.to_dict())
-    
-
+        type = Type(file_name)
+        event = type.delete()
+        return jsonify(event.to_dict())
     
     logger.info("Type Flask Routes Registered")
     return type_routes

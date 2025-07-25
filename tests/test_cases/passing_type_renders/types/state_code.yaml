@@ -1,6 +1,6 @@
 root:
   description: A US state code
-  type: simple_primitive
+  type: simple
   schema:
     type: string
     pattern: ^[A-Z]{2}$

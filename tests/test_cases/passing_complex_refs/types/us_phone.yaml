@@ -1,6 +1,6 @@
 root:
   description: A US phone number
-  type: complex_primitive
+  type: complex
   json_type:
     type: string
     pattern: ^(\+1[0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$

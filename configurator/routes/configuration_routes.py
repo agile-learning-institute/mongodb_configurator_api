@@ -36,12 +36,10 @@ def create_configuration_routes():
         result = Configuration.lock_all()
         return jsonify(result.to_dict())
 
-
-    @blueprint.route('/collection/<file_name>/', methods=['POST'])
+    @blueprint.route('/collection/<collection_name>/', methods=['POST'])
     @event_route("CFG-ROUTES-04", "CREATE_COLLECTION", "creating collection")
-    def create_collection(file_name):
-        template_service = TemplateService()
-        result = template_service.create_collection(file_name)
+    def create_collection(collection_name):
+        result = TemplateService.create_collection(collection_name)
         return jsonify(result)
 
     @blueprint.route('/<file_name>/', methods=['GET'])
@@ -55,8 +53,8 @@ def create_configuration_routes():
     @event_route("CFG-ROUTES-06", "PUT_CONFIGURATION", "updating configuration")
     def update_configuration(file_name):
         configuration = Configuration(file_name, request.json)
-        file_obj = configuration.save()
-        return jsonify(file_obj.to_dict())
+        result = configuration.save()
+        return jsonify(result)
     
     @blueprint.route('/<file_name>/', methods=['DELETE'])
     @event_route("CFG-ROUTES-07", "DELETE_CONFIGURATION", "deleting configuration")
@@ -69,8 +67,8 @@ def create_configuration_routes():
     @event_route("CFG-ROUTES-09", "PROCESS_CONFIGURATION", "processing configuration")
     def process_configuration(file_name):
         configuration = Configuration(file_name)
-        result = configuration.process()
-        return jsonify(result.to_dict())
+        event = configuration.process()
+        return jsonify(event.to_dict())
 
     @blueprint.route('json_schema/<file_name>/<version>/', methods=['GET'])
     @event_route("CFG-ROUTES-10", "GET_JSON_SCHEMA", "getting JSON schema")

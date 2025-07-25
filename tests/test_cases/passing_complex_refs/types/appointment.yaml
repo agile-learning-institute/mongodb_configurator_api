@@ -2,11 +2,11 @@ root:
   description: A date/time range
   type: object
   properties:
-    from:
+    - from:
       description: Starting Date/Time
       type: date-time
       required: true
-    to:
+    - to:
       description: Ending Date/Time
       type: date-time
       required: true

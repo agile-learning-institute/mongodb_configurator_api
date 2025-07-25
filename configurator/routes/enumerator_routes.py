@@ -26,8 +26,6 @@ def create_enumerator_routes():
         event = enumerators.lock_all()
         return jsonify(event.to_dict())
     
-
-    
     # GET /api/enumerations/<file_name> - Get specific enumeration file
     @enumerator_routes.route('/<file_name>/', methods=['GET'])
     @event_route("ENU-02", "GET_ENUMERATION", "getting enumeration")
@@ -39,10 +37,9 @@ def create_enumerator_routes():
     @enumerator_routes.route('/<file_name>/', methods=['PUT'])
     @event_route("ENU-03", "PUT_ENUMERATION", "updating enumeration")
     def put_enumeration(file_name):
-        data = request.get_json(force=True)
-        enumerations = Enumerations(data=data, file_name=file_name)
-        file_obj = enumerations.save()
-        return jsonify(file_obj.to_dict())
+        enumerations = Enumerations(file_name, request.json)
+        result = enumerations.save()
+        return jsonify(result.to_dict())
     
     # DELETE /api/enumerations/<file_name> - Delete specific enumeration file
     @enumerator_routes.route('/<file_name>/', methods=['DELETE'])
@@ -50,7 +47,6 @@ def create_enumerator_routes():
     def delete_enumeration(file_name):
         enumerators = Enumerators()
         event = enumerators.delete(file_name)
-        event.record_success()
         return jsonify(event.to_dict())
 
     logger.info("Enumerator Flask Routes Registered")

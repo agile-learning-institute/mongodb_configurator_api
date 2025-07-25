@@ -1,5 +1,6 @@
 root:
   description: A numeric count value
+  type: complex
   json_type:
     type: integer
   bson_type:

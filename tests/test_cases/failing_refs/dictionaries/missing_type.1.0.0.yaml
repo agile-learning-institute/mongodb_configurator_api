@@ -4,6 +4,6 @@ root:
   description: A schema with a missing type
   type: object
   properties:
-    missing:
+    - missing:
       description: A missing type
       type: missing

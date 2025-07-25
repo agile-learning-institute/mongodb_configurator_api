@@ -1,6 +1,6 @@
 root:
   description: A valid URL
-  type: complex_primitive
+  type: complex
   json_type:
     type: string
     format: uri

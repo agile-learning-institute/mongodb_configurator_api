@@ -51,17 +51,11 @@ class FileIO:
         files = []
         
         try:
-            if not os.path.exists(folder):
-                event = ConfiguratorEvent(event_id="FIL-02", event_type="GET_DOCUMENTS", event_data={"error": "Folder not found"})
-                raise ConfiguratorException(f"Folder not found: {folder}", event)
-                
             for file_name in os.listdir(folder):
                 file_path = os.path.join(folder, file_name)
                 if os.path.isfile(file_path):
                     files.append(File(file_path))
             return files
-        except ConfiguratorException as e:
-            raise e
         except Exception as e:
             event = ConfiguratorEvent(event_id="FIL-03", event_type="GET_DOCUMENTS", event_data={e})
             raise ConfiguratorException(f"Failed to get documents from {folder}", event)
@@ -72,23 +66,7 @@ class FileIO:
         config = Config.get_instance()
         folder = os.path.join(config.INPUT_FOLDER, folder_name)
         file_path = os.path.join(folder, file_name)
-        
-        # Check if file exists
-        if not os.path.exists(file_path):
-            abs_path = os.path.abspath(file_path)
-            cwd = os.getcwd()
-            event = ConfiguratorEvent(event_id="FIL-04", event_type="FILE_NOT_FOUND",
-                event_data={"file_path": file_path, "abs_path": abs_path, "cwd": cwd})
-            raise ConfiguratorException(f"File not found: {file_path} (abs: {abs_path}, cwd: {cwd})", event)
-        
-        # Get extension from file path
         extension = os.path.splitext(file_path)[1].lower()
-        
-        # Only allow .yaml and .json
-        if extension not in [".yaml", ".json"]:
-            event = ConfiguratorEvent(event_id="FIL-05", event_type="UNSUPPORTED_FILE_TYPE", 
-                event_data={"file_name": file_name, "extension": extension})
-            raise ConfiguratorException(f"Unsupported file type: {extension}", event)
         
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
@@ -106,44 +84,32 @@ class FileIO:
         config = Config.get_instance()
         folder = os.path.join(config.INPUT_FOLDER, folder_name)
         file_path = os.path.join(folder, file_name)
-        
-        # Get extension from file path
         extension = os.path.splitext(file_path)[1].lower()
-        
-        # Only allow .yaml and .json
-        if extension not in [".yaml", ".json"]:
-            event = ConfiguratorEvent(event_id="FIL-07", event_type="UNSUPPORTED_FILE_TYPE", event_data=file_name)
-            raise ConfiguratorException(f"Unsupported file type: {extension}", event)
         
         try:
             with open(file_path, 'w', encoding='utf-8') as f:
                 if extension == ".yaml":
-                    yaml.dump(document, f, default_flow_style=False, allow_unicode=True, sort_keys=False)
+                    yaml.dump(document, f)
                 elif extension == ".json":
                     f.write(json_util.dumps(document, indent=2))
             
-            return File(file_path)
+            return FileIO.get_document(folder_name, file_name)
         except Exception as e:
             event = ConfiguratorEvent(event_id="FIL-08", event_type="PUT_DOCUMENT", event_data={"error": str(e)})
             raise ConfiguratorException(f"Failed to put document to {file_path}", event)
     
     @staticmethod
     def delete_document(folder_name: str, file_name: str) -> ConfiguratorEvent:
-        """Delete a file."""
         config = Config.get_instance()
         folder = os.path.join(config.INPUT_FOLDER, folder_name)
         file_path = os.path.join(folder, file_name)
-        event = ConfiguratorEvent(event_id="FIL-09", event_type="DELETE_DOCUMENT")
         
         try:
-            if not os.path.exists(file_path):
-                event.record_failure({"error": "File not found", "file_path": file_path})
-                return event
-                
+            event = ConfiguratorEvent(event_id="FIL-09", event_type="DELETE_DOCUMENT")
             os.remove(file_path)
             event.record_success()
             return event
         except Exception as e:
             event.record_failure({"error": str(e), "file_path": file_path})
-            return event
+            raise ConfiguratorException(f"Failed to delete {file_name} from {folder_name}", event)
     

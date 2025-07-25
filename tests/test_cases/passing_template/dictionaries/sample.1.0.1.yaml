@@ -4,15 +4,15 @@ root:
   description: A simple collection for testing
   type: object
   properties:
-    _id:
+    - _id:
       description: The unique identifier for the media
       type: identifier
       required: true
-    full_name:
+    - full_name:
       description: The name of the document
       type: sentence
       required: true
-    status:
+    - status:
       description: The current status of the document
       type: enum
       enums: default_status

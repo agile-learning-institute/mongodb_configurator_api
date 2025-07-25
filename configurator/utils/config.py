@@ -30,9 +30,9 @@ class Config:
             self.DICTIONARY_FOLDER = ''
             self.CONFIGURATION_FOLDER = ''
             self.TEST_DATA_FOLDER = ''
-            self.TEMPLATE_FOLDER = ''
             self.MIGRATIONS_FOLDER = ''
             self.API_CONFIG_FOLDER = ''
+            self.ENUMERATOR_FOLDER = ''
             self.API_PORT = 0
             self.SPA_PORT = 0
             self.AUTO_PROCESS = False
@@ -53,10 +53,9 @@ class Config:
                 "DICTIONARY_FOLDER": "dictionaries",
                 "CONFIGURATION_FOLDER": "configurations",
                 "TEST_DATA_FOLDER": "test_data",
-                "TEMPLATE_FOLDER": "templates",
                 "MIGRATIONS_FOLDER": "migrations",
                 "API_CONFIG_FOLDER": "api_config",
-                "ENUMERATOR_FOLDER": "enumerators"
+                "ENUMERATOR_FOLDER": "enumerators",
             }
             self.config_ints = {
                 "API_PORT": "8081",

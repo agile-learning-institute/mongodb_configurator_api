@@ -23,11 +23,8 @@ def create_migration_routes():
     @migration_routes.route('/<file_name>/', methods=['GET'])
     @event_route("MIG-02", "GET_MIGRATION", "getting migration")
     def get_migration(file_name):
-        try:
-            content = FileIO.get_document(config.MIGRATIONS_FOLDER, file_name)
-            return jsonify(content)
-        except Exception as e:
-            raise ConfiguratorException(f"Migration file {file_name} not found", ConfiguratorEvent(event_id="MIG-01", event_type="MIGRATION_NOT_FOUND"))
+        content = FileIO.get_document(config.MIGRATIONS_FOLDER, file_name)
+        return jsonify(content)
 
     # PUT /api/migrations/<file_name>/ - Update or create a migration file
     @migration_routes.route('/<file_name>/', methods=['PUT'])
@@ -35,7 +32,7 @@ def create_migration_routes():
     def put_migration(file_name):
         content = request.get_json(force=True)
         file = FileIO.put_document(config.MIGRATIONS_FOLDER, file_name, content)
-        return jsonify(file.to_dict())
+        return jsonify(file)
 
     # DELETE /api/migrations/<file_name>/ - Delete a migration file
     @migration_routes.route('/<file_name>/', methods=['DELETE'])

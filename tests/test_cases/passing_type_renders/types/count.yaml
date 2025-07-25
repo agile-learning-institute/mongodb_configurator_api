@@ -1,6 +1,6 @@
 root:
   description: A positive integer value
-  type: complex_primitive
+  type: complex
   json_type:
     type: number
     minimum: 1

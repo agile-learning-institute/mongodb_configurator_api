@@ -4,6 +4,6 @@ root:
   description: A schema for invalid tests data
   type: object
   properties:
-    name:
+    - name:
       description: The name of the person
       type: word

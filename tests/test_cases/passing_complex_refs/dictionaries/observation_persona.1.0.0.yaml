@@ -4,22 +4,22 @@ root:
   description: A persona observation for design thinking exercises.
   type: object
   properties:
-    name:
+    - name:
       description: The name of the persona
       type: word
       required: true
-    age:
+    - age:
       description: The age of the persona
       type: count
-    occupation:
+    - occupation:
       description: The occupation of the persona
       type: sentence
-    goals:
+    - goals:
       description: The goals of the persona
       type: markdown
-    frustrations:
+    - frustrations:
       description: The frustrations of the persona
       type: markdown
-    needs:
+    - needs:
       description: The needs of the persona
       type: markdown 

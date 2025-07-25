@@ -4,22 +4,22 @@ root:
   description: A hill of a Hills exercise
   type: object
   properties:
-    name:
+    - name:
       description: Unique Name of the hill
       type: word
-    users:
+    - users:
       description: Users who made the observation
       required: true
       type: array
       items:
         description: User Name
         type: word
-    who:
+    - who:
       description: Persona Who is the hill about
       type: sentence
-    what:
+    - what:
       description: What the user does
       type: sentence
-    wow:
+    - wow:
       description: The Wow that happens when Who does What
       type: sentence

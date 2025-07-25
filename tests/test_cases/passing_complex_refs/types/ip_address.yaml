@@ -1,6 +1,6 @@
 root:
   description: An IPv4 or IPv6 address
-  type: complex_primitive
+  type: complex
   json_type:
     type: string
     format: ip

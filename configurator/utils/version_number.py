@@ -6,13 +6,6 @@ class VersionNumber:
     """Class for handling version numbers."""
     
     def __init__(self, version: str):
-        """Initialize a VersionNumber instance.
-        
-        Args:
-            version: Version string collection.major.minor.patch[.enumerator]
-                   If enumerator is omitted, defaults to 0.
-            
-        """
         self.version = version
         parts = version.split('.')
         if len(parts) < 4 or len(parts) > 5:
