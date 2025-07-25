@@ -1,5 +1,5 @@
 from configurator.services.enumerator_service import Enumerations
-from configurator.services.property import Property
+from .property import Property
 from configurator.services.type_services import Type
 
 class CustomType(Property):

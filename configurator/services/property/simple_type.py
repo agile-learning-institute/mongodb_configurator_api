@@ -1,5 +1,5 @@
 from configurator.services.enumerator_service import Enumerations
-from configurator.services.property import Property
+from .property import Property
 
 class SimpleType(Property):
     def __init__(self, data: dict):

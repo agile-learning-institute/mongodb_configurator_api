@@ -4,6 +4,7 @@ from configurator.utils.config import Config
 from configurator.utils.file_io import FileIO
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.services.property import Property
+from configurator.services.enumerator_service import Enumerations
 
 class Type:
     def __init__(self, file_name: str, document: dict = None):
@@ -26,11 +27,11 @@ class Type:
         the_dict['root'] = self.root.to_dict()
         return the_dict
 
-    def to_json_schema(self, type_stack: list = []):
-        return self.root.get_json_schema(type_stack)
+    def to_json_schema(self, enumerations: Enumerations, ref_stack: list = []):
+        return self.root.to_json_schema(enumerations, ref_stack)
     
-    def to_bson_schema(self, type_stack: list = None):
-        return self.root.get_bson_schema(type_stack)
+    def to_bson_schema(self, enumerations: Enumerations, ref_stack: list = []):
+        return self.root.to_bson_schema(enumerations, ref_stack)
     
     def save(self):
         return FileIO.put_document(self.config.TYPE_FOLDER, self.file_name, self.to_dict())
@@ -57,11 +58,9 @@ class Type:
             return lock_all_event
         except ConfiguratorException as e:
             lock_all_event.append_events([e.event])
-            file_event.record_failure(f"ConfiguratorException locking type {file.file_name}")
             lock_all_event.record_failure(f"ConfiguratorException locking all types: {str(e)}") 
             raise ConfiguratorException("Cannot lock all types", lock_all_event)
         except Exception as e:
-            file_event.record_failure(f"Unexpected error locking all types: {str(e)}")
             lock_all_event.record_failure(f"Unexpected error locking all types: {str(e)}")
             raise ConfiguratorException("Cannot lock all types", lock_all_event)
 

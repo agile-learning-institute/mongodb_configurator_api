@@ -1,15 +1,15 @@
 from configurator.utils.file_io import FileIO
 from configurator.utils.config import Config
 from configurator.services.enumerator_service import Enumerations
-from configurator.services.property.object_type import ObjectType
-from configurator.services.property.array_type import ArrayType
-from configurator.services.property.complex_type import ComplexType
-from configurator.services.property.simple_type import SimpleType
-from configurator.services.property.custom_type import CustomType
-from configurator.services.property.enum_array_type import EnumArrayType
-from configurator.services.property.enum_type import EnumType
-from configurator.services.property.one_of_type import OneOfType
-from configurator.services.property.ref_type import RefType
+from .object_type import ObjectType
+from .array_type import ArrayType
+from .complex_type import ComplexType
+from .simple_type import SimpleType
+from .custom_type import CustomType
+from .enum_array_type import EnumArrayType
+from .enum_type import EnumType
+from .one_of_type import OneOfType
+from .ref_type import RefType
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 
 class Property:
@@ -62,4 +62,4 @@ class Property:
     def to_bson_schema(self, enumerations: Enumerations, ref_stack: list = []):
         the_schema = {}
         the_schema['bsonType'] = self.type
-        return the_schema
+        return the_schema 
