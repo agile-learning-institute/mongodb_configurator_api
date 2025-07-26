@@ -36,7 +36,7 @@ class TestMigrationEvents(unittest.TestCase):
         shutil.rmtree(self.config.INPUT_FOLDER)
     
     @patch('configurator.utils.mongo_io.MongoClient')
-    @patch('configurator.services.configuration_services.Enumerators')
+    @patch('configurator.services.configuration_version.Enumerators')
     def test_migration_event_structure(self, mock_enumerators, mock_client):
         """Test that migration events are properly nested."""
         # Use MagicMock for __getitem__ support

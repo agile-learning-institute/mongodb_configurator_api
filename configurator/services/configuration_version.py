@@ -31,12 +31,12 @@ class Version:
         return the_dict
 
     def get_json_schema(self, enumerations: Enumerations) -> dict:
-        dictionary_filename: str = self.version.get_schema_filename()
+        dictionary_filename: str = self.version_number.get_schema_filename()
         dictionary = Dictionary(dictionary_filename)
         return dictionary.get_json_schema(enumerations)
 
     def get_bson_schema(self, enumerations: Enumerations) -> dict:
-        dictionary_filename: str = self.version.get_schema_filename()
+        dictionary_filename: str = self.version_number.get_schema_filename()
         dictionary = Dictionary(dictionary_filename)
         return dictionary.get_bson_schema(enumerations)
 
@@ -46,11 +46,11 @@ class Version:
             
             # If current version is greater than or equal to this version, skip processing
             current_version = VersionManager.get_current_version(mongo_io, self.collection_name)
-            if current_version >= self.version:
+            if current_version >= self.version_number:
                 event.data = {
                     "skip_reason": "Version already implemented",
                     "current_version": str(current_version),
-                    "target_version": str(self.version)
+                    "target_version": self.version_number.get_version_str()
                 }
                 event.record_success()
                 return event
@@ -89,7 +89,7 @@ class Version:
             # Apply schema validation
             sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="APPLY_SCHEMA_VALIDATION")
             event.append_events([sub_event])
-            enumerations = Enumerators().getVersion(self.version.get_enumerator_version())
+            enumerations = Enumerators().getVersion(self.version_number.get_enumerator_version())
             bson_schema: dict = self.get_bson_schema(enumerations)
             
             # Add schema context to event
@@ -111,7 +111,7 @@ class Version:
             result = mongo_io.upsert(
                 self.config.VERSION_COLLECTION_NAME,
                 {"collection_name": self.collection_name},
-                {"collection_name": self.collection_name, "current_version": self.version.version}
+                {"collection_name": self.collection_name, "current_version": self.version_number.version}
             )
             sub_event.data = result
             sub_event.record_success()
