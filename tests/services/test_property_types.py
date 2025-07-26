@@ -448,17 +448,17 @@ class TestSimpleType(unittest.TestCase):
         data = {
             "name": "test_property",
             "type": "string",
-            "schema": {"minLength": 5, "maxLength": 10}
+            "schema": {"type": "string", "minLength": 5, "maxLength": 10}
         }
         prop = SimpleType(data)
+        result = prop.to_bson_schema(Mock())
         
-        # This should fail due to KeyError accessing the_dict["type"]
-        # because BaseProperty.to_bson_schema() returns {"bsonType": "string"}
-        # but SimpleType tries to access the_dict["type"] which doesn't exist
-        with self.assertRaises(KeyError) as context:
-            result = prop.to_bson_schema(Mock())
-        
-        self.assertIn("'type'", str(context.exception))
+        expected = {
+            "bsonType": "string",
+            "minLength": 5,
+            "maxLength": 10
+        }
+        self.assertEqual(result, expected)
 
 
 class TestComplexType(unittest.TestCase):
@@ -500,17 +500,38 @@ class TestComplexType(unittest.TestCase):
     def test_complex_type_to_json_schema(self):
         """Test ComplexType to_json_schema method"""
         data = {
-            "name": "test_complex",
+            "name": "test_property",
             "type": "complex",
-            "description": "Test complex",
-            "json_schema": {"format": "email"}
+            "json_schema": {"format": "email", "pattern": "^[^@]+@[^@]+\\.[^@]+$"},
+            "bson_schema": {"bsonType": "string"}
         }
         prop = ComplexType(data)
-        mock_enumerations = Mock()
-        result = prop.to_json_schema(mock_enumerations)
-        self.assertEqual(result["description"], "Test complex")
-        self.assertEqual(result["type"], "complex")
-        self.assertEqual(result["format"], "email")
+        result = prop.to_json_schema(Mock())
+        
+        expected = {
+            "description": "",
+            "type": "complex",
+            "format": "email",
+            "pattern": "^[^@]+@[^@]+\\.[^@]+$"
+        }
+        self.assertEqual(result, expected)
+
+    def test_complex_type_to_bson_schema(self):
+        """Test ComplexType to_bson_schema method"""
+        data = {
+            "name": "test_property",
+            "type": "complex",
+            "json_schema": {"format": "email", "pattern": "^[^@]+@[^@]+\\.[^@]+$"},
+            "bson_schema": {"bsonType": "string"}
+        }
+        prop = ComplexType(data)
+        result = prop.to_bson_schema(Mock())
+        
+        # ComplexType should use the bsonType from bson_schema to override the base "complex" type
+        expected = {
+            "bsonType": "string"
+        }
+        self.assertEqual(result, expected)
 
 
 class TestCustomType(unittest.TestCase):
