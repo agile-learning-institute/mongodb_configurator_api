@@ -19,7 +19,6 @@ class SimpleType(BaseProperty):
     def to_bson_schema(self, enumerations: Enumerations, ref_stack: list = []):
         the_dict = super().to_bson_schema(enumerations, ref_stack)
         the_dict.update(self.schema)
-        the_dict["bsonType"] = the_dict["type"]
         del the_dict["type"]
         return the_dict
 

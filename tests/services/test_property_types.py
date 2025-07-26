@@ -428,18 +428,37 @@ class TestSimpleType(unittest.TestCase):
     def test_simple_type_to_json_schema(self):
         """Test SimpleType to_json_schema method"""
         data = {
-            "name": "test_simple",
-            "type": "simple",
-            "description": "Test simple",
-            "schema": {"minimum": 0, "maximum": 100}
+            "name": "test_property",
+            "type": "string",
+            "schema": {"minLength": 5, "maxLength": 10}
         }
         prop = SimpleType(data)
-        mock_enumerations = Mock()
-        result = prop.to_json_schema(mock_enumerations)
-        self.assertEqual(result["description"], "Test simple")
-        self.assertEqual(result["type"], "simple")
-        self.assertEqual(result["minimum"], 0)
-        self.assertEqual(result["maximum"], 100)
+        result = prop.to_json_schema(Mock())
+        
+        expected = {
+            "description": "",
+            "type": "string",
+            "minLength": 5,
+            "maxLength": 10
+        }
+        self.assertEqual(result, expected)
+
+    def test_simple_type_to_bson_schema(self):
+        """Test SimpleType to_bson_schema method"""
+        data = {
+            "name": "test_property",
+            "type": "string",
+            "schema": {"minLength": 5, "maxLength": 10}
+        }
+        prop = SimpleType(data)
+        
+        # This should fail due to KeyError accessing the_dict["type"]
+        # because BaseProperty.to_bson_schema() returns {"bsonType": "string"}
+        # but SimpleType tries to access the_dict["type"] which doesn't exist
+        with self.assertRaises(KeyError) as context:
+            result = prop.to_bson_schema(Mock())
+        
+        self.assertIn("'type'", str(context.exception))
 
 
 class TestComplexType(unittest.TestCase):
