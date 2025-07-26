@@ -39,6 +39,8 @@ class TestMissingData(unittest.TestCase):
             # Verify the exception contains appropriate error information
             exception = context.exception
             self.assertIsInstance(exception.event, ConfiguratorEvent)
+            self.assertEqual(exception.event.status, "FAILURE")
+            self.assertIsNotNone(exception.event.id)
 
     def test_empty_dictionaries_folder(self):
         """Test that empty dictionaries folder is handled properly"""
@@ -61,6 +63,8 @@ class TestMissingData(unittest.TestCase):
             # Verify the exception contains appropriate error information
             exception = context.exception
             self.assertIsInstance(exception.event, ConfiguratorEvent)
+            self.assertEqual(exception.event.status, "FAILURE")
+            self.assertIsNotNone(exception.event.id)
 
     def test_empty_types_folder(self):
         """Test that empty types folder is handled properly"""
@@ -83,6 +87,8 @@ class TestMissingData(unittest.TestCase):
             # Verify the exception contains appropriate error information
             exception = context.exception
             self.assertIsInstance(exception.event, ConfiguratorEvent)
+            self.assertEqual(exception.event.status, "FAILURE")
+            self.assertIsNotNone(exception.event.id)
 
     def test_empty_enumerators_folder(self):
         """Test that empty enumerators folder is handled properly"""
@@ -105,6 +111,8 @@ class TestMissingData(unittest.TestCase):
             # Verify the exception contains appropriate error information
             exception = context.exception
             self.assertIsInstance(exception.event, ConfiguratorEvent)
+            self.assertEqual(exception.event.status, "FAILURE")
+            self.assertIsNotNone(exception.event.id)
 
     def test_empty_test_data_folder(self):
         """Test that empty test_data folder is handled properly"""
@@ -127,6 +135,8 @@ class TestMissingData(unittest.TestCase):
             # Verify the exception contains appropriate error information
             exception = context.exception
             self.assertIsInstance(exception.event, ConfiguratorEvent)
+            self.assertEqual(exception.event.status, "FAILURE")
+            self.assertIsNotNone(exception.event.id)
 
 if __name__ == '__main__':
     unittest.main() 

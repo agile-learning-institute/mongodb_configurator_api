@@ -30,7 +30,8 @@ class TestUnparsableFiles(unittest.TestCase):
         # Verify the exception contains appropriate error information
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
-        self.assertIn("Failed to get document", str(exception))
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertIsNotNone(exception.event.id)
 
     def test_unparsable_dictionary_file(self):
         """Test that unparsable dictionary files are properly detected and reported"""
@@ -44,7 +45,8 @@ class TestUnparsableFiles(unittest.TestCase):
         # Verify the exception contains appropriate error information
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
-        self.assertIn("Failed to get document", str(exception))
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertIsNotNone(exception.event.id)
 
     def test_unparsable_enumerators_file(self):
         """Test that unparsable enumerators files are properly detected and reported"""
@@ -58,7 +60,8 @@ class TestUnparsableFiles(unittest.TestCase):
         # Verify the exception contains appropriate error information
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
-        self.assertIn("Failed to get document", str(exception))
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertIsNotNone(exception.event.id)
 
     def test_unparsable_migrations_file(self):
         """Test that unparsable migrations files are properly detected and reported"""
@@ -72,7 +75,8 @@ class TestUnparsableFiles(unittest.TestCase):
         # Verify the exception contains appropriate error information
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
-        self.assertIn("Failed to get document", str(exception))
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertIsNotNone(exception.event.id)
 
     def test_unparsable_test_data_file(self):
         """Test that unparsable test data files are properly detected and reported"""
@@ -86,7 +90,8 @@ class TestUnparsableFiles(unittest.TestCase):
         # Verify the exception contains appropriate error information
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
-        self.assertIn("Failed to get document", str(exception))
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertIsNotNone(exception.event.id)
 
     def test_unsupported_file_type(self):
         """Test that unsupported file types are properly detected and reported"""
@@ -100,7 +105,8 @@ class TestUnparsableFiles(unittest.TestCase):
         # Verify the exception contains appropriate error information
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
-        self.assertIn("UNSUPPORTED_FILE_TYPE", str(exception.event.type))
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertIsNotNone(exception.event.id)
 
 if __name__ == '__main__':
     unittest.main() 

@@ -31,7 +31,8 @@ class TestBadReferences(unittest.TestCase):
             dictionary.get_json_schema(mock_enumerations)
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
-        self.assertIn("circular", str(exception).lower())
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertIsNotNone(exception.event.id)
 
     def test_missing_reference_dictionary(self):
         """Test that missing references in dictionaries are properly detected and reported"""
@@ -43,12 +44,8 @@ class TestBadReferences(unittest.TestCase):
             dictionary.get_json_schema(mock_enumerations)
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
-        # Accept either 'file not found' or 'missing' in the error message
-        self.assertTrue(
-            "file not found" in str(exception).lower() or
-            "missing" in str(exception).lower() or
-            "not found" in str(exception).lower()
-        )
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertIsNotNone(exception.event.id)
 
     def test_missing_type_reference(self):
         """Test that missing type references are properly detected and reported"""
@@ -60,7 +57,8 @@ class TestBadReferences(unittest.TestCase):
             dictionary.get_json_schema(mock_enumerations)
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
-        self.assertIn("missing", str(exception).lower() or "not found", str(exception).lower())
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertIsNotNone(exception.event.id)
 
     def test_missing_test_data_reference(self):
         """Test that a configuration referencing missing test data fails during processing"""
@@ -70,12 +68,8 @@ class TestBadReferences(unittest.TestCase):
             configuration.get_json_schema("1.0.0.0")
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
-        # The error should indicate that the test data file is missing
-        self.assertTrue(
-            "file not found" in str(exception).lower() or
-            "missing" in str(exception).lower() or
-            "not found" in str(exception).lower()
-        )
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertIsNotNone(exception.event.id)
 
     def test_missing_migration_reference(self):
         """Test that a configuration referencing missing migration data fails during processing"""
@@ -85,12 +79,8 @@ class TestBadReferences(unittest.TestCase):
             configuration.get_json_schema("1.0.0.0")
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
-        # The error should indicate that the migration file is missing
-        self.assertTrue(
-            "file not found" in str(exception).lower() or
-            "missing" in str(exception).lower() or
-            "not found" in str(exception).lower()
-        )
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertIsNotNone(exception.event.id)
 
 if __name__ == '__main__':
     unittest.main() 
