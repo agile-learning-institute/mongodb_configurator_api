@@ -1,13 +1,9 @@
 from flask import Blueprint, request, jsonify
 from configurator.services.configuration_services import Configuration
-from configurator.services.dictionary_services import Dictionary
 from configurator.services.template_service import TemplateService
-from configurator.services.enumerator_service import Enumerators
-from configurator.utils.configurator_exception import ConfiguratorEvent
 from configurator.utils.config import Config
-from configurator.utils.file_io import FileIO, File
+from configurator.utils.file_io import FileIO
 from configurator.utils.route_decorators import event_route
-from configurator.utils.version_number import VersionNumber
 import logging
 
 

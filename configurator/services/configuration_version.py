@@ -6,7 +6,8 @@ from configurator.utils.mongo_io import MongoIO
 from configurator.utils.version_number import VersionNumber
 from configurator.utils.version_manager import VersionManager
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
-from configurator.services.enumerator_service import Enumerations, Enumerators
+from configurator.services.enumeration_service import Enumerations
+from configurator.services.enumerators import Enumerators
 
 class Version:
     def __init__(self, collection_name: str, document: dict):

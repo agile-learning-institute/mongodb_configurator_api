@@ -1,4 +1,4 @@
-from configurator.services.enumerator_service import Enumerations
+from configurator.services.enumeration_service import Enumerations
 from .base import BaseProperty
 
 class EnumType(BaseProperty):

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, Mock
 from configurator.services.property.enum_type import EnumType
-from configurator.services.enumerator_service import Enumerations
+from configurator.services.enumeration_service import Enumerations
 
 
 class TestEnumType(unittest.TestCase):
@@ -52,7 +52,7 @@ class TestEnumType(unittest.TestCase):
         }
         prop = EnumType(data)
         
-        with patch('configurator.services.enumerator_service.Enumerations') as mock_enumerations:
+        with patch('configurator.services.enumeration_service.Enumerations') as mock_enumerations:
             mock_enum = Mock()
             mock_enum.get_enum_values.return_value = ["value1", "value2"]
             mock_enumerations.return_value = mock_enum
@@ -73,7 +73,7 @@ class TestEnumType(unittest.TestCase):
         }
         prop = EnumType(data)
         
-        with patch('configurator.services.enumerator_service.Enumerations') as mock_enumerations:
+        with patch('configurator.services.enumeration_service.Enumerations') as mock_enumerations:
             mock_enum = Mock()
             mock_enum.get_enum_values.return_value = ["value1", "value2"]
             mock_enumerations.return_value = mock_enum

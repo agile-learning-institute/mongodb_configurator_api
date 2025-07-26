@@ -4,7 +4,7 @@ from configurator.utils.config import Config
 from configurator.utils.file_io import FileIO
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.services.property import Property
-from configurator.services.enumerator_service import Enumerations
+from configurator.services.enumeration_service import Enumerations
 from configurator.services.service_base import ServiceBase
 
 class Type(ServiceBase):

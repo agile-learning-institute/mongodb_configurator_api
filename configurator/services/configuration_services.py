@@ -3,7 +3,7 @@ from configurator.utils.file_io import FileIO
 from configurator.utils.mongo_io import MongoIO
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.services.configuration_version import Version
-from configurator.services.enumerator_service import Enumerators
+from configurator.services.enumerators import Enumerators
 from configurator.services.service_base import ServiceBase
 
 class Configuration(ServiceBase):
@@ -21,26 +21,26 @@ class Configuration(ServiceBase):
         d["versions"] = [v.to_dict() for v in self.versions]
         return d
 
-    def get_json_schema(self, version_str: str) -> dict:
+    def get_version(self, version_str: str) -> Version:
         for version in self.versions:
             if version.version_str == version_str:
-                enumerations = Enumerators().getVersion(version.version_number.get_enumerator_version())
-                return version.get_json_schema(enumerations)
-        
+                return version
+            
         event = ConfiguratorEvent("CFG-02", "GET_JSON_SCHEMA")
         event.record_failure(f"Version {version_str} not found")
         raise ConfiguratorException(f"Version {version_str} not found", event)
 
+    def get_json_schema(self, version_str: str) -> dict:
+        version = self.get_version(version_str)
+        enumerators = Enumerators()
+        enumerations = enumerators.get_version(version_str)
+        return version.get_json_schema(enumerations)
+
     def get_bson_schema(self, version_str: str) -> dict:
-        """Get BSON schema for a specific version."""
-        for version in self.versions:
-            if version.version_str == version_str:
-                enumerations = Enumerators().getVersion(version.version_number.get_enumerator_version())
-                return version.get_bson_schema(enumerations)
-        
-        event = ConfiguratorEvent("CFG-03", "GET_BSON_SCHEMA")
-        event.record_failure(f"Version {version_str} not found")
-        raise ConfiguratorException(f"Version {version_str} not found", event)
+        version = self.get_version(version_str)
+        enumerators = Enumerators()
+        enumerations = enumerators.get_version(version_str)
+        return version.get_bson_schema(enumerations)
         
     def process(self) -> ConfiguratorEvent:
         try:
@@ -48,8 +48,11 @@ class Configuration(ServiceBase):
             event.data = {"configuration_name": self.file_name, "version_count": len(self.versions)}
             mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
 
+            # Process enumerations first
             enumerators = Enumerators()
-            event.append_events(enumerators.upsert_all_to_database(mongo_io))        
+            for enumeration in enumerators.enumerations:
+                event.append_events([enumeration.upsert(mongo_io)])
+            
             for version in self.versions:
                 event.append_events([version.process(mongo_io)])
             event.record_success()

@@ -1,7 +1,7 @@
 """Base class for all property types"""
 
 from configurator.utils.config import Config
-from configurator.services.enumerator_service import Enumerations
+from configurator.services.enumeration_service import Enumerations
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 
 class BaseProperty:

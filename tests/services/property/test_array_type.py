@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, Mock
 from configurator.services.property.array_type import ArrayType
-from configurator.services.enumerator_service import Enumerations
+from configurator.services.enumeration_service import Enumerations
 
 
 class TestArrayType(unittest.TestCase):

@@ -1,7 +1,7 @@
 import unittest
 from unittest.mock import patch, Mock
 from configurator.services.property.custom_type import CustomType
-from configurator.services.enumerator_service import Enumerations
+from configurator.services.enumeration_service import Enumerations
 
 
 class TestCustomType(unittest.TestCase):

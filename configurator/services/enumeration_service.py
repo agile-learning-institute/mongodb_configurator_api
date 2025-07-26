@@ -1,33 +1,31 @@
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
-from configurator.utils.file_io import FileIO, File
 from configurator.utils.config import Config
-from configurator.utils.mongo_io import MongoIO
-import os
-from typing import List, Dict, Any, Optional
+from configurator.services.service_base import ServiceBase
+from typing import List, Dict
 
-class Enumerations:
-    def __init__(self, enumeration: dict = {}):
-        self.config = Config.get_instance()
-        self.name = enumeration.get("name")
+class Enumerations(ServiceBase):
+    def __init__(self, file_name: str = None, document: dict = None):
+        super().__init__(file_name, document, Config.get_instance().ENUMERATOR_FOLDER)
+        self.name = self._document.get("name")
         self.values = []
-        for value in enumeration.get("values", []):
+        for value in self._document.get("values", []):
             self.values.append({
                 "value": value.get("value"),
                 "description": value.get("description")
             })
             
-        self._locked = enumeration.get("_locked", False)
+        self._locked = self._document.get("_locked", False)
 
     def to_dict(self):
-        the_dict = {}
-        the_dict["name"] = self.name
-        the_dict["values"] = []
+        d = super().to_dict()
+        d["name"] = self.name
+        d["values"] = []
         for value in self.values:
-            the_dict["values"].append({
+            d["values"].append({
                 "value": value.get("value"),
                 "description": value.get("description")
             })
-        return the_dict
+        return d
 
     def get_enum_dict(self) -> Dict[str, Dict[str, str]]:
         the_dict = {}
@@ -39,5 +37,4 @@ class Enumerations:
         the_values = set()
         for value in self.values:
             the_values.add(value.get("value"))
-        return the_values
-    
+        return the_values 

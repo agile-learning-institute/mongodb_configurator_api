@@ -113,7 +113,7 @@ class TestDictionary(unittest.TestCase):
         """Test Dictionary to_json_schema method"""
         # Arrange
         mock_property_instance = Mock()
-        mock_property_instance.get_json_schema.return_value = {"type": "object"}
+        mock_property_instance.to_json_schema.return_value = {"type": "object"}
         mock_property.return_value = mock_property_instance
         
         dictionary = Dictionary(self.test_file_name, self.test_document)
@@ -124,14 +124,14 @@ class TestDictionary(unittest.TestCase):
         
         # Assert
         self.assertEqual(result, {"type": "object"})
-        mock_property_instance.get_json_schema.assert_called_once_with(mock_enumerations, [])
+        mock_property_instance.to_json_schema.assert_called_once_with(mock_enumerations, [])
 
     @patch('configurator.services.dictionary_services.Property')
     def test_to_bson_schema(self, mock_property):
         """Test Dictionary to_bson_schema method"""
         # Arrange
         mock_property_instance = Mock()
-        mock_property_instance.get_bson_schema.return_value = {"bsonType": "object"}
+        mock_property_instance.to_bson_schema.return_value = {"bsonType": "object"}
         mock_property.return_value = mock_property_instance
         
         dictionary = Dictionary(self.test_file_name, self.test_document)
@@ -142,7 +142,7 @@ class TestDictionary(unittest.TestCase):
         
         # Assert
         self.assertEqual(result, {"bsonType": "object"})
-        mock_property_instance.get_bson_schema.assert_called_once_with(mock_enumerations, [])
+        mock_property_instance.to_bson_schema.assert_called_once_with(mock_enumerations, [])
 
     @patch('configurator.services.service_base.FileIO')
     @patch('configurator.services.dictionary_services.Property')

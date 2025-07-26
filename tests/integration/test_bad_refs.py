@@ -1,7 +1,7 @@
 from configurator.utils.config import Config
 from configurator.services.configuration_services import Configuration
 from configurator.services.dictionary_services import Dictionary
-from configurator.services.enumerator_service import Enumerators
+
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 import unittest
 import os
@@ -28,7 +28,7 @@ class TestBadReferences(unittest.TestCase):
         mock_enumerations.get_enum_values.return_value = []
         with self.assertRaises(ConfiguratorException) as context:
             dictionary = Dictionary(dict_file)
-            dictionary.get_json_schema(mock_enumerations)
+            dictionary.to_json_schema(mock_enumerations)
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
         self.assertEqual(exception.event.status, "FAILURE")
@@ -41,7 +41,7 @@ class TestBadReferences(unittest.TestCase):
         mock_enumerations.get_enum_values.return_value = []
         with self.assertRaises(ConfiguratorException) as context:
             dictionary = Dictionary(dict_file)
-            dictionary.get_json_schema(mock_enumerations)
+            dictionary.to_json_schema(mock_enumerations)
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
         self.assertEqual(exception.event.status, "FAILURE")
@@ -54,7 +54,7 @@ class TestBadReferences(unittest.TestCase):
         mock_enumerations.get_enum_values.return_value = []
         with self.assertRaises(ConfiguratorException) as context:
             dictionary = Dictionary(dict_file)
-            dictionary.get_json_schema(mock_enumerations)
+            dictionary.to_json_schema(mock_enumerations)
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
         self.assertEqual(exception.event.status, "FAILURE")

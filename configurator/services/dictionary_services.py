@@ -2,7 +2,7 @@ import os
 from configurator.utils.config import Config
 from configurator.utils.file_io import FileIO
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
-from configurator.services.enumerator_service import Enumerations
+from configurator.services.enumeration_service import Enumerations
 from configurator.services.property import Property
 from configurator.services.service_base import ServiceBase
 
@@ -17,10 +17,10 @@ class Dictionary(ServiceBase):
         return d
 
     def to_json_schema(self, enumerations: Enumerations, ref_stack: list = []):
-        return self.root.get_json_schema(enumerations, ref_stack)
+        return self.root.to_json_schema(enumerations, ref_stack)
 
     def to_bson_schema(self, enumerations: Enumerations, ref_stack: list = []):
-        return self.root.get_bson_schema(enumerations, ref_stack)
+        return self.root.to_bson_schema(enumerations, ref_stack)
 
     @staticmethod
     def lock_all(status: bool = True):

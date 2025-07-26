@@ -1,6 +1,7 @@
 file_name: missing_ref.1.0.0.yaml
 _locked: false
 root:
+  name: root
   description: A schema with a missing reference
   type: object
   properties:
