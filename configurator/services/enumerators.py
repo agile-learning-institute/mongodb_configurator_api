@@ -3,6 +3,9 @@ from configurator.utils.configurator_exception import ConfiguratorEvent, Configu
 from configurator.utils.file_io import FileIO
 from configurator.utils.config import Config
 from configurator.utils.version_number import VersionNumber
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Enumerators:
     """A helper class for loading and accessing enumerations - not a service"""
@@ -16,8 +19,12 @@ class Enumerators:
 
     def get_version(self, version_str: str) -> Enumerations:
         """Get enumerations for a specific version string"""
-        version_number = VersionNumber(version_str).get_enumerator_version()
+        logger.info(f"Getting enumerations for version {version_str}")
+        version = VersionNumber(version_str)
+        version_number = version.get_enumerator_version()
+        logger.info(f"Version number: {version_number}")
         for enumeration in self.enumerations:
+            logger.info(f"Enumeration version: {enumeration.version}")
             if enumeration.version == version_number:
                 return enumeration
 

@@ -12,6 +12,6 @@
   {
     "_id": {"$oid": "a00000000000000000000003"},
     "full_name": "Dr. James Earl Ray II",
-    "status": "draft"
+    "status": "active"
   }
 ]

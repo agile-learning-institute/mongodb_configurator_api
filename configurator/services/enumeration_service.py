@@ -24,7 +24,7 @@ class Enumerations(ServiceBase):
             if enumeration.get("name") == enum_name:
                 for value in enumeration.get("values"): 
                     the_values.add(value.get("value"))
-                return the_values 
+                return sorted(list(the_values)) 
 
         event = ConfiguratorEvent(event_id=f"ENU-02", event_type="GET_ENUM_VALUES")
         event.record_failure(f"Enumeration {enum_name} not found")

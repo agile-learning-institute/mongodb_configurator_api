@@ -65,7 +65,7 @@ class TestBadReferences(unittest.TestCase):
         config_file = "test_data.yaml"
         with self.assertRaises(ConfiguratorException) as context:
             configuration = Configuration(config_file)
-            configuration.get_json_schema("1.0.0.0")
+            configuration.process()
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
         self.assertEqual(exception.event.status, "FAILURE")
@@ -76,7 +76,7 @@ class TestBadReferences(unittest.TestCase):
         config_file = "test_migrations.yaml"
         with self.assertRaises(ConfiguratorException) as context:
             configuration = Configuration(config_file)
-            configuration.get_json_schema("1.0.0.0")
+            configuration.process()
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
         self.assertEqual(exception.event.status, "FAILURE")

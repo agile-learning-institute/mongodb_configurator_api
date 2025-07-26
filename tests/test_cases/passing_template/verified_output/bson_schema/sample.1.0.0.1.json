@@ -1,16 +1,17 @@
 {
   "bsonType": "object",
+  "additionalProperties": false,
   "properties": {
     "_id": {
       "bsonType": "objectId"
     },
     "first_name": {
-      "pattern": "^\\S{1,40}$",
-      "bsonType": "string"
+      "bsonType": "string",
+      "pattern": "^[^\\s]{1,40}$"
     },
     "last_name": {
-      "pattern": "^\\S{1,40}$",
-      "bsonType": "string"
+      "bsonType": "string",
+      "pattern": "^[^\\s]{1,40}$"
     },
     "status": {
       "bsonType": "string",
@@ -23,6 +24,5 @@
   "required": [
     "_id",
     "status"
-  ],
-  "additionalProperties": false
+  ]
 }

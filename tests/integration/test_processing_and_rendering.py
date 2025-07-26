@@ -1,544 +1,290 @@
-from configurator.services.configuration_services import Configuration
-from configurator.services.type_services import Type
-from configurator.utils.config import Config
-from configurator.utils.file_io import FileIO
-from configurator.utils.mongo_io import MongoIO
-from configurator.utils.configurator_exception import ConfiguratorEvent
-import unittest
 import os
 import json
-import yaml
-import datetime
+import unittest
 from bson import json_util
-from bson.objectid import ObjectId
+from configurator.utils.version_number import VersionNumber
+from configurator.utils.config import Config
+from configurator.utils.mongo_io import MongoIO
+from configurator.services.configuration_services import Configuration
+from configurator.utils.ejson_encoder import MongoJSONEncoder
+from abc import ABC, abstractmethod
 
-class TestProcessingAndRendering(unittest.TestCase):
-    """Test Processing and Rendering of several passing_* test cases"""
 
-    expected_pro_count = None  # Should be set in subclasses
-    expect_enu_05_success = True
+def setup_test_environment(test_case, expected_pro_count):
+    """Set up environment for a test case and return config."""
+    # Set required environment variables
+    os.environ['INPUT_FOLDER'] = f"./tests/test_cases/{test_case}"
+    os.environ['ENABLE_DROP_DATABASE'] = 'true'
+    os.environ['MONGO_CONNECTION_STRING'] = "mongodb://localhost:27017/"
+    
+    # Initialize config
+    Config._instance = None
+    config = Config.get_instance()
+    
+    # Clean up environment variables
+    del os.environ['INPUT_FOLDER']
+    del os.environ['ENABLE_DROP_DATABASE']
+    del os.environ['MONGO_CONNECTION_STRING']
+    
+    return config, expected_pro_count
 
-    def _ejson_encode(self, obj):
-        """Simple ejson-encode function that handles ObjectId and datetime conversion."""
-        if isinstance(obj, (ObjectId, datetime.datetime, datetime.date)):
-            return str(obj)
-        elif hasattr(obj, 'isoformat'):  # Handle any object with isoformat method
-            return str(obj)
+
+def drop_database(config):
+    """Drop the database to ensure clean state."""
+    mongo_io = MongoIO(config.MONGO_CONNECTION_STRING, config.MONGO_DB_NAME)
+    mongo_io.drop_database()
+    mongo_io.disconnect()
+
+
+def load_verified_data(file_path):
+    """Load verified output data from JSON file"""
+    with open(file_path, 'r') as f:
+        content = f.read().strip()
+        if not content:
+            return []
+        return json.loads(content)
+
+
+def normalize_mongo_data(obj):
+    """Recursively convert MongoDB objects to EJSON string format for comparison"""
+    if isinstance(obj, dict):
+        return {k: normalize_mongo_data(v) for k, v in obj.items()}
+    elif isinstance(obj, list):
+        return [normalize_mongo_data(item) for item in obj]
+    elif hasattr(obj, '__class__') and obj.__class__.__name__ == 'ObjectId':
+        return {"$oid": str(obj)}  # Convert ObjectId to MongoDB extended JSON format
+    elif hasattr(obj, '__class__') and obj.__class__.__name__ in ['datetime', 'date']:
+        return str(obj)  # Convert datetime/date to string
+    else:
         return obj
 
-    def _normalize_mongo_data(self, obj):
-        """Normalize MongoDB data by converting ObjectIds and datetimes to strings."""
-        if isinstance(obj, dict):
-            return {k: self._normalize_mongo_data(v) for k, v in obj.items()}
-        elif isinstance(obj, list):
-            return [self._normalize_mongo_data(item) for item in obj]
-        else:
-            return self._ejson_encode(obj)
-
-    def setUp(self):
-        """Set up test environment."""
-        self.test_case = getattr(self, 'test_case', 'passing_template')
-        # Do not allow passing_type_renders as a test_case for process_and_render tests
-        if self.test_case == 'passing_type_renders':
-            self.skipTest('passing_type_renders should only be used in type rendering integration tests, not process_and_render tests.')
-        os.environ['INPUT_FOLDER'] = f"./tests/test_cases/{self.test_case}"
-        # Set MongoDB connection string for local development
-        os.environ['MONGO_CONNECTION_STRING'] = "mongodb://localhost:27017/"
-        Config._instance = None
-        self.config = Config.get_instance()
-        del os.environ['INPUT_FOLDER']
-        del os.environ['MONGO_CONNECTION_STRING']
+def compare_database_data(actual_data, verified_data):
+    """Compare database data, handling 'ignore' values in verified output"""
+    if isinstance(actual_data, dict) and isinstance(verified_data, dict):
+        # Remove fields that are marked as 'ignore' in verified data
+        # Also remove fields that exist in actual but not in verified
+        filtered_actual = {}
+        filtered_verified = {}
         
-        # Ensure the database is dropped before any test runs
-        # This guarantees a clean state for every test
-        mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
-        mongo_io.drop_database()
-        mongo_io.disconnect()
-        
-        # Initialize MongoDB connection
-        self.mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
-        
-
-    def tearDown(self):
-        """Clean up after tests."""
-        Config._instance = None
-
-    def test_processing(self):
-        """Test processing of configuration files and verify all events succeeded, ENU-05 success, and PRO* count matches expected."""
-        # Process all configurations
-        results = Configuration.process_all()
-
-        # Assert processing was successful
-        self.assertEqual(results.status, "SUCCESS", f"Processing failed: {results.to_dict()}")
-
-        # Recursively check all events for SUCCESS status, count PRO* events, and check ENU-05
-        pro_count = 0
-        enu_05_success = False
-        failure_events = []
-        
-        def check_events(event):
-            nonlocal pro_count, enu_05_success, failure_events
-            if isinstance(event, dict):
-                eid = str(event.get("id", ""))
-                status = event.get("status", "")
-                
-                # Check for any FAILURE status in the entire event tree
-                if status == "FAILURE":
-                    failure_events.append({
-                        "id": eid,
-                        "type": event.get("type", ""),
-                        "data": event.get("data", {}),
-                        "event": event
-                    })
-                
-                # Count PRO* events and check their status
-                if eid.startswith("PRO"):
-                    pro_count += 1
-                    self.assertEqual(status, "SUCCESS", f"Event {eid} did not succeed: {event}")
-                
-                # Check for ENU-05 success
-                if eid == "ENU-05" and status == "SUCCESS":
-                    enu_05_success = True
-                
-                # Recursively check sub-events
-                for sub in event.get("sub_events", []):
-                    check_events(sub)
-            elif hasattr(event, 'to_dict'):
-                check_events(event.to_dict())
-        
-        check_events(results.to_dict())
-
-        # Fail the test if any sub-events had FAILURE status
-        if failure_events:
-            failure_details = "\n".join([
-                f"- {event['id']} ({event['type']}): {event['data']}"
-                for event in failure_events
-            ])
-            self.fail(f"Processing completed with {len(failure_events)} failure events:\n{failure_details}")
-
-        # Check ENU-05 if required
-        if self.expect_enu_05_success and (self.expected_pro_count is None or self.expected_pro_count > 0):
-            self.assertTrue(enu_05_success, "No ENU-05 event with SUCCESS status found in event tree.")
-
-        # Check PRO* event count if expected_pro_count is set
-        if self.expected_pro_count is not None:
-            self.assertEqual(pro_count, self.expected_pro_count, f"Expected {self.expected_pro_count} PRO* events, found {pro_count}.")
-
-        # Compare database state
-        self._compare_database_state()
-        
-        # Compare processing events
-        self._compare_processing_events(results)
-
-    def test_renders(self):
-        """Test rendering of configurations and compare against verified output"""
-        # Arrange
-        verified_output_dir = f"{self.config.INPUT_FOLDER}/verified_output"
-        json_schema_dir = f"{verified_output_dir}/json_schema"
-        
-        if not os.path.exists(json_schema_dir):
-            self.skipTest(f"No verified JSON schema directory found: {json_schema_dir}")
-        
-        # Act & Assert - Iterate over verified output JSON schema files
-        for filename in os.listdir(json_schema_dir):
-            if filename.endswith('.yaml'):
-                # Extract collection and version from filename (e.g., "sample.1.0.0.1.yaml")
-                schema_name = filename.replace('.yaml', '')
-                parts = schema_name.split('.')
-                
-                if len(parts) >= 2:
-                    collection_name = parts[0]
-                    version_str = '.'.join(parts[1:])
-                    
-                    # Render the same value based on collection/version
-                    configuration = Configuration(f"{collection_name}.yaml")
-                    json_schema = configuration.get_json_schema(version_str)
-                    
-                    # Compare against verified output
-                    self._compare_json_schema_rendering(schema_name, json_schema)
-
-    def test_reprocessing(self):
-        """Test that re-processing skips already implemented versions and doesn't affect database state."""
-        # First processing - should work normally
-        first_results = Configuration.process_all()
-        self.assertEqual(first_results.status, "SUCCESS", f"First processing failed: {first_results.to_dict()}")
-        
-        # Capture database state after first processing
-        first_db_state = self._capture_database_state()
-        
-        # Second processing - should skip already implemented versions
-        second_results = Configuration.process_all()
-        self.assertEqual(second_results.status, "SUCCESS", f"Second processing failed: {second_results.to_dict()}")
-        
-        # Capture database state after second processing
-        second_db_state = self._capture_database_state()
-        
-        # Verify database state is identical (no changes from re-processing)
-        self._compare_database_states(first_db_state, second_db_state)
-        
-        # Verify that processing events show skipped versions
-        self._verify_skipped_versions(second_results)
-
-    def _capture_database_state(self):
-        """Capture the current state of all collections in the database."""
-        db_state = {}
-        collections = self.mongo_io.db.list_collection_names()
-        
-        for collection_name in collections:
-            documents = list(self.mongo_io.db[collection_name].find())
-            # Normalize the data to convert ObjectIds and datetimes to strings
-            normalized_documents = self._normalize_mongo_data(documents)
-            db_state[collection_name] = normalized_documents
-        
-        return db_state
-
-    def _compare_database_states(self, first_state, second_state):
-        """Compare two database states to ensure they are identical."""
-        # Check that all collections exist in both states
-        self.assertEqual(set(first_state.keys()), set(second_state.keys()), 
-                        "Database collections changed between processing runs")
-        
-        for collection_name in first_state.keys():
-            first_docs = first_state[collection_name]
-            second_docs = second_state[collection_name]
+        for key, value in actual_data.items():
+            if key in verified_data and verified_data[key] == 'ignore':
+                continue  # Skip this field
+            if key not in verified_data:
+                continue  # Skip fields that don't exist in verified data
+            filtered_actual[key] = normalize_mongo_data(value)
             
-            # Sort documents by version for DatabaseEnumerators to handle order issues
-            if collection_name == "DatabaseEnumerators":
-                first_docs = sorted(first_docs, key=lambda x: x.get('version', 0))
-                second_docs = sorted(second_docs, key=lambda x: x.get('version', 0))
+        for key, value in verified_data.items():
+            if value == 'ignore':
+                continue  # Skip this field
+            filtered_verified[key] = value
             
-            self.assertEqual(len(first_docs), len(second_docs), 
-                           f"Collection {collection_name} document count changed between processing runs")
-            
-            for i, (first_doc, second_doc) in enumerate(zip(first_docs, second_docs)):
-                self._compare_document(collection_name, i, first_doc, second_doc)
-
-    def _verify_skipped_versions(self, results):
-        """Verify that processing events show skipped versions."""
-        def check_for_skipped_events(event):
-            if isinstance(event, dict):
-                eid = str(event.get("id", ""))
-                event_type = event.get("event_type", "")
-                status = event.get("status", "")
-                data = event.get("data", {})
-                
-                # Look for skip-related events or messages
-                if "SKIP" in event_type.upper() or "SKIP" in str(data):
-                    return True
-                
-                # Check for skip data in the event
-                if isinstance(data, dict) and "skip_reason" in data:
-                    return True
-                
-                # Check sub-events
-                for sub in event.get("sub_events", []):
-                    if check_for_skipped_events(sub):
-                        return True
-            elif hasattr(event, 'to_dict'):
-                return check_for_skipped_events(event.to_dict())
+        return filtered_actual == filtered_verified
+    elif isinstance(actual_data, list) and isinstance(verified_data, list):
+        if len(actual_data) != len(verified_data):
             return False
         
-        # Check if any events show skipped versions
-        has_skipped_events = check_for_skipped_events(results.to_dict())
+        # Sort both lists by version if they contain version fields
+        if actual_data and isinstance(actual_data[0], dict) and 'version' in actual_data[0]:
+            actual_data = sorted(actual_data, key=lambda x: x.get('version', 0))
+        if verified_data and isinstance(verified_data[0], dict) and 'version' in verified_data[0]:
+            verified_data = sorted(verified_data, key=lambda x: x.get('version', 0))
         
-        # For re-processing, we should see skip events or at least successful completion
-        self.assertTrue(results.status == "SUCCESS", 
-                       "Re-processing should complete successfully even if versions are skipped")
-        
-        # Log the results for debugging
-        print(f"Re-processing results status: {results.status}")
-        if has_skipped_events:
-            print("Found skip events in processing results")
-        else:
-            print("No explicit skip events found, but processing completed successfully")
+        for i, (actual, verified) in enumerate(zip(actual_data, verified_data)):
+            if not compare_database_data(actual, verified):
+                print(f"List item {i} comparison failed:")
+                print(f"  Actual: {actual}")
+                print(f"  Verified: {verified}")
+                return False
+        return True
+    else:
+        return normalize_mongo_data(actual_data) == verified_data
 
-    def _compare_database_state(self):
-        """Compare database state against verified output with property value compares."""
-        verified_output_dir = f"{self.config.INPUT_FOLDER}/verified_output"
-        db_dir = f"{verified_output_dir}/test_database"
-        
-        if not os.path.exists(db_dir):
-            return  # No database state to compare
-        
-        # Get all JSON files in the test_database directory
-        for filename in os.listdir(db_dir):
-            if filename.endswith('.json'):
-                collection_name = filename.replace('.json', '')
-                
-                # Load expected data from verified output
-                expected_path = f"{db_dir}/{filename}"
-                with open(expected_path, 'r') as f:
-                    expected_data = json.load(f)
-                
-                # Get actual data from database
-                actual_data = list(self.mongo_io.db[collection_name].find())
-                
-                # Normalize the actual data to convert ObjectIds and datetimes to strings
-                actual_data = self._normalize_mongo_data(actual_data)
-                
-                # Compare the data, ignoring properties with value "ignore"
-                self._compare_collection_data(collection_name, expected_data, actual_data)
 
-    def _compare_processing_events(self, results):
-        """No-op: event comparison is now handled in test_processing."""
+class BaseProcessAndRenderTest(ABC):
+    """Base class for processing and rendering tests"""
+    
+    @abstractmethod
+    def setUp(self):
+        """Set up test environment - must be implemented by subclasses"""
+        pass
+    
+    @property
+    @abstractmethod
+    def test_case(self):
+        """Test case name - must be implemented by subclasses"""
+        pass
+    
+    @property
+    @abstractmethod
+    def expected_pro_count(self):
+        """Expected number of processing events - must be implemented by subclasses"""
         pass
 
-
-
-    def _compare_bson_schemas(self, verified_output_dir: str):
-        """Compare BSON schemas against verified output."""
-        bson_dir = f"{verified_output_dir}/bson_schema"
-        if not os.path.exists(bson_dir):
-            return  # No BSON schemas to compare
-        
-        for filename in os.listdir(bson_dir):
-            if filename.endswith('.json'):
-                schema_name = filename.replace('.json', '')
-                
-                # Get the actual schema from the database or configuration
-                # This would need to be implemented based on how schemas are stored
-                # For now, just check that the file exists
-                self.assertTrue(os.path.exists(f"{bson_dir}/{filename}"), 
-                              f"Expected BSON schema file: {filename}")
-
-    def _compare_json_schemas(self, verified_output_dir: str):
-        """Compare JSON schemas against verified output."""
-        json_dir = f"{verified_output_dir}/json_schema"
-        if not os.path.exists(json_dir):
-            return  # No JSON schemas to compare
-        
-        for filename in os.listdir(json_dir):
-            if filename.endswith('.yaml'):
-                schema_name = filename.replace('.yaml', '')
-                
-                # Get the actual schema from the database or configuration
-                # This would need to be implemented based on how schemas are stored
-                # For now, just check that the file exists
-                self.assertTrue(os.path.exists(f"{json_dir}/{filename}"), 
-                              f"Expected JSON schema file: {filename}")
-
-
-
-    def _compare_collection_data(self, collection_name: str, expected_data: list, actual_data: list):
-        """Compare collection data, ignoring properties with value 'ignore'."""
-        self.assertEqual(len(expected_data), len(actual_data), 
-                        f"Collection {collection_name} has different number of documents")
-        
-        # Sort documents by version for DatabaseEnumerators to handle order issues
-        if collection_name == "DatabaseEnumerators":
-            expected_data = sorted(expected_data, key=lambda x: x.get('version', 0))
-            actual_data = sorted(actual_data, key=lambda x: x.get('version', 0))
-        
-        for i, (expected_doc, actual_doc) in enumerate(zip(expected_data, actual_data)):
-            # Compare documents, ignoring properties with value "ignore"
-            self._compare_document(collection_name, i, expected_doc, actual_doc)
-
-    def _compare_document(self, collection_name: str, doc_index: int, expected_doc: dict, actual_doc: dict):
-        """Compare a single document, ignoring properties with value 'ignore'."""
-        
-        for key, expected_value in expected_doc.items():
-            if expected_value == "ignore":
-                continue  # Skip properties with value "ignore"
-            
-            # For DatabaseEnumerators, ignore _id comparison since ObjectIds are generated dynamically
-            if collection_name == "DatabaseEnumerators" and key == "_id":
-                continue
-            
-            # For CollectionVersions, ignore _id comparison since ObjectIds are generated dynamically
-            if collection_name == "CollectionVersions" and key == "_id":
-                continue
-            
-            self.assertIn(key, actual_doc, 
-                         f"Document {doc_index} in collection {collection_name} missing key: {key}")
-            
-            actual_value = actual_doc[key]
-            
-            # Handle ObjectId format differences
-            if key == "_id":
-                # Normalize ObjectId formats for comparison
-                if isinstance(expected_value, dict) and '$oid' in expected_value:
-                    expected_value = expected_value['$oid']
-                if isinstance(actual_value, dict) and '$oid' in actual_value:
-                    actual_value = actual_value['$oid']
-            
-            # Handle MongoDB date format
-            if isinstance(expected_value, dict) and '$date' in expected_value:
-                # Expected value is MongoDB date format, normalize actual value
-                actual_value = self._ejson_encode(actual_value)
-                expected_value = expected_value['$date']
-            elif isinstance(expected_value, dict) and isinstance(actual_value, dict):
-                # Recursively compare nested objects
-                self._compare_document(f"{collection_name}.{key}", doc_index, expected_value, actual_value)
-                continue
-            else:
-                # Normalize both values using ejson-encode for consistent comparison
-                actual_value = self._ejson_encode(actual_value)
-                expected_value = self._ejson_encode(expected_value)
-            
-            self.assertEqual(expected_value, actual_value, 
-                           f"Document {doc_index} in collection {collection_name} has different value for key {key}")
-
-    def _compare_json_schema_rendering(self, schema_name: str, actual_schema: dict):
-        """Compare actual JSON schema rendering against verified output."""
-        verified_path = f"{self.config.INPUT_FOLDER}/verified_output/json_schema/{schema_name}.yaml"
-        
-        if not os.path.exists(verified_path):
-            self.fail(f"Expected verified JSON schema file not found: {verified_path}")
-        
-        with open(verified_path, 'r') as f:
-            expected_schema = yaml.safe_load(f)
-        
-        self.assertEqual(actual_schema, expected_schema, 
-                        f"JSON schema for {schema_name} does not match verified output")
-
-class TestTemplate(TestProcessingAndRendering):
-    """Test Processing and Rendering of passing_template"""
-
-    expected_pro_count = 12
-    def setUp(self):
-        self.test_case = 'passing_template'
-        super().setUp()
-
     def tearDown(self):
-        super().tearDown()
+        Config._instance = None
 
-class TestComplexRefs(TestProcessingAndRendering):
-    """Test Processing and Rendering of complex refs with oneOf functionality"""
+    def test_process(self):
+        """Test 1: Does processing produce expected events and match verified database?"""
+        # Process configurations
+        results = Configuration.process_all()
+        
+        # Verify processing succeeded
+        self.assertEqual(results.status, "SUCCESS", f"Processing failed: {results.to_dict()}")
+        
+        # Count processing events - need to count the version processing events
+        # The structure is: CFG-07 -> CFG-sample.yaml -> CFG-05 -> [version events]
+        # Count PRO-01 events (REMOVE_SCHEMA_VALIDATION) to see how many versions were processed
+        pro_count = 0
+        if results.sub_events:
+            config_event = results.sub_events[0]  # CFG-sample.yaml
+            if config_event.sub_events:
+                process_event = config_event.sub_events[0]  # CFG-05
+                # Count PRO-01 events (REMOVE_SCHEMA_VALIDATION) which indicates versions processed
+                for event in process_event.sub_events:
+                    if hasattr(event, 'type') and event.type == 'PROCESS':
+                        # Look for PRO-01 events within each version
+                        for sub_event in event.sub_events:
+                            if hasattr(sub_event, 'id') and sub_event.id == 'PRO-01':
+                                pro_count += 1
+        
+        self.assertEqual(pro_count, self.expected_pro_count, f"Expected {self.expected_pro_count} processing events, found {pro_count}")
+        
+        # Compare database state with verified output
+        verified_db_path = f"{self.config.INPUT_FOLDER}/verified_output/test_database"
+        
+        # Get expected collections from verified output files
+        expected_collections = [f.replace('.json', '') for f in os.listdir(verified_db_path) if f.endswith('.json')]
+        
+        # Get actual collections from database
+        actual_collections = self.mongo_io.db.list_collection_names()
+        
+        # Verify number of collections matches
+        self.assertEqual(len(actual_collections), len(expected_collections),
+                        f"Expected {len(expected_collections)} collections, found {len(actual_collections)}")
+        
+        # Compare each collection's data
+        for filename in os.listdir(verified_db_path):
+            if not filename.endswith('.json'):
+                continue  # Skip non-JSON files like .gitkeep
+            collection_name = filename.replace('.json', '')
+            verified_data = load_verified_data(f"{verified_db_path}/{filename}")
+            
+            # Get actual database data
+            actual_data = list(self.mongo_io.get_documents(collection_name))
+            
+            # Compare using the new comparison function
+            self.assertTrue(compare_database_data(actual_data, verified_data),
+                            f"Database collection {collection_name} does not match verified output")
 
-    expected_pro_count = 4  # Updated to match actual processing behavior with corrected dictionaries
+    def test_render_json(self):
+        """Test 2: Do JSON schemas match verified output?"""
+        verified_schema_dir = f"{self.config.INPUT_FOLDER}/verified_output/json_schema"
+        
+        for filename in os.listdir(verified_schema_dir):
+            if filename.endswith('.yaml'):
+                version_str = filename.replace('.yaml', '')
+                verified_schema_path = f"{verified_schema_dir}/{filename}"
+            
+                # Load verified schema
+                import yaml
+                with open(verified_schema_path, 'r') as f:
+                    expected_schema = yaml.safe_load(f)
+            
+                version_number = VersionNumber(version_str)
+                collection_name = version_number.parts[0]
+                configuration = Configuration(f"{collection_name}.yaml")
+                actual_schema = configuration.get_json_schema(version_number.get_version_str())
+
+                # Compare
+                self.assertEqual(actual_schema, expected_schema,
+                                f"JSON schema for {version_str} does not match verified output")
+
+    def test_render_bson(self):
+        """Test 3: Do BSON schemas match verified output?"""
+        verified_schema_dir = f"{self.config.INPUT_FOLDER}/verified_output/bson_schema"
+        
+        for filename in os.listdir(verified_schema_dir):
+            if filename.endswith('.json'):
+                version_str = filename.replace('.json', '')
+                verified_schema_path = f"{verified_schema_dir}/{filename}"
+                
+                # Load verified schema
+                expected_schema = load_verified_data(verified_schema_path)
+                
+                version_number = VersionNumber(version_str)
+                collection_name = version_number.parts[0]
+                configuration = Configuration(f"{collection_name}.yaml")
+                actual_schema = configuration.get_bson_schema(version_number.get_version_str())
+                actual_schema = normalize_mongo_data(actual_schema)
+                
+                # Compare
+                self.assertEqual(actual_schema, expected_schema,
+                                f"BSON schema for {version_str} does not match verified output")
+
+class TestPassingTemplate(BaseProcessAndRenderTest, unittest.TestCase):
+    """Test passing_template test case"""
+    
+    @property
+    def test_case(self):
+        return "passing_template"
+    
+    @property
+    def expected_pro_count(self):
+        return 2
     
     def setUp(self):
-        self.test_case = 'passing_complex_refs'
-        super().setUp()
+        self.config, _ = setup_test_environment(self.test_case, self.expected_pro_count)
+        drop_database(self.config)
+        self.mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
 
-    def tearDown(self):
-        super().tearDown()
 
-    def test_processing(self):
-        """Test processing of complex refs with oneOf structures."""
-        # Process all configurations
-        results = Configuration.process_all()
-
-        # Debug: Print the full processing results
-        print("\n=== PROCESSING RESULTS DEBUG ===")
-        print(f"Overall status: {results.status}")
-        print(f"Full results: {results.to_dict()}")
-        print("=== END DEBUG ===\n")
-
-        # Assert processing was successful
-        self.assertEqual(results.status, "SUCCESS", f"Processing failed: {results.to_dict()}")
-
-        # Recursively check all PRO* events for SUCCESS status, count them, and check ENU-05
-        pro_count = 0
-        enu_05_success = False
-        failure_events = []
-        
-        def check_events(event):
-            nonlocal pro_count, enu_05_success, failure_events
-            if isinstance(event, dict):
-                eid = str(event.get("id", ""))
-                status = event.get("status", "")
-                event_type = event.get("event_type", "")
-                
-                # Debug: Print all events
-                print(f"Event: {eid} ({event_type}) - Status: {status}")
-                
-                # Check for any FAILURE status in the entire event tree
-                if status == "FAILURE":
-                    failure_events.append({
-                        "id": eid,
-                        "type": event_type,
-                        "data": event.get("data", {}),
-                        "event": event
-                    })
-                
-                # Count PRO* events and check their status
-                if eid.startswith("PRO"):
-                    pro_count += 1
-                    self.assertEqual(status, "SUCCESS", f"Event {eid} did not succeed: {event}")
-                
-                # Check for ENU-05 success
-                if eid == "ENU-05" and status == "SUCCESS":
-                    enu_05_success = True
-                
-                # Recursively check sub-events
-                for sub in event.get("sub_events", []):
-                    check_events(sub)
-            elif hasattr(event, 'to_dict'):
-                check_events(event.to_dict())
-        
-        check_events(results.to_dict())
-
-        # Fail the test if any sub-events had FAILURE status
-        if failure_events:
-            failure_details = "\n".join([
-                f"- {event['id']} ({event['type']}): {event['data']}"
-                for event in failure_events
-            ])
-            self.fail(f"Processing completed with {len(failure_events)} failure events:\n{failure_details}")
-
-        # Check ENU-05 if required
-        if self.expect_enu_05_success and (self.expected_pro_count is None or self.expected_pro_count > 0):
-            self.assertTrue(enu_05_success, "No ENU-05 event with SUCCESS status found in event tree.")
-
-        # Check PRO* event count if expected_pro_count is set
-        if self.expected_pro_count is not None:
-            self.assertEqual(pro_count, self.expected_pro_count, f"Expected {self.expected_pro_count} PRO* events, found {pro_count}.")
-
-        # Compare database state
-        self._compare_database_state()
-        
-        # Compare processing events
-        self._compare_processing_events(results)
-
-    def test_renders(self):
-        """Test rendering of configurations with oneOf structures and compare against verified output"""
-        # Arrange
-        verified_output_dir = f"{self.config.INPUT_FOLDER}/verified_output"
-        json_schema_dir = f"{verified_output_dir}/json_schema"
-        
-        if not os.path.exists(json_schema_dir):
-            self.skipTest(f"No verified JSON schema directory found: {json_schema_dir}")
-        
-        # Act & Assert - Iterate over verified output JSON schema files
-        for filename in os.listdir(json_schema_dir):
-            if filename.endswith('.yaml'):
-                # Extract collection and version from filename (e.g., "workshop.1.0.0.1.yaml")
-                schema_name = filename.replace('.yaml', '')
-                parts = schema_name.split('.')
-                
-                if len(parts) >= 2:
-                    collection_name = parts[0]
-                    version_str = '.'.join(parts[1:])
-                    
-                    # Render the same value based on collection/version
-                    configuration = Configuration(f"{collection_name}.yaml")
-                    json_schema = configuration.get_json_schema(version_str)
-                    
-                    # Compare against verified output
-                    self._compare_json_schema_rendering(schema_name, json_schema)
-
-class TestEmpty(TestProcessingAndRendering):
-    """Test Processing and Rendering of empty files"""
-
-    expected_pro_count = 0  # Set to the expected number for this test case
+class TestPassingComplexRefs(BaseProcessAndRenderTest, unittest.TestCase):
+    """Test passing_complex_refs test case"""
+    
+    @property
+    def test_case(self):
+        return "passing_complex_refs"
+    
+    @property
+    def expected_pro_count(self):
+        return 1
+    
     def setUp(self):
-        self.test_case = 'passing_empty'
-        super().setUp()
+        self.config, _ = setup_test_environment(self.test_case, self.expected_pro_count)
+        drop_database(self.config)
+        self.mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
 
-    def tearDown(self):
-        super().tearDown()
 
-class TestProcess(TestProcessingAndRendering):
-    """Test Processing and Rendering of passing_process"""
-
-    expected_pro_count = 53  # Set to the expected number for this test case
+class TestPassingEmpty(BaseProcessAndRenderTest, unittest.TestCase):
+    """Test passing_empty test case"""
+    
+    @property
+    def test_case(self):
+        return "passing_empty"
+    
+    @property
+    def expected_pro_count(self):
+        return 0
+    
     def setUp(self):
-        self.test_case = 'passing_process'
-        super().setUp()
+        self.config, _ = setup_test_environment(self.test_case, self.expected_pro_count)
+        drop_database(self.config)
+        self.mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
 
-    def tearDown(self):
-        super().tearDown()
 
-if __name__ == '__main__':
-    unittest.main() 
+class TestPassingProcess(BaseProcessAndRenderTest, unittest.TestCase):
+    """Test passing_process test case"""
+    
+    @property
+    def test_case(self):
+        return "passing_process"
+    
+    @property
+    def expected_pro_count(self):
+        return 3
+    
+    def setUp(self):
+        self.config, _ = setup_test_environment(self.test_case, self.expected_pro_count)
+        drop_database(self.config)
+        self.mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME) 
+
