@@ -5,50 +5,50 @@ root:
   type: object
   required: false
   properties:
-    _id:
+    - name: _id
       description: The unique identifier for content
       type: identity
       required: true
-    title:
+    - name: title
       description: Content title
       type: sentence
       required: true
-    subtitle:
+    - name: subtitle
       description: Content subtitle
       type: sentence
       required: false
-    content_type:
+    - name: content_type
       description: Type of content (article, video, podcast, etc.)
       type: word
       required: true
-    status:
+    - name: status
       description: Content status
       type: enum
       required: true
       enums: default_status
-    author_id:
+    - name: author_id
       description: The unique identifier for the author
       type: identity
       required: true
-    metadata:
+    - name: metadata
       description: Additional metadata for the content
       type: object
       required: false
       additional_properties: false
       properties:
-        created_at:
+        - name: created_at
           description: When the content was created
           type: date-time
           required: true
-        updated_at:
+        - name: updated_at
           description: When the content was last updated
           type: date-time
           required: false
-        published_at:
+        - name: published_at
           description: When the content was published
           type: date-time
           required: false
-    last_saved:
+    - name: last_saved
       description: Last saved breadcrumb
       type: breadcrumb
       required: true
