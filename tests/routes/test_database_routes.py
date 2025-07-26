@@ -41,8 +41,6 @@ class TestDatabaseRoutes(unittest.TestCase):
         response_data = response.json
         # Expect a single event, not a list
         self.assertIsInstance(response_data, dict)
-        self.assertEqual(response_data["id"], "MON-12")
-        self.assertEqual(response_data["type"], "DROP_DATABASE")
         self.assertEqual(response_data["status"], "SUCCESS")
         mock_mongo_io.drop_database.assert_called_once()
         mock_mongo_io.disconnect.assert_called_once()

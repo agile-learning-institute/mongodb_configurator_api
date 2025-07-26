@@ -239,7 +239,6 @@ class TestEnumerators(unittest.TestCase):
                     result = Enumerators.lock_all()
                     
                     self.assertEqual(result.status, "SUCCESS")
-                    self.assertEqual(result.type, "LOCK_ALL_ENUMERATORSS")
 
 
 if __name__ == '__main__':

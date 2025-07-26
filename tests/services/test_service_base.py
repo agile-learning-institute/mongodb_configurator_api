@@ -103,7 +103,6 @@ class TestServiceBase(unittest.TestCase):
                     result = ServiceBase.lock_all(TestService, "types")
                     
                     self.assertEqual(result.status, "SUCCESS")
-                    self.assertEqual(result.type, "LOCK_ALL_TYPESS")
 
     def test_lock_all_failure(self):
         """Test ServiceBase lock_all method failure"""

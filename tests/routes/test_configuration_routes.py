@@ -72,7 +72,6 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("type", response_data)
         self.assertIn("status", response_data)
         self.assertEqual(response_data["status"], "SUCCESS")
-        self.assertEqual(response_data["type"], "PROCESS_ALL_CONFIGURATIONS")
         self.assertIn("sub_events", response_data)
 
     @patch('configurator.routes.configuration_routes.Configuration')

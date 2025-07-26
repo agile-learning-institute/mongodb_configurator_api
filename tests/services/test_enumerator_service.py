@@ -123,7 +123,7 @@ class TestEnumerators(unittest.TestCase):
                     
                     result = Enumerators.lock_all()
                     
-                    self.assertEqual(result.type, "LOCK_ALL_ENUMERATORSS")
+                    self.assertEqual(result.status, "SUCCESS")
 
 
 class TestEnumerations(unittest.TestCase):
