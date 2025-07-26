@@ -1,12 +1,11 @@
-file_name: url.yaml
-_locked: true
 root:
+  name: url
   description: A valid URL
-  type: complex_primitive
+  type: complex
   json_type:
     type: string
     format: uri
   bson_type:
     bsonType: string
     pattern: ^https?://[^\s]+$
-  required: false
+  required: false 

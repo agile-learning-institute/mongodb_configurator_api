@@ -1,6 +1,7 @@
 file_name: user.1.0.1.yaml
 _locked: true
 root:
+  name: user
   description: A user collection for testing the schema system
   type: object
   required: false
@@ -27,6 +28,7 @@ root:
       type: array
       required: false
       items:
+        name: category
         description: A user category
         type: object
         required: false
@@ -50,6 +52,7 @@ root:
       description: User preferences and settings
       type: object
       required: false
+      name: preferences
       properties:
         - name: notification_types
           description: Types of notifications the user wants to receive

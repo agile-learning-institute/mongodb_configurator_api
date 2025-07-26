@@ -1,6 +1,7 @@
 file_name: observation_hills.1.0.0.yaml
 _locked: false
 root:
+  name: observation_hills
   description: A hill of a Hills exercise
   type: object
   properties:

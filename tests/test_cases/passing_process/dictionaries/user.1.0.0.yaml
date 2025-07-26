@@ -1,6 +1,7 @@
 file_name: user.1.0.0.yaml
 _locked: true
 root:
+  name: user
   description: A user collection for testing the schema system
   type: object
   required: false

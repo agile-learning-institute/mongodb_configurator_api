@@ -1,6 +1,7 @@
 file_name: observation_priority.1.0.0.yaml
 _locked: false
 root:
+  name: observation_priority
   description: A priority of a Priority exercise
   type: object
   properties:

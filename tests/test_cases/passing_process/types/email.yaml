@@ -1,6 +1,7 @@
 root:
+  name: email
   description: A valid email address
-  type: simple_primitive
+  type: simple
   schema:
     type: string
     pattern: ^[^ \t\n\r@]+@[^ \t\n\r@]+\.[^ \t\n\r@]+$

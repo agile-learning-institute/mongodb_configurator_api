@@ -1,6 +1,7 @@
 file_name: organization.1.0.0.yaml
 _locked: true
 root:
+  name: organization
   description: An organization in the system
   type: object
   required: false

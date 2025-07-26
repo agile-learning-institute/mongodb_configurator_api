@@ -1,6 +1,7 @@
 file_name: media.1.0.0.yaml
 _locked: true
 root:
+  name: media
   description: A media item in the system
   type: object
   required: false
@@ -36,8 +37,10 @@ root:
     - name: metadata
       description: Media meta data - one of several types (video, audio, image)
       type: one_of
+      name: metadata
       properties:
-        - description: Video content structure
+        - name: video
+          description: Video content structure
           type: object
           required: false
           additional_properties: false
@@ -56,7 +59,8 @@ root:
               type: enum
               required: false
               enums: media_quality
-        - description: Audio content structure
+        - name: audio
+          description: Audio content structure
           type: object
           required: false
           additional_properties: false
@@ -74,7 +78,8 @@ root:
               type: enum
               required: false
               enums: audio_format
-        - description: Image content structure
+        - name: image
+          description: Image content structure
           type: object
           required: false
           additional_properties: false

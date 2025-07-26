@@ -1,10 +1,11 @@
 file_name: observation_persona.1.0.0.yaml
 _locked: false
 root:
+  name: observation_persona
   description: A persona observation for design thinking exercises.
   type: object
   properties:
-    - name:
+    - name: name
       description: The name of the persona
       type: word
       required: true

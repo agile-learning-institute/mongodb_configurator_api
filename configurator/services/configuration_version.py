@@ -34,12 +34,12 @@ class Version:
     def get_json_schema(self, enumerations: Enumerations) -> dict:
         dictionary_filename: str = self.version_number.get_schema_filename()
         dictionary = Dictionary(dictionary_filename)
-        return dictionary.get_json_schema(enumerations)
+        return dictionary.to_json_schema(enumerations)
 
     def get_bson_schema(self, enumerations: Enumerations) -> dict:
         dictionary_filename: str = self.version_number.get_schema_filename()
         dictionary = Dictionary(dictionary_filename)
-        return dictionary.get_bson_schema(enumerations)
+        return dictionary.to_bson_schema(enumerations)
 
     def process(self, mongo_io: MongoIO) -> ConfiguratorEvent:
         try:
@@ -90,7 +90,7 @@ class Version:
             # Apply schema validation
             sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="APPLY_SCHEMA_VALIDATION")
             event.append_events([sub_event])
-            enumerations = Enumerators().getVersion(self.version_number.get_enumerator_version())
+            enumerations = Enumerators().get_version(self.version_str)
             bson_schema: dict = self.get_bson_schema(enumerations)
             
             # Add schema context to event

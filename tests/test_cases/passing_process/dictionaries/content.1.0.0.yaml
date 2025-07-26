@@ -1,6 +1,7 @@
 file_name: content.1.0.0.yaml
 _locked: true
 root:
+  name: content
   description: A simple content collection for testing
   type: object
   required: false
@@ -35,6 +36,7 @@ root:
       type: object
       required: false
       additional_properties: false
+      name: metadata
       properties:
         - name: created_at
           description: When the content was created

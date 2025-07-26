@@ -2,6 +2,7 @@ from configurator.services.enumeration_service import Enumerations
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.file_io import FileIO
 from configurator.utils.config import Config
+from configurator.utils.version_number import VersionNumber
 
 class Enumerators:
     """A helper class for loading and accessing enumerations - not a service"""
@@ -15,8 +16,9 @@ class Enumerators:
 
     def get_version(self, version_str: str) -> Enumerations:
         """Get enumerations for a specific version string"""
+        version_number = VersionNumber(version_str).get_enumerator_version()
         for enumeration in self.enumerations:
-            if hasattr(enumeration, 'version_str') and enumeration.version_str == version_str:
+            if enumeration.version == version_number:
                 return enumeration
 
         event = ConfiguratorEvent("ENU-06", "GET_ENUMERATION_VERSION")

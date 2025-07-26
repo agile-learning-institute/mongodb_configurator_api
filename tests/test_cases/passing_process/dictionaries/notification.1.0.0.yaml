@@ -1,6 +1,7 @@
 file_name: notification.1.0.0.yaml
 _locked: true
 root:
+  name: notification
   description: A simple notification collection for testing
   type: object
   required: false

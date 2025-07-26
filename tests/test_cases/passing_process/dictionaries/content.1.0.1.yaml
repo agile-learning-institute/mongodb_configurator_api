@@ -1,6 +1,7 @@
 file_name: content.1.0.1.yaml
 _locked: true
 root:
+  name: content
   description: A content collection for testing
   type: object
   required: false
@@ -39,6 +40,7 @@ root:
       description: Additional metadata for the content
       type: object
       required: false
+      name: metadata
       properties:
         - name: created_at
           description: When the content was created
@@ -57,6 +59,7 @@ root:
           type: array
           required: false
           items:
+            name: category
             description: A content category
             type: object
             required: false

@@ -1,6 +1,7 @@
 file_name: observation_retrospective.1.0.0.yaml
 _locked: false
 root:
+  name: observation_retrospective
   description: An observation for a Retrospective exercise
   type: one_of
   properties:

@@ -157,7 +157,7 @@ class TestConfiguration(unittest.TestCase):
             
             with patch('configurator.services.configuration_version.Dictionary') as mock_dictionary:
                 mock_dictionary_instance = Mock()
-                mock_dictionary_instance.get_json_schema.return_value = {"schema": "json"}
+                mock_dictionary_instance.to_json_schema.return_value = {"schema": "json"}
                 mock_dictionary.return_value = mock_dictionary_instance
                 
                 config = Configuration(self.test_file_name, self.test_document)
@@ -178,7 +178,7 @@ class TestConfiguration(unittest.TestCase):
             
             with patch('configurator.services.configuration_version.Dictionary') as mock_dictionary:
                 mock_dictionary_instance = Mock()
-                mock_dictionary_instance.get_bson_schema.return_value = {"schema": "bson"}
+                mock_dictionary_instance.to_bson_schema.return_value = {"schema": "bson"}
                 mock_dictionary.return_value = mock_dictionary_instance
                 
                 config = Configuration(self.test_file_name, self.test_document)

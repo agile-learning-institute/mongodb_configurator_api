@@ -1,6 +1,7 @@
 file_name: observation_ranking.1.0.0.yaml
 _locked: false
 root:
+  name: observation_ranking
   description: The outcome of a Priority exercise
   type: object
   properties:

@@ -1,6 +1,7 @@
 file_name: workshop.1.0.0.yaml
 _locked: false
 root:
+  name: workshop
   description: A record of a specific design thinking workshop.
   type: object
   properties:
@@ -39,6 +40,7 @@ root:
       type: array
       required: true
       items:
+        name: exercise
         description: A Workshop Exercise and observations
         type: object
         required: true
@@ -71,6 +73,7 @@ root:
             type: array
             required: false
             items:
+              name: observation
               type: one_of
               properties:
                 - name: stakeholder

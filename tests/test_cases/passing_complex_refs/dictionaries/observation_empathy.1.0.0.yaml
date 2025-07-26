@@ -1,6 +1,7 @@
 file_name: observation_empathy.1.0.0.yaml
 _locked: false
 root:
+  name: observation_empathy
   description: An empathy observation from an Empathy Mapping exercise
   type: one_of
   properties:
