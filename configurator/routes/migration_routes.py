@@ -31,14 +31,15 @@ def create_migration_routes():
     @event_route("MIG-08", "UPDATE_MIGRATION", "updating migration")
     def put_migration(file_name):
         content = request.get_json(force=True)
-        file = FileIO.put_document(config.MIGRATIONS_FOLDER, file_name, content)
-        return jsonify(file)
+        document = FileIO.put_document(config.MIGRATIONS_FOLDER, file_name, content)
+        return jsonify(document)
 
     # DELETE /api/migrations/<file_name>/ - Delete a migration file
     @migration_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("MIG-06", "DELETE_MIGRATION", "deleting migration")
     def delete_migration(file_name):
-        return jsonify(FileIO.delete_document(config.MIGRATIONS_FOLDER, file_name).to_dict())
+        event = FileIO.delete_document(config.MIGRATIONS_FOLDER, file_name)
+        return jsonify(event.to_dict())
     
     logger.info("Migration Flask Routes Registered")
     return migration_routes 

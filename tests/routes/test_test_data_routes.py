@@ -90,9 +90,7 @@ class TestTestDataRoutes(unittest.TestCase):
         """Test successful PUT /api/test_data/<file_name>."""
         # Arrange
         test_data = {"data": "test content"}
-        mock_file = Mock()
-        mock_file.to_dict.return_value = {"file_name": "test_file.json", "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"}
-        mock_file_io.put_document.return_value = mock_file
+        mock_file_io.put_document.return_value = test_data
 
         # Act
         response = self.client.put('/api/test_data/test_file.json/', json=test_data)
@@ -100,7 +98,7 @@ class TestTestDataRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, {"file_name": "test_file.json", "size": 100, "created_at": "2023-01-01T00:00:00", "updated_at": "2023-01-01T00:00:00"})
+        self.assertEqual(response_data, test_data)
 
     @patch('configurator.routes.test_data_routes.FileIO')
     def test_put_data_file_general_exception(self, mock_file_io):

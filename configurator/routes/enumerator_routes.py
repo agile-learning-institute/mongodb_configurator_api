@@ -39,7 +39,7 @@ def create_enumerator_routes():
     def put_enumeration(file_name):
         enumerations = Enumerations(file_name, request.json)
         result = enumerations.save()
-        return jsonify(result.to_dict())
+        return jsonify(result)
     
     # DELETE /api/enumerations/<file_name> - Delete specific enumeration file
     @enumerator_routes.route('/<file_name>/', methods=['DELETE'])

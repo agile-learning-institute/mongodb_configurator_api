@@ -79,7 +79,7 @@ class FileIO:
             raise ConfiguratorException(f"Failed to get document from {file_path}", event)
     
     @staticmethod
-    def put_document(folder_name: str, file_name: str, document: dict) -> File:
+    def put_document(folder_name: str, file_name: str, document: dict) -> dict:
         """Write document content to a file."""
         config = Config.get_instance()
         folder = os.path.join(config.INPUT_FOLDER, folder_name)
@@ -93,10 +93,10 @@ class FileIO:
                 elif extension == ".json":
                     f.write(json_util.dumps(document, indent=2))
             
-            return FileIO.get_document(folder_name, file_name)
         except Exception as e:
             event = ConfiguratorEvent(event_id="FIL-08", event_type="PUT_DOCUMENT", event_data={"error": str(e)})
             raise ConfiguratorException(f"Failed to put document to {file_path}", event)
+        return FileIO.get_document(folder_name, file_name)
     
     @staticmethod
     def delete_document(folder_name: str, file_name: str) -> ConfiguratorEvent:

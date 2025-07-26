@@ -104,7 +104,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         }
         mock_enumeration = Mock()
         mock_enumeration.to_dict.return_value = test_data
-        mock_enumeration.save.return_value = mock_enumeration
+        mock_enumeration.save.return_value = {"saved": "data"}
         mock_enumerations_class.return_value = mock_enumeration
 
         # Act
@@ -113,8 +113,8 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, test_data)
-        mock_enumerations_class.assert_called_once_with(data=test_data, file_name="test")
+        self.assertEqual(response_data, {"saved": "data"})
+        mock_enumerations_class.assert_called_once_with("test", test_data)
 
     @patch('configurator.routes.enumerator_routes.Enumerations')
     def test_put_enumeration_exception(self, mock_enumerations_class):

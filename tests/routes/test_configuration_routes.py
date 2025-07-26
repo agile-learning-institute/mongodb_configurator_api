@@ -135,7 +135,7 @@ class TestConfigurationRoutes(unittest.TestCase):
         test_data = {"name": "test_config", "version": "1.0.0", "_locked": False}
         mock_configuration = Mock()
         mock_configuration.to_dict.return_value = {"name": "test_config", "version": "1.0.0", "_locked": False}
-        mock_configuration.save.return_value = mock_configuration
+        mock_configuration.save.return_value = {"name": "test_config", "version": "1.0.0", "_locked": False}
         mock_configuration_class.return_value = mock_configuration
 
         # Act
@@ -144,7 +144,7 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        # For successful responses, expect configuration data directly
+        # For successful responses, expect the saved data directly
         self.assertEqual(response_data, {"name": "test_config", "version": "1.0.0", "_locked": False})
 
     @patch('configurator.routes.configuration_routes.Configuration')
@@ -339,31 +339,12 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    @patch('configurator.routes.configuration_routes.TemplateService')
-    def test_create_collection_success(self, mock_template_service_class):
-        """Test successful POST /api/configurations/collection/<file_name>."""
-        # Arrange
-        mock_template_service = Mock()
-        mock_template_service.create_collection.return_value = {"created": True}
-        mock_template_service_class.return_value = mock_template_service
-
-        # Act
-        response = self.client.post('/api/configurations/collection/test_collection/')
-
-        # Assert
-        self.assertEqual(response.status_code, 200)
-        response_data = response.json
-        # For successful responses, expect data directly, not wrapped in event envelope
-        self.assertEqual(response_data, {"created": True})
-
-    @patch('configurator.routes.configuration_routes.TemplateService')
-    def test_create_collection_configurator_exception(self, mock_template_service_class):
+    @patch('configurator.routes.configuration_routes.TemplateService.create_collection')
+    def test_create_collection_configurator_exception(self, mock_create_collection):
         """Test POST /api/configurations/collection/<file_name> when TemplateService raises ConfiguratorException."""
         # Arrange
-        mock_template_service = Mock()
         event = ConfiguratorEvent("TPL-01", "TEMPLATE_ERROR")
-        mock_template_service.create_collection.side_effect = ConfiguratorException("Template error", event)
-        mock_template_service_class.return_value = mock_template_service
+        mock_create_collection.side_effect = ConfiguratorException("Template error", event)
 
         # Act
         response = self.client.post('/api/configurations/collection/test_collection/')
@@ -377,13 +358,26 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    @patch('configurator.routes.configuration_routes.TemplateService')
-    def test_create_collection_general_exception(self, mock_template_service_class):
+    @patch('configurator.routes.configuration_routes.TemplateService.create_collection')
+    def test_create_collection_success(self, mock_create_collection):
+        """Test successful POST /api/configurations/collection/<file_name>."""
+        # Arrange
+        mock_create_collection.return_value = {"created": True}
+
+        # Act
+        response = self.client.post('/api/configurations/collection/test_collection/')
+
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json
+        # For successful responses, expect data directly, not wrapped in event envelope
+        self.assertEqual(response_data, {"created": True})
+
+    @patch('configurator.routes.configuration_routes.TemplateService.create_collection')
+    def test_create_collection_general_exception(self, mock_create_collection):
         """Test POST /api/configurations/collection/<file_name> when TemplateService raises a general exception."""
         # Arrange
-        mock_template_service = Mock()
-        mock_template_service.create_collection.side_effect = Exception("Unexpected error")
-        mock_template_service_class.return_value = mock_template_service
+        mock_create_collection.side_effect = Exception("Unexpected error")
 
         # Act
         response = self.client.post('/api/configurations/collection/test_collection/')

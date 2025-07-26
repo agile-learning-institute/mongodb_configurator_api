@@ -240,7 +240,7 @@ class MongoIO:
             event.record_failure("Bulk write operation failed unexpectedly", {"error": str(e)})
             raise ConfiguratorException(f"Bulk write operation failed unexpectedly: {e}, {collection_name}, {data_file}", event)
 
-    def drop_database(self) -> list[ConfiguratorEvent]:
+    def drop_database(self) -> ConfiguratorEvent:
         config = Config.get_instance()
         event = ConfiguratorEvent(event_id="MON-12", event_type="DROP_DATABASE")
 
@@ -274,7 +274,7 @@ class MongoIO:
             self.client.drop_database(self.db.name)
             event.record_success()
             logger.info(f"Dropped database: {self.db.name}")
-            return [event]
+            return event
         except Exception as e:
             event.event_data = e
             event.record_failure("Check collection counts raised an exception")
