@@ -33,13 +33,13 @@ class Configuration(ServiceBase):
     def get_json_schema(self, version_str: str) -> dict:
         version = self.get_version(version_str)
         enumerators = Enumerators()
-        enumerations = enumerators.get_version(version_str)
+        enumerations = enumerators.get_version(f"{self.collection_name}.{version_str}")
         return version.get_json_schema(enumerations)
 
     def get_bson_schema(self, version_str: str) -> dict:
         version = self.get_version(version_str)
         enumerators = Enumerators()
-        enumerations = enumerators.get_version(version_str)
+        enumerations = enumerators.get_version(f"{self.collection_name}.{version_str}")
         return version.get_bson_schema(enumerations)
         
     def process(self) -> ConfiguratorEvent:
