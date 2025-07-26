@@ -163,6 +163,7 @@ class MongoIO:
             event.append_events([sub_event])
             self.execute_migration(collection_name, pipeline)
             sub_event.record_success()
+            event.record_success()
             return [event]
         except Exception as e:
             event.record_failure({"error": str(e), "collection": collection_name, "file": migration_file})

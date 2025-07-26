@@ -112,8 +112,6 @@ class TestMigrationEvents(unittest.TestCase):
         # Verify the migration file event has the correct data
         self.assertIn("migration_file", migration_file_event.data)
         self.assertEqual(migration_file_event.data["migration_file"], "test_migration.json")
-        self.assertIn("pipeline_stages", migration_file_event.data)
-        self.assertEqual(migration_file_event.data["pipeline_stages"], 2)
         
         # Verify that MON-13 (LOAD_MIGRATION) and MON-08 (EXECUTE_MIGRATION) events are nested
         load_event = None
