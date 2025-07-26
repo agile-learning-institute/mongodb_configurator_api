@@ -4,5 +4,5 @@ root:
   type: simple
   schema:
     type: string
-    pattern: ^[^ \t\n\r@]+@[^ \t\n\r@]+\.[^ \t\n\r@]+$
+    pattern: ^[^\s@]+@[^\s@]+\.[^\s@]+$
   required: false

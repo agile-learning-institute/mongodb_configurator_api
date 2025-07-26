@@ -1,4 +1,4 @@
 {
-  "pattern": "^[^ \\t\\n\\r]{1,40}$",
+  "pattern": "^[^\\s]{1,40}$",
   "bsonType": "string"
 }

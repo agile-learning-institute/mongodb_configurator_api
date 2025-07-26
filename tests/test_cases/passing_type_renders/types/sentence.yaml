@@ -4,5 +4,5 @@ root:
   type: simple
   schema:
     type: string
-    pattern: ^[^\t\n\r]{0,255}$
+    pattern: ^[^\s]{0,255}$
   required: false
