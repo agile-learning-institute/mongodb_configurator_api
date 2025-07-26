@@ -4,38 +4,31 @@ from configurator.utils.mongo_io import MongoIO
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.services.configuration_version import Version
 from configurator.services.enumerator_service import Enumerators
+from configurator.services.service_base import ServiceBase
 
-class Configuration:
+class Configuration(ServiceBase):
     def __init__(self, file_name: str = None, document: dict = None):
-        self.config = Config.get_instance()
-        
-        if file_name is None:
-            event = ConfiguratorEvent(event_id="CFG-01", event_type="CREATE_CONFIGURATION", event_data=document)
-            raise ConfiguratorException("Configuration file name is required", event)
-        
-        if document is None:
-            document = FileIO.get_document(self.config.CONFIGURATION_FOLDER, file_name)
-
-        self.file_name = file_name
-        self.collection_name = file_name.split('.')[0]
-        self._locked = document.get("_locked", False)
-        self.title = document.get("title", "")
-        self.description = document.get("description", "")
-        self.versions = [Version(self.collection_name, v) for v in document.get("versions", [])]
+        super().__init__(file_name, document, "configurations")
+        self.collection_name = self.file_name.split('.')[0]
+        self.title = self._document.get("title", "")
+        self.description = self._document.get("description", "")
+        self.versions = [Version(self.collection_name, v) for v in self._document.get("versions", [])]
 
     def to_dict(self):
-        the_dict = {}
-        the_dict["file_name"] = self.file_name
-        the_dict["_locked"] = self._locked
-        the_dict["title"] = self.title
-        the_dict["description"] = self.description
-        the_dict["versions"] = [v.to_dict() for v in self.versions]
-        return the_dict
+        d = super().to_dict()
+        d["title"] = self.title
+        d["description"] = self.description
+        d["versions"] = [v.to_dict() for v in self.versions]
+        return d
+
+    @staticmethod
+    def _get_folder_name():
+        return "configurations"
 
     def get_json_schema(self, version_str: str) -> dict:
         for version in self.versions:
             if version.version_str == version_str:
-                enumerations = Enumerators().getVersion(version.collection_version.get_enumerator_version())
+                enumerations = Enumerators().getVersion(version.version_number.get_enumerator_version())
                 return version.get_json_schema(enumerations)
         
         event = ConfiguratorEvent("CFG-02", "GET_JSON_SCHEMA")
@@ -46,23 +39,12 @@ class Configuration:
         """Get BSON schema for a specific version."""
         for version in self.versions:
             if version.version_str == version_str:
-                enumerations = Enumerators().getVersion(version.collection_version.get_enumerator_version())
+                enumerations = Enumerators().getVersion(version.version_number.get_enumerator_version())
                 return version.get_bson_schema(enumerations)
         
         event = ConfiguratorEvent("CFG-03", "GET_BSON_SCHEMA")
         event.record_failure(f"Version {version_str} not found")
         raise ConfiguratorException(f"Version {version_str} not found", event)
-
-    def save(self):
-        return FileIO.put_document(self.config.CONFIGURATION_FOLDER, self.file_name, self.to_dict())
-    
-    def delete(self):
-        if self._locked:
-            event = ConfiguratorEvent(event_id="CFG-04", event_type="DELETE_CONFIGURATION")
-            event.record_failure("Cannot delete locked configuration")
-            raise ConfiguratorException("Cannot delete locked configuration", event)
-
-        return FileIO.delete_document(self.config.CONFIGURATION_FOLDER, self.file_name)
         
     def process(self) -> ConfiguratorEvent:
         try:
@@ -86,27 +68,7 @@ class Configuration:
 
     @staticmethod
     def lock_all(status: bool = True):
-        config = Config.get_instance()
-        lock_all_event = ConfiguratorEvent(event_id="CFG-06", event_type="LOCK_ALL_CONFIGURATIONS", event_data={"status": status})
-        try:
-            for file in FileIO.get_documents(config.CONFIGURATION_FOLDER):
-                file_event = ConfiguratorEvent(event_id=f"CFG-{file.file_name}", event_type="LOCK_CONFIGURATION")
-                lock_all_event.append_events([file_event])
-                configuration = Configuration(file.file_name)
-                configuration._locked = status
-                configuration.save()
-                file_event.record_success()
-            lock_all_event.record_success()
-            return lock_all_event
-        except ConfiguratorException as e:
-            lock_all_event.append_events([e.event])
-            file_event.record_failure(f"ConfiguratorException locking configuration {file.file_name}")
-            lock_all_event.record_failure(f"ConfiguratorException locking configuration {file.file_name}")
-            raise ConfiguratorException("Cannot lock all configurations", lock_all_event)
-        except Exception as e:
-            file_event.record_failure(f"Unexpected error locking configuration {file.file_name}")
-            lock_all_event.record_failure(f"Unexpected error locking configuration {file.file_name}")
-            raise ConfiguratorException("Cannot lock all configurations", lock_all_event)
+        return ServiceBase.lock_all(Configuration, status)
 
     @staticmethod
     def process_all():

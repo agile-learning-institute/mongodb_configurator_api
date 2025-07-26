@@ -93,25 +93,17 @@ class TestTemplateService(unittest.TestCase):
 
     def test_new_configuration_without_file_name(self):
         """Test TemplateService.new_configuration method without file name"""
-        # Note: The source code has a defect - it passes None as file_name to Configuration
-        # which raises an exception. This test documents that defect.
-        
-        # Act & Assert
         with self.assertRaises(ConfiguratorException) as context:
-            TemplateService.new_configuration(self.test_collection_name)
+            TemplateService.new_configuration(None)
         
-        self.assertIn("Configuration file name is required", str(context.exception))
+        self.assertIn("configuration file name is required", str(context.exception))
 
     def test_new_dictionary_without_file_name(self):
         """Test TemplateService.new_dictionary method without file name"""
-        # Note: The source code has a defect - it passes None as file_name to Dictionary
-        # which raises an exception. This test documents that defect.
-        
-        # Act & Assert
         with self.assertRaises(ConfiguratorException) as context:
-            TemplateService.new_dictionary(self.test_collection_name)
+            TemplateService.new_dictionary(None)
         
-        self.assertIn("Dictionary file name is required", str(context.exception))
+        self.assertIn("dictionary file name is required", str(context.exception))
 
     def test_create_collection_defects(self):
         """Test TemplateService.create_collection method - all defects have been fixed"""

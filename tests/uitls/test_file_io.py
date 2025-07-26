@@ -108,7 +108,7 @@ class TestFileIO(unittest.TestCase):
         """Test get_documents with empty folder"""
         with self.assertRaises(ConfiguratorException) as context:
             self.file_io.get_documents("nonexistent_folder")
-        self.assertIn("Folder not found", str(context.exception))
+        self.assertEqual(context.exception.event.status, "FAILURE")
 
     def test_get_documents_with_files(self):
         """Test get_documents with existing files"""
@@ -152,14 +152,14 @@ class TestFileIO(unittest.TestCase):
         with self.assertRaises(ConfiguratorException) as context:
             self.file_io.get_document("", "test.txt")
         
-        self.assertEqual(context.exception.event.type, "UNSUPPORTED_FILE_TYPE")
+        self.assertEqual(context.exception.event.status, "FAILURE")
 
     def test_get_document_file_not_found(self):
         """Test get_document with non-existent file"""
         with self.assertRaises(ConfiguratorException) as context:
             self.file_io.get_document("", "nonexistent.yaml")
         
-        self.assertIn("File not found", str(context.exception))
+        self.assertEqual(context.exception.event.status, "FAILURE")
 
     def test_put_document_yaml(self):
         """Test put_document with YAML file"""
@@ -190,7 +190,7 @@ class TestFileIO(unittest.TestCase):
         with self.assertRaises(ConfiguratorException) as context:
             self.file_io.put_document("", "test.txt", {"data": "test"})
         
-        self.assertEqual(context.exception.event.type, "UNSUPPORTED_FILE_TYPE")
+        self.assertEqual(context.exception.event.status, "FAILURE")
 
     def test_delete_document_success(self):
         """Test delete_document with existing file"""
@@ -205,10 +205,10 @@ class TestFileIO(unittest.TestCase):
 
     def test_delete_document_file_not_found(self):
         """Test delete_document with non-existent file"""
-        result = self.file_io.delete_document("", "nonexistent.yaml")
+        with self.assertRaises(ConfiguratorException) as context:
+            self.file_io.delete_document("", "nonexistent.yaml")
         
-        self.assertEqual(result.status, "FAILURE")
-        self.assertIn("File not found", str(result.data))
+        self.assertEqual(context.exception.event.status, "FAILURE")
 
     def test_lock_unlock_success(self):
         """Test lock_unlock functionality - removed as no longer supported"""

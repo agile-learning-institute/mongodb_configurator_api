@@ -51,13 +51,21 @@ class FileIO:
         files = []
         
         try:
+            if not os.path.exists(folder):
+                event = ConfiguratorEvent(event_id="FIL-03", event_type="GET_DOCUMENTS")
+                event.record_failure("Folder not found")
+                raise ConfiguratorException(f"Folder not found: {folder}", event)
+            
             for file_name in os.listdir(folder):
                 file_path = os.path.join(folder, file_name)
                 if os.path.isfile(file_path):
                     files.append(File(file_path))
             return files
+        except ConfiguratorException:
+            raise
         except Exception as e:
-            event = ConfiguratorEvent(event_id="FIL-03", event_type="GET_DOCUMENTS", event_data={e})
+            event = ConfiguratorEvent(event_id="FIL-03", event_type="GET_DOCUMENTS")
+            event.record_failure(str(e))
             raise ConfiguratorException(f"Failed to get documents from {folder}", event)
     
     @staticmethod
@@ -68,14 +76,25 @@ class FileIO:
         file_path = os.path.join(folder, file_name)
         extension = os.path.splitext(file_path)[1].lower()
         
+        # Check for unsupported file types
+        if extension not in [".yaml", ".json"]:
+            event = ConfiguratorEvent(event_id="FIL-06", event_type="UNSUPPORTED_FILE_TYPE")
+            event.record_failure(f"Unsupported file type: {extension}")
+            raise ConfiguratorException(f"Unsupported file type: {extension}", event)
+        
         try:
             with open(file_path, 'r', encoding='utf-8') as f:
                 if extension == ".yaml":
                     return yaml.safe_load(f)
                 elif extension == ".json":
                     return json_util.loads(f.read())
+        except FileNotFoundError:
+            event = ConfiguratorEvent(event_id="FIL-06", event_type="GET_DOCUMENT")
+            event.record_failure("File not found")
+            raise ConfiguratorException(f"File not found: {file_path}", event)
         except Exception as e:
-            event = ConfiguratorEvent(event_id="FIL-06", event_type="GET_DOCUMENT", event_data={"error": str(e)})
+            event = ConfiguratorEvent(event_id="FIL-06", event_type="GET_DOCUMENT")
+            event.record_failure(str(e))
             raise ConfiguratorException(f"Failed to get document from {file_path}", event)
     
     @staticmethod
@@ -94,7 +113,8 @@ class FileIO:
                     f.write(json_util.dumps(document, indent=2))
             
         except Exception as e:
-            event = ConfiguratorEvent(event_id="FIL-08", event_type="PUT_DOCUMENT", event_data={"error": str(e)})
+            event = ConfiguratorEvent(event_id="FIL-08", event_type="PUT_DOCUMENT")
+            event.record_failure(str(e))
             raise ConfiguratorException(f"Failed to put document to {file_path}", event)
         return FileIO.get_document(folder_name, file_name)
     
@@ -104,13 +124,17 @@ class FileIO:
         folder = os.path.join(config.INPUT_FOLDER, folder_name)
         file_path = os.path.join(folder, file_name)
         
+        event = ConfiguratorEvent(event_id="FIL-09", event_type="DELETE_DOCUMENT")
+        
         try:
-            event = ConfiguratorEvent(event_id="FIL-09", event_type="DELETE_DOCUMENT")
             os.remove(file_path)
             event.record_success()
             return event
+        except FileNotFoundError:
+            event.record_failure("File not found")
+            raise ConfiguratorException(f"Failed to delete {file_name} from {folder_name}", event)
         except Exception as e:
-            event.record_failure({"error": str(e), "file_path": file_path})
+            event.record_failure(str(e))
             raise ConfiguratorException(f"Failed to delete {file_name} from {folder_name}", event)
     
     @staticmethod
@@ -123,6 +147,7 @@ class FileIO:
         try:
             return os.path.isfile(file_path)
         except Exception as e:
-            event = ConfiguratorEvent(event_id="FIL-10", event_type="FILE_EXISTS", event_data={"error": str(e)})
+            event = ConfiguratorEvent(event_id="FIL-10", event_type="FILE_EXISTS")
+            event.record_failure(str(e))
             raise ConfiguratorException(f"Failed to check if file exists: {file_path}", event)
     

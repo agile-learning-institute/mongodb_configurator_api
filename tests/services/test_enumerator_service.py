@@ -108,35 +108,30 @@ class TestEnumerators(unittest.TestCase):
                     # Act & Assert - test that version property is accessible
                     self.assertEqual(enum.version, 1)
 
-    def test_lock_all(self):
+    @patch('configurator.services.service_base.FileIO')
+    def test_lock_all(self, mock_file_io):
         """Test that lock_all() locks all enumerations and returns a ConfiguratorEvent."""
         # Arrange
-        with patch('configurator.services.enumerator_service.FileIO.get_documents') as mock_get_documents:
-            mock_files = [Mock(file_name="test1.yaml"), Mock(file_name="test2.yaml")]
-            mock_get_documents.return_value = mock_files
-            
-            with patch('configurator.services.enumerator_service.FileIO.get_document') as mock_get_document:
-                mock_get_document.return_value = {
-                    "version": 1,
-                    "enumerators": [
-                        {"name": "test_enum", "values": [{"value": "value1", "description": "desc1"}]}
-                    ]
-                }
-                
-                with patch('configurator.services.enumerator_service.FileIO.put_document') as mock_put_document:
-                    mock_put_document.return_value = Mock()
-                    
-                    with patch('configurator.services.enumerator_service.Enumerations') as mock_enumerations:
-                        mock_enum1 = Mock(file_name="test1.yaml")
-                        mock_enum2 = Mock(file_name="test2.yaml")
-                        mock_enumerations.side_effect = [mock_enum1, mock_enum2]
-                        
-                        # Act - call the static method directly
-                        result = Enumerators.lock_all()
-                        
-                        # Assert
-                        self.assertIsNotNone(result)
-                        self.assertEqual(result.type, "LOCK_ENUMERATIONS")
+        mock_enum1 = Mock()
+        mock_enum1.file_name = "enum1.yaml"
+        mock_enum2 = Mock()
+        mock_enum2.file_name = "enum2.yaml"
+        mock_files = [mock_enum1, mock_enum2]
+        mock_file_io.get_documents.return_value = mock_files
+        
+        # Mock FileIO.get_document to return a valid document
+        mock_file_io.get_document.return_value = {
+            "version": 0,
+            "enumerators": []
+        }
+        
+        # Act
+        result = Enumerators.lock_all()
+        
+        # Assert
+        self.assertEqual(result.type, "LOCK_ALL_ENUMERATORS")
+        mock_file_io.get_documents.assert_called_once()
+        mock_file_io.get_document.assert_called()
 
 
 class TestEnumerations(unittest.TestCase):
