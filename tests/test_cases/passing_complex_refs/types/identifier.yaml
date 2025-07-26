@@ -1,9 +1,9 @@
 root:
   description: A unique identifier for a document
-  type: complex
+  type: complex_primitive
+  required: false
   json_type:
     type: string
     pattern: ^[0-9a-fA-F]{24}$
   bson_type:
     bsonType: objectId
-  required: false

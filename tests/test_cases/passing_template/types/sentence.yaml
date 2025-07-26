@@ -1,6 +1,7 @@
 root:
   description: A String of text, 0 to 255 characters with no special characters
-  type: simple
+  type: simple_primitive
+  required: false
   schema:
     type: string
     pattern: "^[^\\t\\n\\r]{0,255}$"

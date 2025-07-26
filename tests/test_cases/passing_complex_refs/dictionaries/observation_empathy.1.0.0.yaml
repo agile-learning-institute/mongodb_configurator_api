@@ -2,56 +2,57 @@ file_name: observation_empathy.1.0.0.yaml
 _locked: false
 root:
   description: An empathy observation from an Empathy Mapping exercise
-  one_of:
+  type: one_of
+  properties:
     - type: object
       properties:
-        - users:
+        - name: users
           description: Users who made the observation
           required: true
           type: array
           items:
             description: User Name
             type: word
-        says:
+        - name: says
           description: Things the user says
           type: sentence
           required: true
     - type: object
       properties:
-        - users:
+        - name: users
           description: Users who made the observation
           required: true
           type: array
           items:
             description: User Name
             type: word
-        does:
+        - name: does
           description: Things the user does
           type: sentence
           required: true
     - type: object
       properties:
-        - users:
+        - name: users
           description: Users who made the observation
           required: true
           type: array
           items:
             description: User Name
             type: word
-        - thinks:
+        - name: thinks
           description: Things the user thinks
           type: sentence
           required: true
     - type: object
       properties:
-        - users:
+        - name: users
           description: Users who made the observation
           required: true
           type: array
           items:
             description: User Name
             type: word
-        - feels:
+        - name: feels
           description: Things the user feels
           type: sentence
           required: true

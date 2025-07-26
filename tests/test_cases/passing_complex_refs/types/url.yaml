@@ -1,10 +1,10 @@
 root:
   description: A valid URL
-  type: complex
+  type: complex_primitive
+  required: false
   json_type:
     type: string
     format: uri
   bson_type:
     bsonType: string
-    pattern: ^https?://[^ \t\n\r]+$
-  required: false 
+    pattern: ^https?://[^ \t\n\r]+$ 

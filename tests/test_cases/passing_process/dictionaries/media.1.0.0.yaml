@@ -35,7 +35,8 @@ root:
       enums: media_tags
     - name: metadata
       description: Media meta data - one of several types (video, audio, image)
-      one_of:
+      type: one_of
+      properties:
         - description: Video content structure
           type: object
           required: false
