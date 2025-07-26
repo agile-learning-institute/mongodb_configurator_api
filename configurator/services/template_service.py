@@ -10,18 +10,18 @@ class TemplateService:
         pass
     
     @staticmethod
-    def create_collection(self, collection_name: str) -> dict:
+    def create_collection(collection_name: str) -> dict:
         config = Config.get_instance()
         configuration_file_name = f"{collection_name}.yaml"
         dictionary_file_name = f"{collection_name}.0.0.1.yaml"
         configuration_template = TemplateService.new_configuration(collection_name, configuration_file_name)
         dictionary_template = TemplateService.new_dictionary(collection_name, dictionary_file_name)
         
-        if FileIO.file_exists(self.config.CONFIGURATION_FOLDER, configuration_file_name):
+        if FileIO.file_exists(config.CONFIGURATION_FOLDER, configuration_file_name):
             event = ConfiguratorEvent("TEMPLATE-01", "CONFIGURATION_EXISTS", {"file": configuration_file_name})
             raise ConfiguratorException(f"Configuration file {configuration_file_name} already exists", event)
         
-        if FileIO.file_exists(self.config.DICTIONARY_FOLDER, dictionary_file_name):
+        if FileIO.file_exists(config.DICTIONARY_FOLDER, dictionary_file_name):
             event = ConfiguratorEvent("TEMPLATE-02", "DICTIONARY_EXISTS", {"file": dictionary_file_name})
             raise ConfiguratorException(f"Dictionary file {dictionary_file_name} already exists", event)
         

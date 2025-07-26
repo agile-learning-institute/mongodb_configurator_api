@@ -113,3 +113,16 @@ class FileIO:
             event.record_failure({"error": str(e), "file_path": file_path})
             raise ConfiguratorException(f"Failed to delete {file_name} from {folder_name}", event)
     
+    @staticmethod
+    def file_exists(folder_name: str, file_name: str) -> bool:
+        """Check if a file exists in the specified folder."""
+        config = Config.get_instance()
+        folder = os.path.join(config.INPUT_FOLDER, folder_name)
+        file_path = os.path.join(folder, file_name)
+        
+        try:
+            return os.path.isfile(file_path)
+        except Exception as e:
+            event = ConfiguratorEvent(event_id="FIL-10", event_type="FILE_EXISTS", event_data={"error": str(e)})
+            raise ConfiguratorException(f"Failed to check if file exists: {file_path}", event)
+    
