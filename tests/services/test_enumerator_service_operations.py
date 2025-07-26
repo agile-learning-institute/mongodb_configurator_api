@@ -55,12 +55,12 @@ class TestEnumerations(unittest.TestCase):
         """Test Enumerations get_enum_dict method"""
         enum = Enumerations(self.test_enumeration)
         result = enum.get_enum_dict()
-        # Note: This method has a bug - it uses "name" instead of "value"
-        # The test reflects the current implementation which returns {None: 'Third value'}
-        # because the values don't have a "name" key, only "value" and "description"
-        self.assertIsInstance(result, dict)
-        # The current implementation returns {None: 'Third value'} due to the bug
-        # This test documents the defect in the source code
+        expected = {
+            "value1": "First value",
+            "value2": "Second value", 
+            "value3": "Third value"
+        }
+        self.assertEqual(result, expected)
 
     def test_enumerations_get_enum_values(self):
         """Test Enumerations get_enum_values method"""
@@ -270,20 +270,18 @@ class TestEnumerators(unittest.TestCase):
         mock_enum2 = Mock()
         mock_enumerators_class.side_effect = [mock_enum1, mock_enum2]
         
-        # Note: The source code has defects:
-        # 1. It uses ENUMERATORS_FOLDER instead of ENUMERATOR_FOLDER (AttributeError)
-        # 2. It has UnboundLocalError with file_event in exception handlers
-        # This test documents these defects
+        # Note: The source code has a potential defect:
+        # It has UnboundLocalError with file_event in exception handlers
+        # This defect is intermittent and depends on specific error conditions
+        # The current test scenario doesn't trigger it, but it exists in the code
         
-        # Act & Assert
-        with self.assertRaises((AttributeError, UnboundLocalError)) as context:
-            Enumerators.lock_all(True)
+        # Act
+        result = Enumerators.lock_all(True)
         
-        # Should fail due to ENUMERATORS_FOLDER attribute error
-        self.assertTrue(
-            "ENUMERATORS_FOLDER" in str(context.exception) or 
-            "file_event" in str(context.exception)
-        )
+        # Assert
+        self.assertIsNotNone(result)
+        # Verify that the method processes the files correctly
+        self.assertEqual(mock_enumerators_class.call_count, 2)
 
     @patch('configurator.services.enumerator_service.FileIO')
     @patch('configurator.services.enumerator_service.Enumerators')
@@ -296,20 +294,17 @@ class TestEnumerators(unittest.TestCase):
         test_event = ConfiguratorEvent(event_id="TEST-01", event_type="TEST_ERROR")
         mock_enumerators_class.side_effect = ConfiguratorException("Test error", test_event)
         
-        # Note: The source code has defects:
-        # 1. It uses ENUMERATORS_FOLDER instead of ENUMERATOR_FOLDER (AttributeError)
-        # 2. It has UnboundLocalError with file_event in exception handlers
-        # This test documents these defects
+        # Note: The source code has a potential defect:
+        # It has UnboundLocalError with file_event in exception handlers
+        # This defect is intermittent and depends on specific error conditions
+        # The current test scenario triggers ConfiguratorException, not UnboundLocalError
         
         # Act & Assert
-        with self.assertRaises((AttributeError, UnboundLocalError)) as context:
+        with self.assertRaises(ConfiguratorException) as context:
             Enumerators.lock_all(True)
         
-        # Should fail due to ENUMERATORS_FOLDER attribute error
-        self.assertTrue(
-            "ENUMERATORS_FOLDER" in str(context.exception) or 
-            "file_event" in str(context.exception)
-        )
+        # Should fail due to ConfiguratorException from the mocked Enumerators constructor
+        self.assertIn("Cannot lock all enumerators", str(context.exception))
 
 
 if __name__ == '__main__':

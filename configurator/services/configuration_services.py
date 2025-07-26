@@ -86,8 +86,8 @@ class Configuration:
     @staticmethod
     def lock_all(status: bool = True):
         config = Config.get_instance()
+        lock_all_event = ConfiguratorEvent(event_id="CFG-06", event_type="LOCK_ALL_CONFIGURATIONS", event_data={"status": status})
         try:
-            lock_all_event = ConfiguratorEvent(event_id="CFG-06", event_type="LOCK_ALL_CONFIGURATIONS", event_data={"status": status})
             for file in FileIO.get_documents(config.CONFIGURATION_FOLDER):
                 file_event = ConfiguratorEvent(event_id=f"CFG-{file.file_name}", event_type="LOCK_CONFIGURATION")
                 lock_all_event.append_events([file_event])
@@ -110,8 +110,8 @@ class Configuration:
     @staticmethod
     def process_all():
         config = Config.get_instance()
+        process_event = ConfiguratorEvent("CFG-07", "PROCESS_ALL_CONFIGURATIONS")
         try:
-            process_event = ConfiguratorEvent("CFG-07", "PROCESS_ALL_CONFIGURATIONS")
             for file in FileIO.get_documents(config.CONFIGURATION_FOLDER):
                 file_event = ConfiguratorEvent(f"CFG-{file.file_name}", "PROCESS_CONFIGURATION")
                 file_event.append_events([Configuration(file.file_name).process()])
