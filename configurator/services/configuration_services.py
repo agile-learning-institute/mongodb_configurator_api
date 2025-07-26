@@ -15,11 +15,11 @@ class Configuration(ServiceBase):
         self.versions = [Version(self.collection_name, v) for v in self._document.get("versions", [])]
 
     def to_dict(self):
-        d = super().to_dict()
-        d["title"] = self.title
-        d["description"] = self.description
-        d["versions"] = [v.to_dict() for v in self.versions]
-        return d
+        the_dict = super().to_dict()
+        the_dict["title"] = self.title
+        the_dict["description"] = self.description
+        the_dict["versions"] = [v.to_dict() for v in self.versions]
+        return the_dict
 
     def get_version(self, version_str: str) -> Version:
         for version in self.versions:
@@ -27,8 +27,8 @@ class Configuration(ServiceBase):
                 return version
             
         event = ConfiguratorEvent("CFG-02", "GET_JSON_SCHEMA")
-        event.record_failure(f"Version {version_str} not found")
-        raise ConfiguratorException(f"Version {version_str} not found", event)
+        event.record_failure(f"Version {version_str} not found in configuration {self.file_name}")
+        raise ConfiguratorException(f"Version {version_str} not found in configuration {self.file_name}", event)
 
     def get_json_schema(self, version_str: str) -> dict:
         version = self.get_version(version_str)
@@ -73,9 +73,11 @@ class Configuration(ServiceBase):
     def process_all():
         config = Config.get_instance()
         process_event = ConfiguratorEvent("CFG-07", "PROCESS_ALL_CONFIGURATIONS")
+        file_event = ConfiguratorEvent("CFG-08", "PROCESS_CONFIGURATION")
         try:
             for file in FileIO.get_documents(config.CONFIGURATION_FOLDER):
                 file_event = ConfiguratorEvent(f"CFG-{file.file_name}", "PROCESS_CONFIGURATION")
+                process_event.append_events([file_event])
                 file_event.append_events([Configuration(file.file_name).process()])
                 file_event.record_success()
             process_event.record_success()

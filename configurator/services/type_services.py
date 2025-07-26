@@ -13,9 +13,9 @@ class Type(ServiceBase):
         self.root = Property(self._document.get("root", {}))
 
     def to_dict(self):
-        d = super().to_dict()
-        d["root"] = self.root.to_dict()
-        return d
+        the_dict = super().to_dict()
+        the_dict["root"] = self.root.to_dict()
+        return the_dict
 
     def to_json_schema(self, enumerations: Enumerations, ref_stack: list = []):
         return self.root.to_json_schema(enumerations, ref_stack)
