@@ -10,6 +10,9 @@ def Property(data: dict):
     elif type_ == 'complex':
         from .complex_type import ComplexType
         return ComplexType(data)
+    elif type_ == 'constant':
+        from .constant_type import ConstantType
+        return ConstantType(data)
     elif type_ == 'enum_array':
         from .enum_array_type import EnumArrayType
         return EnumArrayType(data)
