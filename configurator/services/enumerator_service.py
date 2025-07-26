@@ -74,9 +74,9 @@ class Enumerators:
 
     @staticmethod
     def lock_all(status: bool = True):
+        config = Config.get_instance()
+        lock_all_event = ConfiguratorEvent("ENU-04", "LOCK_ENUMERATIONS")
         try:
-            config = Config.get_instance()
-            lock_all_event = ConfiguratorEvent("ENU-04", "LOCK_ENUMERATIONS")
             for file in FileIO.get_documents(config.ENUMERATOR_FOLDER):
                 file_event = ConfiguratorEvent(f"ENU-{file.file_name}", "LOCK_ENUMERATION")
                 lock_all_event.append_events([file_event])
