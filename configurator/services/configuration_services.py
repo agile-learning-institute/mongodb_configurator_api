@@ -21,7 +21,7 @@ class Configuration:
         self._locked = document.get("_locked", False)
         self.title = document.get("title", "")
         self.description = document.get("description", "")
-        self.versions = [Version(self.collection_name, document) for v in document.get("versions", [])]
+        self.versions = [Version(self.collection_name, v) for v in document.get("versions", [])]
 
     def to_dict(self):
         the_dict = {}
