@@ -14,16 +14,16 @@ class TemplateService:
         config = Config.get_instance()
         configuration_file_name = f"{collection_name}.yaml"
         dictionary_file_name = f"{collection_name}.0.0.1.yaml"
-        configuration_template = TemplateService.new_configuration(collection_name=collection_name, file_name=configuration_file_name)
-        dictionary_template = TemplateService.new_dictionary(collection_name=collection_name, file_name=dictionary_file_name)
+        configuration_template = TemplateService.new_configuration(collection_name, configuration_file_name)
+        dictionary_template = TemplateService.new_dictionary(collection_name, dictionary_file_name)
         
-        if FileIO.file_exists(self.config.CONFIGURATION_FOLDER, self.file_name):
-            event = ConfiguratorEvent("TEMPLATE-01", "CONFIGURATION_EXISTS", {"file": self.file_name})
-            raise ConfiguratorException(f"Configuration file {self.file_name} already exists", event)
+        if FileIO.file_exists(self.config.CONFIGURATION_FOLDER, configuration_file_name):
+            event = ConfiguratorEvent("TEMPLATE-01", "CONFIGURATION_EXISTS", {"file": configuration_file_name})
+            raise ConfiguratorException(f"Configuration file {configuration_file_name} already exists", event)
         
-        if FileIO.file_exists(self.config.DICTIONARY_FOLDER, self.dictionary_file_name):
-            event = ConfiguratorEvent("TEMPLATE-02", "DICTIONARY_EXISTS", {"file": self.dictionary_file_name})
-            raise ConfiguratorException(f"Dictionary file {self.dictionary_file_name} already exists", event)
+        if FileIO.file_exists(self.config.DICTIONARY_FOLDER, dictionary_file_name):
+            event = ConfiguratorEvent("TEMPLATE-02", "DICTIONARY_EXISTS", {"file": dictionary_file_name})
+            raise ConfiguratorException(f"Dictionary file {dictionary_file_name} already exists", event)
         
         configuration_template.save()
         dictionary_template.save()
@@ -35,13 +35,14 @@ class TemplateService:
         document["title"] = f"{collection_name} Configuration"
         document["description"] = f"Collection for managing {collection_name}"
         document["versions"] = [{"version": "0.0.1.0"}]
-        return Configuration(file_name=file_name, document=document)
+        return Configuration(file_name, document)
     
     @staticmethod
     def new_dictionary(collection_name: str, file_name: str = None):
         document = {}
         document["file_name"] = file_name
         document["root"] = {}
+        document["root"]["name"] = "root"
         document["root"]["description"] = f"A {collection_name} collection for testing the schema system"
         document["root"]["type"] = "object"
         document["root"]["properties"] = [
@@ -68,4 +69,4 @@ class TemplateService:
                 "required": True
             }
         ]
-        return Dictionary(file_name=file_name, document=document)
+        return Dictionary(file_name, document)
