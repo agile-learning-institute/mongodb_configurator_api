@@ -17,10 +17,11 @@ class Configuration:
             document = FileIO.get_document(self.config.CONFIGURATION_FOLDER, file_name)
 
         self.file_name = file_name
+        self.collection_name = file_name.split('.')[0]
         self._locked = document.get("_locked", False)
         self.title = document.get("title", "")
         self.description = document.get("description", "")
-        self.versions = [Version(file_name.replace('.yaml', ''), v, self.config) for v in document.get("versions", [])]
+        self.versions = [Version(self.collection_name, document) for v in document.get("versions", [])]
 
     def to_dict(self):
         the_dict = {}
