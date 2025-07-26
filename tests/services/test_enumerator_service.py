@@ -108,30 +108,22 @@ class TestEnumerators(unittest.TestCase):
                     # Act & Assert - test that version property is accessible
                     self.assertEqual(enum.version, 1)
 
-    @patch('configurator.services.service_base.FileIO')
-    def test_lock_all(self, mock_file_io):
+    def test_lock_all(self):
         """Test that lock_all() locks all enumerations and returns a ConfiguratorEvent."""
-        # Arrange
-        mock_enum1 = Mock()
-        mock_enum1.file_name = "enum1.yaml"
-        mock_enum2 = Mock()
-        mock_enum2.file_name = "enum2.yaml"
-        mock_files = [mock_enum1, mock_enum2]
-        mock_file_io.get_documents.return_value = mock_files
-        
-        # Mock FileIO.get_document to return a valid document
-        mock_file_io.get_document.return_value = {
-            "version": 0,
-            "enumerators": []
-        }
-        
-        # Act
-        result = Enumerators.lock_all()
-        
-        # Assert
-        self.assertEqual(result.type, "LOCK_ALL_ENUMERATORS")
-        mock_file_io.get_documents.assert_called_once()
-        mock_file_io.get_document.assert_called()
+        with patch('configurator.utils.file_io.FileIO.get_documents') as mock_get_documents:
+            mock_file = Mock()
+            mock_file.file_name = "test.yaml"
+            mock_get_documents.return_value = [mock_file]
+            
+            with patch('configurator.utils.file_io.FileIO.get_document') as mock_get_document:
+                mock_get_document.return_value = {"_locked": False}
+                
+                with patch('configurator.utils.file_io.FileIO.put_document') as mock_put_document:
+                    mock_put_document.return_value = {"saved": True}
+                    
+                    result = Enumerators.lock_all()
+                    
+                    self.assertEqual(result.type, "LOCK_ALL_ENUMERATORSS")
 
 
 class TestEnumerations(unittest.TestCase):

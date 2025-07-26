@@ -9,17 +9,13 @@ from configurator.services.service_base import ServiceBase
 
 class Type(ServiceBase):
     def __init__(self, file_name: str, document: dict = None):
-        super().__init__(file_name, document, "types")
+        super().__init__(file_name, document, Config.get_instance().TYPE_FOLDER)
         self.root = Property(self._document.get("root", {}))
 
     def to_dict(self):
         d = super().to_dict()
         d["root"] = self.root.to_dict()
         return d
-
-    @staticmethod
-    def _get_folder_name():
-        return "types"
 
     def to_json_schema(self, enumerations: Enumerations, ref_stack: list = []):
         return self.root.to_json_schema(enumerations, ref_stack)
@@ -29,5 +25,5 @@ class Type(ServiceBase):
     
     @staticmethod
     def lock_all(status: bool = True):
-        return ServiceBase.lock_all(Type, status)
+        return ServiceBase.lock_all(Type, Config.get_instance().TYPE_FOLDER, status)
 

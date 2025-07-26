@@ -10,7 +10,7 @@ from typing import List, Dict, Any, Optional
 class Enumerators(ServiceBase):
     """A list of Enumerations - loads enumerations on demand"""
     def __init__(self, file_name: str = None, document: dict = None):
-        super().__init__(file_name, document, "enumerators")
+        super().__init__(file_name, document, Config.get_instance().ENUMERATOR_FOLDER)
         self.version = self._document.get("version", 0)
         self.enumerations = []
         for enumeration in self._document.get("enumerators", []):
@@ -20,10 +20,6 @@ class Enumerators(ServiceBase):
         d = super().to_dict()
         d["enumerations"] = [enumeration.to_dict() for enumeration in self.enumerations]
         return d
-
-    @staticmethod
-    def _get_folder_name():
-        return "enumerators"
 
     def upsert_all_to_database(self, mongo_io: MongoIO) -> ConfiguratorEvent:
         config = Config.get_instance()
@@ -58,5 +54,5 @@ class Enumerators(ServiceBase):
 
     @staticmethod
     def lock_all(status: bool = True):
-        return ServiceBase.lock_all(Enumerators, status)
+        return ServiceBase.lock_all(Enumerators, Config.get_instance().ENUMERATOR_FOLDER, status)
 

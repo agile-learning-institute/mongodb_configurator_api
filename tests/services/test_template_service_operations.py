@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock, Mock
 from configurator.services.template_service import TemplateService
 import os
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+from configurator.utils.config import Config
 
 
 class TestTemplateService(unittest.TestCase):
@@ -96,14 +97,16 @@ class TestTemplateService(unittest.TestCase):
         with self.assertRaises(ConfiguratorException) as context:
             TemplateService.new_configuration(None)
         
-        self.assertIn("configuration file name is required", str(context.exception))
+        config = Config.get_instance()
+        self.assertIn(f"{config.CONFIGURATION_FOLDER} file name is required", str(context.exception))
 
     def test_new_dictionary_without_file_name(self):
         """Test TemplateService.new_dictionary method without file name"""
         with self.assertRaises(ConfiguratorException) as context:
             TemplateService.new_dictionary(None)
         
-        self.assertIn("dictionary file name is required", str(context.exception))
+        config = Config.get_instance()
+        self.assertIn(f"{config.DICTIONARY_FOLDER} file name is required", str(context.exception))
 
     def test_create_collection_defects(self):
         """Test TemplateService.create_collection method - all defects have been fixed"""

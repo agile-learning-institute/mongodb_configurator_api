@@ -2,6 +2,7 @@ import unittest
 from unittest.mock import Mock, patch
 from configurator.services.configuration_services import Configuration
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+from configurator.utils.config import Config
 
 
 class TestConfiguration(unittest.TestCase):
@@ -60,9 +61,10 @@ class TestConfiguration(unittest.TestCase):
     def test_init_without_file_name(self):
         """Test Configuration initialization without file name raises exception"""
         with self.assertRaises(ConfiguratorException) as context:
-            Configuration(None, self.test_document)
+            Configuration()
         
-        self.assertIn("configuration file name is required", str(context.exception))
+        config = Config.get_instance()
+        self.assertIn(f"{config.CONFIGURATION_FOLDER} file name is required", str(context.exception))
 
     @patch('configurator.services.configuration_services.Version')
     def test_to_dict(self, mock_version):

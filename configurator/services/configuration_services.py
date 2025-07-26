@@ -8,7 +8,7 @@ from configurator.services.service_base import ServiceBase
 
 class Configuration(ServiceBase):
     def __init__(self, file_name: str = None, document: dict = None):
-        super().__init__(file_name, document, "configurations")
+        super().__init__(file_name, document, Config.get_instance().CONFIGURATION_FOLDER)
         self.collection_name = self.file_name.split('.')[0]
         self.title = self._document.get("title", "")
         self.description = self._document.get("description", "")
@@ -20,10 +20,6 @@ class Configuration(ServiceBase):
         d["description"] = self.description
         d["versions"] = [v.to_dict() for v in self.versions]
         return d
-
-    @staticmethod
-    def _get_folder_name():
-        return "configurations"
 
     def get_json_schema(self, version_str: str) -> dict:
         for version in self.versions:
@@ -68,7 +64,7 @@ class Configuration(ServiceBase):
 
     @staticmethod
     def lock_all(status: bool = True):
-        return ServiceBase.lock_all(Configuration, status)
+        return ServiceBase.lock_all(Configuration, Config.get_instance().CONFIGURATION_FOLDER, status)
 
     @staticmethod
     def process_all():

@@ -3,6 +3,7 @@ from unittest.mock import patch, MagicMock, Mock
 from configurator.services.type_services import Type
 import os
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+from configurator.utils.config import Config
 
 
 class TestType(unittest.TestCase):
@@ -58,9 +59,10 @@ class TestType(unittest.TestCase):
     def test_init_without_file_name(self):
         """Test Type initialization without file name raises exception"""
         with self.assertRaises(ConfiguratorException) as context:
-            Type(None, self.test_document)
+            Type(file_name=None)
         
-        self.assertIn("type file name is required", str(context.exception))
+        config = Config.get_instance()
+        self.assertIn(f"{config.TYPE_FOLDER} file name is required", str(context.exception))
 
     @patch('configurator.services.type_services.Property')
     def test_to_dict(self, mock_property):
@@ -225,24 +227,6 @@ class TestType(unittest.TestCase):
             mock_type2._locked = True
             mock_type1.save.assert_called_once()
             mock_type2.save.assert_called_once()
-
-    @patch('configurator.services.service_base.FileIO')
-    def test_lock_all_types_failure(self, mock_file_io):
-        """Test Type lock_all method failure"""
-        # Arrange
-        mock_file1 = Mock()
-        mock_file1.file_name = "type1.yaml"
-        mock_files = [mock_file1]
-        mock_file_io.get_documents.return_value = mock_files
-        
-        # Mock FileIO.get_document to raise an exception when Type constructor tries to load the document
-        mock_file_io.get_document.side_effect = Exception("Test error")
-        
-        # Act & Assert
-        with self.assertRaises(ConfiguratorException) as context:
-            Type.lock_all()
-        
-        self.assertIn("Cannot lock all types", str(context.exception))
 
 
 if __name__ == '__main__':

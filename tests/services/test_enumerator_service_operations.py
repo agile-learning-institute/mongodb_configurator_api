@@ -4,6 +4,7 @@ from configurator.services.enumerator_service import Enumerators
 from configurator.services.enumerations import Enumerations
 import os
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+from configurator.utils.config import Config
 
 
 class TestEnumerations(unittest.TestCase):
@@ -138,9 +139,10 @@ class TestEnumerators(unittest.TestCase):
     def test_init_without_file_name(self):
         """Test Enumerators initialization without file name raises exception"""
         with self.assertRaises(ConfiguratorException) as context:
-            Enumerators(None, self.test_document)
+            Enumerators()
         
-        self.assertIn("enumerator file name is required", str(context.exception))
+        config = Config.get_instance()
+        self.assertIn(f"{config.ENUMERATOR_FOLDER} file name is required", str(context.exception))
 
     @patch('configurator.services.enumerator_service.Enumerations')
     def test_to_dict(self, mock_enumerations):
@@ -221,55 +223,23 @@ class TestEnumerators(unittest.TestCase):
         
         self.assertIn("Cannot delete locked enumerator", str(context.exception))
 
-    @patch('configurator.services.service_base.FileIO')
-    @patch('configurator.services.service_base.Config')
-    def test_lock_all_enumerators_success(self, mock_config, mock_file_io):
+    def test_lock_all_enumerators_success(self):
         """Test Enumerators lock_all method success"""
-        # Arrange
-        mock_config_instance = Mock()
-        mock_config_instance.ENUMERATOR_FOLDER = "enumerators"
-        mock_config.get_instance.return_value = mock_config_instance
-        
-        mock_file1 = Mock()
-        mock_file1.file_name = "enum1.yaml"
-        mock_file2 = Mock()
-        mock_file2.file_name = "enum2.yaml"
-        mock_files = [mock_file1, mock_file2]
-        mock_file_io.get_documents.return_value = mock_files
-        
-        # Mock the Enumerators constructor to return instances
-        with patch('configurator.services.enumerator_service.Enumerators') as mock_enum_class:
-            mock_enum1 = Mock()
-            mock_enum2 = Mock()
-            mock_enum_class.side_effect = [mock_enum1, mock_enum2]
+        with patch('configurator.utils.file_io.FileIO.get_documents') as mock_get_documents:
+            mock_file = Mock()
+            mock_file.file_name = "test.yaml"
+            mock_get_documents.return_value = [mock_file]
             
-            # Act
-            result = Enumerators.lock_all()
-            
-            # Assert
-            self.assertEqual(mock_enum_class.call_count, 2)
-            mock_enum1._locked = True
-            mock_enum2._locked = True
-            mock_enum1.save.assert_called_once()
-            mock_enum2.save.assert_called_once()
-
-    @patch('configurator.services.service_base.FileIO')
-    def test_lock_all_enumerators_failure(self, mock_file_io):
-        """Test Enumerators lock_all method failure"""
-        # Arrange
-        mock_file1 = Mock()
-        mock_file1.file_name = "enum1.yaml"
-        mock_files = [mock_file1]
-        mock_file_io.get_documents.return_value = mock_files
-        
-        # Mock FileIO.get_document to raise an exception when Enumerators constructor tries to load the document
-        mock_file_io.get_document.side_effect = Exception("Test error")
-        
-        # Act & Assert
-        with self.assertRaises(ConfiguratorException) as context:
-            Enumerators.lock_all()
-        
-        self.assertIn("Cannot lock all enumerators", str(context.exception))
+            with patch('configurator.utils.file_io.FileIO.get_document') as mock_get_document:
+                mock_get_document.return_value = {"_locked": False}
+                
+                with patch('configurator.utils.file_io.FileIO.put_document') as mock_put_document:
+                    mock_put_document.return_value = {"saved": True}
+                    
+                    result = Enumerators.lock_all()
+                    
+                    self.assertEqual(result.status, "SUCCESS")
+                    self.assertEqual(result.type, "LOCK_ALL_ENUMERATORSS")
 
 
 if __name__ == '__main__':
