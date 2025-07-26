@@ -78,7 +78,7 @@ class TestSimpleType(unittest.TestCase):
             
             result = prop.to_bson_schema(mock_enum)
             
-            self.assertEqual(result["bsonType"], "simple")
+            self.assertEqual(result["bsonType"], "string")
             self.assertEqual(result["format"], "email")
 
 

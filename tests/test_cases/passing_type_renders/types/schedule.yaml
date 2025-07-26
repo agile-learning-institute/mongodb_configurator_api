@@ -1,7 +1,9 @@
 root:
+  name: schedule
   description: A list of appointments
   type: array
   items:
+    name: appointment
     description: An appointment
     type: appointment
     required: false

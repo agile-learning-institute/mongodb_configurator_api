@@ -1,4 +1,5 @@
 root:
+  name: date-time
   description: An ISO 8601 formatted date-time string
   type: complex
   json_type:

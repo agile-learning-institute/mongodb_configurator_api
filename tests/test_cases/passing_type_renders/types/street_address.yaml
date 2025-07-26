@@ -1,4 +1,5 @@
 root:
+  name: street_address
   description: A US street address
   type: simple
   schema:

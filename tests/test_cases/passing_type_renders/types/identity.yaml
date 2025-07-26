@@ -1,4 +1,5 @@
 root:
+  name: identity
   description: A unique identifier for a document
   type: complex
   json_type:

@@ -1,4 +1,5 @@
 root:
+  name: ip_address
   description: An IPv4 or IPv6 address
   type: complex
   json_type:

@@ -14,16 +14,16 @@ class TestComplexType(unittest.TestCase):
             "description": "Test description",
             "type": "complex",
             "required": True,
-            "json_schema": {"type": "string", "pattern": "^[a-z]+$"},
-            "bson_schema": {"bsonType": "string", "pattern": "^[a-z]+$"}
+            "json_type": {"type": "string", "pattern": "^[a-z]+$"},
+            "bson_type": {"bsonType": "string", "pattern": "^[a-z]+$"}
         }
         prop = ComplexType(data)
         self.assertEqual(prop.name, "test_prop")
         self.assertEqual(prop.description, "Test description")
         self.assertEqual(prop.type, "complex")
         self.assertTrue(prop.required)
-        self.assertEqual(prop.json_schema, {"type": "string", "pattern": "^[a-z]+$"})
-        self.assertEqual(prop.bson_schema, {"bsonType": "string", "pattern": "^[a-z]+$"})
+        self.assertEqual(prop.json_type, {"type": "string", "pattern": "^[a-z]+$"})
+        self.assertEqual(prop.bson_type, {"bsonType": "string", "pattern": "^[a-z]+$"})
 
     def test_complex_type_to_dict(self):
         """Test ComplexType to_dict method"""
@@ -32,8 +32,8 @@ class TestComplexType(unittest.TestCase):
             "description": "Test description",
             "type": "complex",
             "required": True,
-            "json_schema": {"type": "string", "pattern": "^[a-z]+$"},
-            "bson_schema": {"bsonType": "string", "pattern": "^[a-z]+$"}
+            "json_type": {"type": "string", "pattern": "^[a-z]+$"},
+            "bson_type": {"bsonType": "string", "pattern": "^[a-z]+$"}
         }
         prop = ComplexType(data)
         result = prop.to_dict()
@@ -42,8 +42,8 @@ class TestComplexType(unittest.TestCase):
         self.assertEqual(result["description"], "Test description")
         self.assertEqual(result["type"], "complex")
         self.assertTrue(result["required"])
-        self.assertEqual(result["json_schema"], {"type": "string", "pattern": "^[a-z]+$"})
-        self.assertEqual(result["bson_schema"], {"bsonType": "string", "pattern": "^[a-z]+$"})
+        self.assertEqual(result["json_type"], {"type": "string", "pattern": "^[a-z]+$"})
+        self.assertEqual(result["bson_type"], {"bsonType": "string", "pattern": "^[a-z]+$"})
 
     def test_complex_type_to_json_schema(self):
         """Test ComplexType to_json_schema method"""
@@ -52,7 +52,7 @@ class TestComplexType(unittest.TestCase):
             "description": "Test description",
             "type": "complex",
             "required": True,
-            "json_schema": {"type": "string", "pattern": "^[a-z]+$"}
+            "json_type": {"type": "string", "pattern": "^[a-z]+$"}
         }
         prop = ComplexType(data)
         
@@ -72,7 +72,7 @@ class TestComplexType(unittest.TestCase):
             "description": "Test description",
             "type": "complex",
             "required": True,
-            "bson_schema": {"bsonType": "string", "pattern": "^[a-z]+$"}
+            "bson_type": {"bsonType": "string", "pattern": "^[a-z]+$"}
         }
         prop = ComplexType(data)
         

@@ -1,4 +1,5 @@
 root:
+  name: us_phone
   description: A US phone number
   type: simple
   schema:

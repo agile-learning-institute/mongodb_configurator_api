@@ -1,4 +1,5 @@
 root:
+  name: index
   description: A zero-based array index
   type: complex
   json_type:

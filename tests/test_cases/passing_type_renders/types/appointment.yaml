@@ -1,12 +1,13 @@
 root:
+  name: appointment
   description: A date/time range
   type: object
   properties:
-    - from:
+    - name: from
       description: Starting Date/Time
       type: date-time
       required: true
-    - to:
+    - name: to
       description: Ending Date/Time
       type: date-time
       required: true

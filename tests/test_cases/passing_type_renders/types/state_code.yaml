@@ -1,4 +1,5 @@
 root:
+  name: state_code
   description: A US state code
   type: simple
   schema:

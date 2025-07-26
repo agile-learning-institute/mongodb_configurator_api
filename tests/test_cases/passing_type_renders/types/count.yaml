@@ -1,4 +1,5 @@
 root:
+  name: count
   description: A positive integer value
   type: complex
   json_type:

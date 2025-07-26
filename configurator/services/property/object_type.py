@@ -5,7 +5,7 @@ from .property import Property
 class ObjectType(BaseProperty):
     def __init__(self, data: dict):
         super().__init__(data)
-        self.additional_properties = data.get("additionalProperties", False)
+        self.additional_properties = data.get("additional_properties", False)
         self.properties = []
         for property in data.get("properties", []):
             self.properties.append(Property(property))

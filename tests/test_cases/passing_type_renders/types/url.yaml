@@ -1,4 +1,5 @@
 root:
+  name: url
   description: A valid URL
   type: complex
   json_type:
