@@ -77,7 +77,7 @@ class Enumerators:
         try:
             config = Config.get_instance()
             lock_all_event = ConfiguratorEvent("ENU-04", "LOCK_ENUMERATIONS")
-            for file in FileIO.get_documents(config.ENUMERATORS_FOLDER):
+            for file in FileIO.get_documents(config.ENUMERATOR_FOLDER):
                 file_event = ConfiguratorEvent(f"ENU-{file.file_name}", "LOCK_ENUMERATION")
                 lock_all_event.append_events([file_event])
                 enumerator = Enumerators(file.file_name)
