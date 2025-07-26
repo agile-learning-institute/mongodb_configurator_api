@@ -32,7 +32,7 @@ class Enumerations:
     def get_enum_dict(self) -> Dict[str, Dict[str, str]]:
         the_dict = {}
         for value in self.values:
-            the_dict[value.get("name")] = value.get("description")
+            the_dict[value.get("value")] = value.get("description")
         return the_dict
 
     def get_enum_values(self, enum_name: str) -> List[str]:
