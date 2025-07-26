@@ -7,7 +7,7 @@ class OneOfType(BaseProperty):
         super().__init__(data)
         self.properties = []
         for property in data.get("properties", []):
-            self.one_of.append(Property(property))
+            self.properties.append(Property(property))
 
     def to_dict(self):
         the_dict = super().to_dict()

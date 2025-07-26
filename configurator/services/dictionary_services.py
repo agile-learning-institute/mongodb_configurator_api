@@ -17,7 +17,7 @@ class Dictionary:
             
         self.file_name = file_name
         self._locked = False        
-        self.root = Property(document)
+        self.root = Property(document.get("root", {}))
 
     def to_dict(self):
         result = {}
@@ -57,8 +57,8 @@ class Dictionary:
             return lock_all_event
         except ConfiguratorException as e:
             lock_all_event.append_events([e.event])
-            file_event.record_failure(f"ConfiguratorException locking dictionary {self.version_number}")
-            lock_all_event.record_failure(f"ConfiguratorException locking all dictionaries: {str(e)}")
+            file_event.record_failure("ConfiguratorException locking dictionary")
+            lock_all_event.record_failure("ConfiguratorException locking all dictionaries")
             raise ConfiguratorException("Cannot lock all dictionaries", lock_all_event)
         except Exception as e:
             file_event.record_failure(f"Unexpected error locking all dictionaries: {str(e)}")
