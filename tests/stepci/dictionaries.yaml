@@ -111,10 +111,62 @@ tests:
             jsonpath:
               status: SUCCESS
 
-      # Cleanup - DELETE the test dictionary (will fail when locked)
+      # Unlock - PUT to unlock the dictionary before deletion
+      - name: Unlock Test Dictionary (Cleanup)
+        http:
+          url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "file_name": "test_dict.yaml",
+              "_locked": false,
+              "root": {
+                "name": "test_dict",
+                "description": "Test dictionary for stepCI testing",
+                "type": "object",
+                "required": false,
+                "properties": [
+                  {
+                    "name": "name",
+                    "description": "Name field",
+                    "type": "simple",
+                    "required": false,
+                    "schema": {
+                      "type": "string"
+                    }
+                  },
+                  {
+                    "name": "email",
+                    "description": "Email field",
+                    "type": "simple",
+                    "required": false,
+                    "schema": {
+                      "type": "string",
+                      "format": "email"
+                    }
+                  },
+                  {
+                    "name": "phone",
+                    "description": "Phone field",
+                    "type": "simple",
+                    "required": false,
+                    "schema": {
+                      "type": "string",
+                      "format": "us_phone"
+                    }
+                  }
+                ]
+              }
+            }
+          check:
+            status: /200/
+
+      # Cleanup - DELETE the test dictionary
       - name: Delete Test Dictionary (Cleanup)
         http:
           url: http://${{env.host}}/api/dictionaries/test_dict.yaml/
           method: DELETE
           check:
-            status: /500/
+            status: /200/
