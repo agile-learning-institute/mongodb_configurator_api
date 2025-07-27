@@ -50,16 +50,13 @@ tests:
           check:
             status: /200/
             jsonpath:
-              file_name: test_data.json
-            schema:
-              created_at: 
-                type: string
-                format: date-time
-              updated_at:
-                type: string
-                format: date-time
-              size:
-                type: number
+              $[0]._id: "a00000000000000000000001"
+              $[0].name: "John Doe"
+              $[0].email: "john.doe@example.com"
+              $[0].status: "active"
+              $[1]._id: "a00000000000000000000002"
+              $[1].name: "Jane Smith"
+              $[1].status: "inactive"
                     
       # Read - GET the created test data
       - name: Get Test Data
@@ -69,11 +66,11 @@ tests:
           check:
             status: /200/
             jsonpath:
-              $[0]._id.$oid: "A00000000000000000000001"
+              $[0]._id: "a00000000000000000000001"
               $[0].name: "John Doe"
               $[0].email: "john.doe@example.com"
               $[0].status: "active"
-              $[1]._id.$oid: "A00000000000000000000002"
+              $[1]._id: "a00000000000000000000002"
               $[1].name: "Jane Smith"
               $[1].status: "inactive"
 
@@ -124,16 +121,12 @@ tests:
           check:
             status: /200/
             jsonpath:
-              file_name: test_data.json
-            schema:
-              created_at:
-                type: string
-                format: date-time
-              updated_at:
-                type: string
-                format: date-time
-              size:
-                type: number
+              $[0].name: "John Doe Updated"
+              $[0].email: "john.doe.updated@example.com"
+              $[0].metadata.new_field: "added value"
+              $[1].status: "active"
+              $[2].name: "Bob Wilson"
+              $[2].status: "pending"
 
       # Verify updated data
       - name: Verify Updated Test Data

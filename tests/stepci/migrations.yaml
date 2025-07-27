@@ -36,16 +36,8 @@ tests:
           check:
             status: /200/
             jsonpath:
-              file_name: test_migration.json
-            schema:
-              created_at: 
-                type: string
-                format: date-time
-              updated_at:
-                type: string
-                format: date-time
-              size:
-                type: number
+              $[0].$addFields.test_field: "test_value"
+              $[1].$out: "test_collection"
                     
       # Read - GET the created migration
       - name: Get Test Migration
@@ -79,16 +71,8 @@ tests:
           check:
             status: /200/
             jsonpath:
-              file_name: test_migration.json
-            schema:
-              created_at:
-                type: string
-                format: date-time
-              updated_at:
-                type: string
-                format: date-time
-              size:
-                type: number
+              $[0].$addFields.updated_field: "updated_value"
+              $[1].$out: "updated_collection"
 
       # List all migrations
       - name: List All Migrations
