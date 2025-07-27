@@ -1,8 +1,9 @@
-file_name: test_type.yaml
 _locked: true
+file_name: test_type.yaml
 root:
   description: Updated test type for stepCI testing
-  type: simple_primitive
+  name: test_type
   required: true
   schema:
     type: string
+  type: simple

@@ -1,12 +1,14 @@
+_locked: true
+file_name: count.yaml
 root:
-  name: count
-  description: A positive integer value
-  type: complex
-  json_type:
-    type: number
-    minimum: 1
-    multipleOf: 1
   bson_type:
     bsonType: int
     minimum: 1
-  required: false 
+  description: A positive integer value
+  json_type:
+    minimum: 1
+    multipleOf: 1
+    type: number
+  name: count
+  required: false
+  type: complex

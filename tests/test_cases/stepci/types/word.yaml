@@ -1,8 +1,11 @@
+_locked: true
+file_name: word.yaml
 root:
+  description: A String of text, 1 to 40 characters with no spaces, or special characters
+    like /t or /n
   name: word
-  description: A String of text, 1 to 40 characters with no spaces, or special characters like /t or /n
-  type: simple
-  schema:
-    type: string
-    pattern: ^[^\s]{1,40}$
   required: false
+  schema:
+    pattern: ^[^\s]{1,40}$
+    type: string
+  type: simple

@@ -1,35 +1,35 @@
+_locked: true
+description: A collection for testing
 file_name: sample.yaml
 title: Sample Collection
-description: A collection for testing
 versions:
-- version: 1.0.0.1
-  drop_indexes: []
+- _locked: false
   add_indexes:
-  - name: nameIndex
-    key:
+  - key:
       first_name: 1
       last_name: 1
+    name: nameIndex
     options:
       unique: true
-  - name: statusIndex
-    key:
+  - key:
       status: 1
+    name: statusIndex
     options:
       unique: false
+  drop_indexes: []
   migrations: []
   test_data: sample.1.0.0.1.json
-  _locked: false
-- version: 1.0.1.2
-  drop_indexes:
-  - nameIndex
+  version: 1.0.0.1
+- _locked: false
   add_indexes:
-  - name: fullNameIndex
-    key:
+  - key:
       full_name: 1
+    name: fullNameIndex
     options:
       unique: false
+  drop_indexes:
+  - nameIndex
   migrations:
   - first_last_to_full_name.json
   test_data: sample.1.0.1.2.json
-  _locked: false
-_locked: true
+  version: 1.0.1.2

@@ -1,8 +1,10 @@
+_locked: true
+file_name: us_phone.yaml
 root:
-  name: us_phone
   description: A US phone number
-  type: simple
+  name: us_phone
+  required: false
   schema:
-    type: string
     pattern: ^(\+1[0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$
-  required: false 
+    type: string
+  type: simple
