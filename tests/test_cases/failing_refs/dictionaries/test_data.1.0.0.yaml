@@ -1,9 +1,9 @@
 file_name: test_data.1.0.0.yaml
 _locked: false
 root:
-  description: A schema for invalid tests data
+  description: A schema for missing test data file
   type: object
   properties:
-    name:
-      description: The name of the person
-      type: word
+    - test:
+      description: Just a test property
+      type: object

@@ -1,41 +1,43 @@
 file_name: organization.1.0.0.yaml
 _locked: true
 root:
+  name: organization
   description: An organization in the system
   type: object
   required: false
   additional_properties: false
   properties:
-    _id:
+    - name: _id
       description: The unique identifier for the organization
       type: identity
       required: true
-    name:
+    - name: name
       description: The organization name
       type: sentence
       required: true
-    status:
+    - name: status
       description: The current status of the organization
       type: enum
       required: true
       enums: default_status
-    last_saved:
+    - name: last_saved
       description: When the organization document was last updated
       type: breadcrumb
       required: true
-    users:
+    - name: users
       description: Users associated with this organization
       type: array
       required: false
       items:
+        name: user_id
         description: A user identifier
         type: identity
         required: false
-    website:
+    - name: website
       description: Organization website
       type: url
       required: false
-    home_address:
+    - name: home_address
       description: Organization home address
       type: street_address
       required: false

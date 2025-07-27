@@ -104,7 +104,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
         }
         mock_enumeration = Mock()
         mock_enumeration.to_dict.return_value = test_data
-        mock_enumeration.save.return_value = mock_enumeration
+        mock_enumeration.save.return_value = {"saved": "data"}
         mock_enumerations_class.return_value = mock_enumeration
 
         # Act
@@ -113,8 +113,8 @@ class TestEnumeratorRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        self.assertEqual(response_data, test_data)
-        mock_enumerations_class.assert_called_once_with(data=test_data, file_name="test")
+        self.assertEqual(response_data, {"saved": "data"})
+        mock_enumerations_class.assert_called_once_with("test", test_data)
 
     @patch('configurator.routes.enumerator_routes.Enumerations')
     def test_put_enumeration_exception(self, mock_enumerations_class):
@@ -136,8 +136,8 @@ class TestEnumeratorRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
-    @patch('configurator.routes.enumerator_routes.Enumerators')
-    def test_lock_enumerations_success(self, mock_enumerators_class):
+    @patch('configurator.routes.enumerator_routes.Enumerations')
+    def test_lock_enumerations_success(self, mock_enumerations_class):
         """Test successful PATCH /api/enumerations - Lock all enumerations."""
         # Arrange
         mock_event = Mock()
@@ -148,9 +148,7 @@ class TestEnumeratorRoutes(unittest.TestCase):
             "data": {},
             "events": []
         }
-        mock_enumerators = Mock()
-        mock_enumerators.lock_all.return_value = mock_event
-        mock_enumerators_class.return_value = mock_enumerators
+        mock_enumerations_class.lock_all.return_value = mock_event
 
         # Act
         response = self.client.patch('/api/enumerations/')
@@ -162,14 +160,14 @@ class TestEnumeratorRoutes(unittest.TestCase):
         self.assertIn("type", response_data)
         self.assertIn("status", response_data)
         self.assertEqual(response_data["status"], "SUCCESS")
-        mock_enumerators.lock_all.assert_called_once()
+        mock_enumerations_class.lock_all.assert_called_once()
 
-    @patch('configurator.routes.enumerator_routes.Enumerators')
-    def test_lock_enumerations_exception(self, mock_enumerators_class):
-        """Test PATCH /api/enumerations when Enumerators raises exception."""
+    @patch('configurator.routes.enumerator_routes.Enumerations')
+    def test_lock_enumerations_exception(self, mock_enumerations_class):
+        """Test PATCH /api/enumerations when Enumerations raises exception."""
         # Arrange
         event = ConfiguratorEvent("ENU-04", "LOCK_ENUMERATIONS")
-        mock_enumerators_class.side_effect = ConfiguratorException("Lock error", event)
+        mock_enumerations_class.lock_all.side_effect = ConfiguratorException("Lock error", event)
 
         # Act
         response = self.client.patch('/api/enumerations/')

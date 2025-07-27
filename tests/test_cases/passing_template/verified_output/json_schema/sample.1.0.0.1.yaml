@@ -1,5 +1,6 @@
 description: A simple collection for testing
 type: object
+additionalProperties: false
 properties:
   _id:
     description: The unique identifier for the media
@@ -8,18 +9,13 @@ properties:
   first_name:
     description: The name of the document
     type: string
-    pattern: "^\\S{1,40}$"
+    pattern: "^[^\\s]{1,40}$"
   last_name:
     description: The last name of the document
     type: string
-    pattern: "^\\S{1,40}$"
+    pattern: "^[^\\s]{1,40}$"
   status:
     description: The current status of the document
     type: string
-    enum:
-      - active
-      - archived
-required:
-  - _id
-  - status
-additionalProperties: false 
+    enum: ['active', 'archived']
+required: ['_id', 'status'] 

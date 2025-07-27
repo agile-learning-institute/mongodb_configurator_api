@@ -1,5 +1,6 @@
 description: A media item in the system
 type: object
+additionalProperties: false
 properties:
   _id:
     description: The unique identifier for the media
@@ -8,49 +9,47 @@ properties:
   title:
     description: The title of the media
     type: string
-    pattern: ^[^\t\n\r]{0,255}$
+    pattern: ^[^\t\n]{0,255}$
   type:
     description: The type of media
     type: string
     enum:
-    - movie
-    - tv_show
-    - documentary
-    - short
-    - image
     - audio
+    - documentary
+    - image
+    - movie
+    - short
+    - tv_show
   status:
     description: The current status of the media
     type: string
     enum:
-    - published
+    - archived
     - draft
     - processing
-    - archived
+    - published
     - scheduled
   last_saved:
     description: When the media was last updated
     type: object
+    additionalProperties: false
     properties:
       from_ip:
-        description: An IPv4 or IPv6 address
+        description: Http Request remote IP address
         type: string
         format: ip
       by_user:
-        description: A String of text, 1 to 40 characters with no spaces, or special
-          characters like /t or /n
+        description: ID Of User
         type: string
-        pattern: ^[^ \t\n\r]{1,40}$
+        pattern: ^[^\s]{1,40}$
       at_time:
-        description: An ISO 8601 formatted date-time string
+        description: The date-time when last updated
         type: string
         format: date-time
       correlation_id:
-        description: A String of text, 1 to 40 characters with no spaces, or special
-          characters like /t or /n
+        description: The logging correlation ID of the update transaction
         type: string
-        pattern: ^[^ \t\n\r]{1,40}$
-    additionalProperties: false
+        pattern: ^[^\s]{1,40}$
     required:
     - from_ip
     - by_user
@@ -63,19 +62,21 @@ properties:
       type: string
       enum:
       - action
-      - sci_fi
+      - art
+      - comedy
       - documentary
       - drama
-      - comedy
-      - thriller
-      - art
-      - painting
       - music
+      - painting
+      - sci_fi
       - song
+      - thriller
   metadata:
+    description: Media meta data - one of several types (video, audio, image)
     oneOf:
     - description: Video content structure
       type: object
+      additionalProperties: false
       properties:
         duration:
           description: Video duration in seconds
@@ -87,23 +88,23 @@ properties:
           type: string
           enum:
           - bluray
-          - dvd
           - digital
-          - streaming
+          - dvd
           - jpg
+          - streaming
         quality:
           description: Video quality
           type: string
           enum:
-          - hd
-          - uhd
-          - sd
           - fhd
+          - hd
+          - sd
+          - uhd
       required:
       - format
-      additionalProperties: false
     - description: Audio content structure
       type: object
+      additionalProperties: false
       properties:
         audio_url:
           description: Audio file URL
@@ -118,16 +119,16 @@ properties:
           description: Audio format
           type: string
           enum:
-          - mp3
-          - wav
           - aac
-          - ogg
           - flac
+          - mp3
+          - ogg
+          - wav
       required:
       - audio_url
-      additionalProperties: false
     - description: Image content structure
       type: object
+      additionalProperties: false
       properties:
         image_url:
           description: Image URL
@@ -147,17 +148,15 @@ properties:
           description: Image format
           type: string
           enum:
+          - gif
           - jpg
           - png
-          - gif
-          - webp
           - svg
+          - webp
       required:
       - image_url
-      additionalProperties: false
 required:
 - _id
 - title
 - status
 - last_saved
-additionalProperties: false

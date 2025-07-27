@@ -1,5 +1,6 @@
 description: A simple collection for testing
 type: object
+additionalProperties: false
 properties:
   _id:
     description: The unique identifier for the media
@@ -8,16 +9,9 @@ properties:
   full_name:
     description: The name of the document
     type: string
-    pattern: "^[^\\t\\n\\r]{0,255}$"
+    pattern: "^[^\\t\\n]{0,255}$"
   status:
     description: The current status of the document
     type: string
-    enum:
-      - draft
-      - active
-      - archived
-required:
-  - _id
-  - full_name
-  - status
-additionalProperties: false 
+    enum: ['active', 'archived', 'draft']
+required: ['_id', 'full_name', 'status'] 

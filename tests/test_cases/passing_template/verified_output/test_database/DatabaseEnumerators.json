@@ -2,7 +2,15 @@
   {
     "_id": "ignore",
     "version": 0,
-    "enumerators": []
+    "enumerators": [
+      {
+        "name": "default_status",
+        "values": [
+          {"value": "active", "description": "Not Deleted"},
+          {"value": "archived", "description": "Soft Delete Indicator"}
+        ]
+      }
+    ]
   },
   {
     "_id": "ignore",

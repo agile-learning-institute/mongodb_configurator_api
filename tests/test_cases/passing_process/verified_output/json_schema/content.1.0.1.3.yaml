@@ -1,5 +1,6 @@
 description: A content collection for testing
 type: object
+additionalProperties: false
 properties:
   _id:
     description: The unique identifier for content
@@ -8,26 +9,26 @@ properties:
   title:
     description: Content title
     type: string
-    pattern: ^[^\t\n\r]{0,255}$
+    pattern: ^[^\t\n]{0,255}$
   subtitle:
     description: Content subtitle
     type: string
-    pattern: ^[^\t\n\r]{0,255}$
+    pattern: ^[^\t\n]{0,255}$
   content_type:
     description: Type of content (article, video, podcast, etc.)
     type: string
     enum:
     - article
-    - video
     - podcast
+    - video
   status:
     description: Content status
     type: string
     enum:
     - active
     - archived
-    - published
     - draft
+    - published
     - scheduled
   author_id:
     description: The unique identifier for the author
@@ -36,10 +37,11 @@ properties:
   full_title:
     description: Full title including subtitle
     type: string
-    pattern: ^[^\t\n\r]{0,255}$
+    pattern: ^[^\t\n]{0,255}$
   metadata:
     description: Additional metadata for the content
     type: object
+    additionalProperties: false
     properties:
       created_at:
         description: When the content was created
@@ -59,66 +61,63 @@ properties:
         items:
           description: A content category
           type: object
+          additionalProperties: false
           properties:
             name:
               description: Category name
               type: string
-              pattern: ^[^ \t\n\r]{1,40}$
+              pattern: ^[^\s]{1,40}$
             type:
               description: Category type
               type: string
               enum:
-              - work
+              - education
+              - news
               - personal
               - project
               - reference
-              - education
               - technology
-              - news
+              - work
             tags:
               description: Category tags
               type: array
               items:
                 type: string
                 enum:
-                - urgent
-                - important
-                - normal
-                - low
-                - completed
-                - in_progress
                 - blocked
+                - completed
+                - important
+                - in_progress
+                - low
+                - normal
                 - review
+                - urgent
           required:
           - name
           - type
-          additionalProperties: false
     required:
     - created_at
-    additionalProperties: false
   last_saved:
     description: Last saved breadcrumb
     type: object
+    additionalProperties: false
     properties:
       from_ip:
-        description: An IPv4 or IPv6 address
+        description: Http Request remote IP address
         type: string
         format: ip
       by_user:
-        description: A String of text, 1 to 40 characters with no spaces, or special
-          characters like /t or /n
+        description: ID Of User
         type: string
-        pattern: ^[^ \t\n\r]{1,40}$
+        pattern: ^[^\s]{1,40}$
       at_time:
-        description: An ISO 8601 formatted date-time string
+        description: The date-time when last updated
         type: string
         format: date-time
       correlation_id:
-        description: A String of text, 1 to 40 characters with no spaces, or special
-          characters like /t or /n
+        description: The logging correlation ID of the update transaction
         type: string
-        pattern: ^[^ \t\n\r]{1,40}$
-    additionalProperties: false
+        pattern: ^[^\s]{1,40}$
     required:
     - from_ip
     - by_user
@@ -131,4 +130,3 @@ required:
 - status
 - author_id
 - last_saved
-additionalProperties: false

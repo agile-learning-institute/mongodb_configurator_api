@@ -1,7 +1,8 @@
 from flask import Blueprint, request, jsonify
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
-from configurator.services.enumerator_service import Enumerators, Enumerations
+
+from configurator.services.enumeration_service import Enumerations
 from configurator.utils.route_decorators import event_route
 from configurator.utils.file_io import FileIO
 import logging
@@ -22,11 +23,9 @@ def create_enumerator_routes():
     @enumerator_routes.route('/', methods=['PATCH'])
     @event_route("ENU-04", "LOCK_ENUMERATIONS", "locking all enumerations")
     def lock_enumerations():
-        enumerators = Enumerators()
-        event = enumerators.lock_all()
+        # Lock all enumeration files
+        event = Enumerations.lock_all()
         return jsonify(event.to_dict())
-    
-
     
     # GET /api/enumerations/<file_name> - Get specific enumeration file
     @enumerator_routes.route('/<file_name>/', methods=['GET'])
@@ -39,18 +38,16 @@ def create_enumerator_routes():
     @enumerator_routes.route('/<file_name>/', methods=['PUT'])
     @event_route("ENU-03", "PUT_ENUMERATION", "updating enumeration")
     def put_enumeration(file_name):
-        data = request.get_json(force=True)
-        enumerations = Enumerations(data=data, file_name=file_name)
-        file_obj = enumerations.save()
-        return jsonify(file_obj.to_dict())
+        enumerations = Enumerations(file_name, request.json)
+        result = enumerations.save()
+        return jsonify(result)
     
     # DELETE /api/enumerations/<file_name> - Delete specific enumeration file
     @enumerator_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("ENU-05", "DELETE_ENUMERATION", "deleting enumeration")
     def delete_enumeration(file_name):
-        enumerators = Enumerators()
-        event = enumerators.delete(file_name)
-        event.record_success()
+        enumeration = Enumerations(file_name)
+        event = enumeration.delete()
         return jsonify(event.to_dict())
 
     logger.info("Enumerator Flask Routes Registered")

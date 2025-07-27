@@ -1,83 +1,86 @@
 file_name: content.1.0.1.yaml
 _locked: true
 root:
+  name: content
   description: A content collection for testing
   type: object
   required: false
   properties:
-    _id:
+    - name: _id
       description: The unique identifier for content
       type: identity
       required: true
-    title:
+    - name: title
       description: Content title
       type: sentence
       required: true
-    subtitle:
+    - name: subtitle
       description: Content subtitle
       type: sentence
       required: false
-    content_type:
+    - name: content_type
       description: Type of content (article, video, podcast, etc.)
       type: enum
       required: true
       enums: content_type
-    status:
+    - name: status
       description: Content status
       type: enum
       required: true
       enums: default_status
-    author_id:
+    - name: author_id
       description: The unique identifier for the author
       type: identity
       required: true
-    full_title:
+    - name: full_title
       description: Full title including subtitle
       type: sentence
       required: false
-    metadata:
+    - name: metadata
       description: Additional metadata for the content
       type: object
       required: false
+      name: metadata
       properties:
-        created_at:
+        - name: created_at
           description: When the content was created
           type: date-time
           required: true
-        updated_at:
+        - name: updated_at
           description: When the content was last updated
           type: date-time
           required: false
-        published_at:
+        - name: published_at
           description: When the content was published
           type: date-time
           required: false
-        categories:
+        - name: categories
           description: Content categories
           type: array
           required: false
           items:
+            name: category
             description: A content category
             type: object
             required: false
             properties:
-              name:
+              - name: name
                 description: Category name
                 type: word
                 required: true
-              type:
+              - name: type
                 description: Category type
                 type: enum
                 required: true
                 enums: category_type
-              tags:
+              - name: tags
                 description: Category tags
                 type: enum_array
                 required: false
                 enums: category_tags
             additional_properties: false
       additional_properties: false
-    last_saved:
+    - name: last_saved
       description: Last saved breadcrumb
       type: breadcrumb
       required: true

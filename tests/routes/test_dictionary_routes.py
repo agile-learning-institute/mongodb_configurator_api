@@ -93,8 +93,7 @@ class TestDictionaryRoutes(unittest.TestCase):
         # Arrange
         test_data = {"name": "test_dict", "version": "1.0.0"}
         mock_dictionary = Mock()
-        mock_saved_file = Mock()
-        mock_saved_file.to_dict.return_value = {"name": "test_dict.yaml", "path": "/path/to/test_dict.yaml"}
+        mock_saved_file = {"name": "test_dict.yaml", "path": "/path/to/test_dict.yaml"}
         mock_dictionary.save.return_value = mock_saved_file
         mock_dictionary_class.return_value = mock_dictionary
 

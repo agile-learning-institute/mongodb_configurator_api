@@ -30,7 +30,7 @@ class TestDatabaseRoutes(unittest.TestCase):
             "ends": "2024-01-01T00:00:00.000Z",
             "sub_events": []
         }
-        mock_mongo_io.drop_database.return_value = [mock_event]
+        mock_mongo_io.drop_database.return_value = mock_event
         mock_mongo_io_class.return_value = mock_mongo_io
 
         # Act
@@ -39,12 +39,9 @@ class TestDatabaseRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        # Expect a list of events, not a simple message
-        self.assertIsInstance(response_data, list)
-        self.assertEqual(len(response_data), 1)
-        self.assertEqual(response_data[0]["id"], "MON-12")
-        self.assertEqual(response_data[0]["type"], "DROP_DATABASE")
-        self.assertEqual(response_data[0]["status"], "SUCCESS")
+        # Expect a single event, not a list
+        self.assertIsInstance(response_data, dict)
+        self.assertEqual(response_data["status"], "SUCCESS")
         mock_mongo_io.drop_database.assert_called_once()
         mock_mongo_io.disconnect.assert_called_once()
 

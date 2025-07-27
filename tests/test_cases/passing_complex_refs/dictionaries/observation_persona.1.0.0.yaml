@@ -1,25 +1,26 @@
 file_name: observation_persona.1.0.0.yaml
 _locked: false
 root:
+  name: observation_persona
   description: A persona observation for design thinking exercises.
   type: object
   properties:
-    name:
+    - name: name
       description: The name of the persona
       type: word
       required: true
-    age:
+    - name: age
       description: The age of the persona
       type: count
-    occupation:
+    - name: occupation
       description: The occupation of the persona
       type: sentence
-    goals:
+    - name: goals
       description: The goals of the persona
       type: markdown
-    frustrations:
+    - name: frustrations
       description: The frustrations of the persona
       type: markdown
-    needs:
+    - name: needs
       description: The needs of the persona
       type: markdown 

@@ -6,6 +6,7 @@ import os
 import json
 import yaml
 from bson import json_util
+import sys
 
 class TestTypeRender(unittest.TestCase):
     """Test Type rendering of input files"""
@@ -35,14 +36,19 @@ class TestTypeRender(unittest.TestCase):
         # Act & Assert
         for type_file in type_files:
             type_name = type_file.file_name.replace('.yaml', '')
+            print(f"Processing type file: {type_file.file_name}")
             type_service = Type(type_file.file_name)
             
+            # Create empty enumerations object
+            from configurator.services.enumeration_service import Enumerations
+            empty_enumerations = Enumerations(file_name="empty.yaml", document={"name": "empty", "values": []})
+            
             # Render JSON schema
-            json_schema = type_service.get_json_schema()
+            json_schema = type_service.to_json_schema(empty_enumerations)
             self.assertIsNotNone(json_schema)
             
             # Render BSON schema
-            bson_schema = type_service.get_bson_schema()
+            bson_schema = type_service.to_bson_schema(empty_enumerations)
             self.assertIsNotNone(bson_schema)
 
             # Compare against verified output

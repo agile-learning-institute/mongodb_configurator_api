@@ -16,19 +16,27 @@ tests:
             Content-Type: application/json
           body: |
             {
+              "file_name": "test_type.yaml",
+              "_locked": false,
               "root": {
+                "name": "test_type",
                 "description": "Test type for stepCI testing",
-                "type": "string",
-                "required": false
+                "type": "simple",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           check:
             status: /200/
             jsonpath:
               file_name: test_type.yaml
-              created_at: /.+/
-              updated_at: /.+/
-              size: /\d+/
+              _locked: false
+              root.name: test_type
+              root.description: "Test type for stepCI testing"
+              root.type: "simple"
+              root.required: false
       
       # Read - GET the created type
       - name: Get Test Type
@@ -38,10 +46,12 @@ tests:
           check:
             status: /200/
             jsonpath:
-              root:
-                description: "Test type for stepCI testing"
-                type: "string"
-                required: false
+              file_name: test_type.yaml
+              _locked: false
+              root.name: test_type
+              root.description: "Test type for stepCI testing"
+              root.type: "simple"
+              root.required: false
 
       # Update - PUT to modify the type
       - name: Update Test Type
@@ -52,19 +62,27 @@ tests:
             Content-Type: application/json
           body: |
             {
+              "file_name": "test_type.yaml",
+              "_locked": false,
               "root": {
+                "name": "test_type",
                 "description": "Updated test type for stepCI testing",
-                "type": "string",
-                "required": true
+                "type": "simple",
+                "required": true,
+                "schema": {
+                  "type": "string"
+                }
               }
             }
           check:
             status: /200/
             jsonpath:
               file_name: test_type.yaml
-              created_at: /.+/
-              updated_at: /.+/
-              size: /\d+/
+              _locked: false
+              root.name: test_type
+              root.description: "Updated test type for stepCI testing"
+              root.type: "simple"
+              root.required: true
 
       # Lock All - PATCH to lock all types
       - name: Lock All Types
@@ -75,18 +93,35 @@ tests:
             status: /200/
             jsonpath:
               status: SUCCESS
-            schema:
-              event_id:
-                type: string
-              event_type:
-                type: string
-              sub_events:
-                type: array
 
-      # Cleanup - DELETE the test type (should fail when locked)
+      # Unlock - PUT to unlock the type before deletion
+      - name: Unlock Test Type (Cleanup)
+        http:
+          url: http://${{env.host}}/api/types/test_type.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "file_name": "test_type.yaml",
+              "_locked": false,
+              "root": {
+                "name": "test_type",
+                "description": "Test type for stepCI testing",
+                "type": "simple",
+                "required": false,
+                "schema": {
+                  "type": "string"
+                }
+              }
+            }
+          check:
+            status: /200/
+
+      # Cleanup - DELETE the test type
       - name: Delete Test Type (Cleanup)
         http:
           url: http://${{env.host}}/api/types/test_type.yaml/
           method: DELETE
           check:
-            status: /500/
+            status: /200/

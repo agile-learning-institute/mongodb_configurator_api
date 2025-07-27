@@ -1,99 +1,102 @@
 file_name: notification.1.0.1.yaml
 _locked: true
 root:
+  name: notification
   description: A notification collection 
   type: object
   required: false
   additional_properties: false
   properties:
-    _id:
+    - name: _id
       description: The unique identifier for notification
       type: identity
       required: true
-    user_id:
+    - name: user_id
       description: The unique identifier for the user
       type: identity
       required: true
-    title:
+    - name: title
       description: Notification title
       type: sentence
       required: true
-    message:
+    - name: message
       description: Notification message
       type: sentence
       required: true
-    notification_type:
+    - name: notification_type
       description: Type of notification
       type: enum
       required: true
       enums: notification_type
-    status:
+    - name: status
       description: Notification status
       type: enum
       required: true
       enums: default_status
-    priority:
+    - name: priority
       description: Notification priority level
       type: enum
       required: true
       enums: priority_level
-    tags:
+    - name: tags
       description: Notification tags for categorization
       type: enum_array
       required: false
       enums: notification_tags
-    categories:
+    - name: categories
       description: Notification categories
       type: enum_array
       required: false
       enums: category_type
-    channels:
+    - name: channels
       description: Delivery channels for this notification
       type: enum_array
       required: true
       enums: delivery_channel
-    metadata:
+    - name: metadata
       description: Additional notification metadata
       type: object
       required: false
       additional_properties: false
+      name: metadata
       properties:
-        created_at:
+        - name: created_at
           description: When the notification was created
           type: date-time
           required: true
-        sent_at:
+        - name: sent_at
           description: When the notification was sent
           type: date-time
           required: false
-        read_at:
+        - name: read_at
           description: When the notification was read
           type: date-time
           required: false
-        expires_at:
+        - name: expires_at
           description: When the notification expires
           type: date-time
           required: false
-        source:
+        - name: source
           description: Source of the notification
           type: object
           required: false
           additional_properties: false
+          name: source
           properties:
-            collection:
+            - name: collection
               description: Source collection name
               type: word
               required: true
-            document_id:
+            - name: document_id
               description: Source document ID
               type: identifier
               required: true
-            action:
+            - name: action
               description: Action that triggered the notification
               type: enum
               required: false
               enums: notification_action
-    last_saved:
+    - name: last_saved
       description: Last saved breadcrumb
       type: breadcrumb
       required: true

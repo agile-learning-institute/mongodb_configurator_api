@@ -1,9 +1,6 @@
 file_name: test_migrations.1.0.0.yaml
 _locked: false
 root:
-  description: A schema for invalid tests data
+  description: A schema for missing migration file
   type: object
-  properties:
-    name:
-      description: The name of the person
-      type: word
+  

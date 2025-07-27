@@ -26,8 +26,6 @@ def create_dictionary_routes():
         result = Dictionary.lock_all()
         return jsonify(result.to_dict())
     
-
-    
     # GET /api/dictionaries/<file_name> - Return a dictionary file
     @dictionary_routes.route('/<file_name>/', methods=['GET'])
     @event_route("DIC-02", "GET_DICTIONARY", "getting dictionary")
@@ -40,17 +38,15 @@ def create_dictionary_routes():
     @event_route("DIC-03", "PUT_DICTIONARY", "updating dictionary")
     def update_dictionary(file_name):
         dictionary = Dictionary(file_name, request.json)
-        file_obj = dictionary.save()
-        return jsonify(file_obj.to_dict())
+        result = dictionary.save()
+        return jsonify(result)
     
     @dictionary_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("DIC-05", "DELETE_DICTIONARY", "deleting dictionary")
     def delete_dictionary(file_name):
         dictionary = Dictionary(file_name)
-        deleted = dictionary.delete()
-        return jsonify(deleted.to_dict())
-    
-
+        event = dictionary.delete()
+        return jsonify(event.to_dict())
     
     logger.info("dictionary Flask Routes Registered")
     return dictionary_routes

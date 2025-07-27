@@ -1,11 +1,8 @@
 root:
-  file_name: us_phone.yaml
-  _locked: true
+  name: us_phone
   description: A US phone number
-  type: complex_primitive
-  json_type:
+  type: simple
+  schema:
     type: string
     pattern: ^(\+1[0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$
-  bson_type:
-    bsonType: string
-    pattern: ^(\+1[0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$
+  required: false 

@@ -93,8 +93,7 @@ class TestTypeRoutes(unittest.TestCase):
         # Arrange
         test_data = {"name": "test_type", "version": "1.0.0"}
         mock_type = Mock()
-        mock_saved_file = Mock()
-        mock_saved_file.to_dict.return_value = {"name": "test_type.yaml", "path": "/path/to/test_type.yaml"}
+        mock_saved_file = {"name": "test_type.yaml", "path": "/path/to/test_type.yaml"}
         mock_type.save.return_value = mock_saved_file
         mock_type_class.return_value = mock_type
 

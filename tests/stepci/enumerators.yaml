@@ -16,6 +16,8 @@ tests:
             Content-Type: application/json
           body: |
             {
+              "file_name": "enumerations.0.yaml",
+              "_locked": false,
               "version": 0,
               "enumerators": []
             }
@@ -23,9 +25,9 @@ tests:
             status: /200/
             jsonpath:
               file_name: enumerations.0.yaml
-              created_at: /.+/
-              updated_at: /.+/
-              size: /\d+/
+              _locked: false
+              version: 0
+              enumerators: []
 
       - name: Put Enumerations 1
         http:
@@ -35,6 +37,8 @@ tests:
             Content-Type: application/json
           body: |
             {
+              "file_name": "enumerations.1.yaml",
+              "_locked": false,
               "version": 1,
               "enumerators": [
                 {
@@ -56,9 +60,14 @@ tests:
             status: /200/
             jsonpath:
               file_name: enumerations.1.yaml
-              created_at: /.+/
-              updated_at: /.+/
-              size: /\d+/
+              _locked: false
+              version: 1
+              enumerators[0].name: default_status
+              enumerators[0].values[0].value: active
+              enumerators[0].values[0].description: Not Deleted
+              enumerators[1].name: test_enum
+              enumerators[1].values[0].value: foo
+              enumerators[1].values[0].description: bar
 
       - name: Put Enumerations 2
         http:
@@ -68,6 +77,8 @@ tests:
             Content-Type: application/json
           body: |
             {
+              "file_name": "enumerations.2.yaml",
+              "_locked": false,
               "version": 2,
               "enumerators": []
             }
@@ -75,9 +86,9 @@ tests:
             status: /200/
             jsonpath:
               file_name: enumerations.2.yaml
-              created_at: /.+/
-              updated_at: /.+/
-              size: /\d+/
+              _locked: false
+              version: 2
+              enumerators: []
 
       # Verify the PUT worked by getting individual files
       - name: Get Enumerations 1 After Put
@@ -87,12 +98,15 @@ tests:
           check:
             status: /200/
             jsonpath:
-              enumerators[1].name: test_enum
-              enumerators[1].values[0].value: foo
-              enumerators[1].values[0].description: bar
+              file_name: enumerations.1.yaml
+              _locked: false
+              version: 1
               enumerators[0].name: default_status
               enumerators[0].values[0].value: active
               enumerators[0].values[0].description: Not Deleted
+              enumerators[1].name: test_enum
+              enumerators[1].values[0].value: foo
+              enumerators[1].values[0].description: bar
 
       # Restore to original state
       - name: Restore Original Enumerations 1
@@ -103,6 +117,8 @@ tests:
             Content-Type: application/json
           body: |
             {
+              "file_name": "enumerations.1.yaml",
+              "_locked": false,
               "version": 1,
               "enumerators": [
                 {
@@ -124,6 +140,5 @@ tests:
             status: /200/
             jsonpath:
               file_name: enumerations.1.yaml
-              created_at: /.+/
-              updated_at: /.+/
-              size: /\d+/
+              _locked: false
+              version: 1

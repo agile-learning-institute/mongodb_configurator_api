@@ -27,7 +27,7 @@ COPY tests/test_cases/passing_template /playground
 RUN pipenv install --deploy --system
 
 # Create build timestamp
-RUN echo $(date +'%Y%m%d-%H%M%S') > /opt/mongo_configurator/BUILT_AT
+RUN echo $(date +'%Y%m%d-%H%M%S') > /opt/mongo_configurator/API_BUILT_AT
 
 # Install Gunicorn for production
 RUN pip install gunicorn

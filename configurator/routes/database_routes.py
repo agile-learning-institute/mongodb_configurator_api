@@ -16,9 +16,9 @@ def create_database_routes():
     @event_route("DB-01", "DROP_DATABASE", "dropping database")
     def drop_database():
         mongo_io = MongoIO(config.MONGO_CONNECTION_STRING, config.MONGO_DB_NAME)
-        events = mongo_io.drop_database()
+        event = mongo_io.drop_database()
         mongo_io.disconnect()
-        return jsonify([event.to_dict() for event in events])
+        return jsonify(event.to_dict())
     
     logger.info("database Flask Routes Registered")
     return database_routes

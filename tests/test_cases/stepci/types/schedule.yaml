@@ -1,0 +1,12 @@
+_locked: true
+file_name: schedule.yaml
+root:
+  description: A list of appointments
+  items:
+    description: An appointment
+    name: appointment
+    required: false
+    type: appointment
+  name: schedule
+  required: false
+  type: array

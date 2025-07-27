@@ -6,19 +6,19 @@ root:
   required: false
   additional_properties: false
   properties:
-    _id:
+    - name: _id
       description: The unique identifier for the media
       type: identity
       required: true
-    first_name:
+    - name: first_name
       description: First Name
       type: word
       required: false
-    last_name:
+    - name: last_name
       description: Family Name
       type: word
       required: false
-    status:
+    - name: status
       description: The current status of the document
       type: enum
       required: true

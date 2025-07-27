@@ -1,0 +1,11 @@
+_locked: true
+file_name: markdown.yaml
+root:
+  description: A String of text, at least 1 and no more than 4k characters. May contain
+    markdown, newlines, and tabs.
+  name: markdown
+  required: false
+  schema:
+    maxLength: 4096
+    type: string
+  type: simple

@@ -1,96 +1,101 @@
 file_name: media.1.0.0.yaml
 _locked: true
 root:
+  name: media
   description: A media item in the system
   type: object
   required: false
   additional_properties: false
   properties:
-    _id:
+    - name: _id
       description: The unique identifier for the media
       type: identity
       required: true
-    title:
+    - name: title
       description: The title of the media
       type: sentence
       required: true
-    type:
+    - name: type
       description: The type of media
       type: enum
       required: false
       enums: media_type
-    status:
+    - name: status
       description: The current status of the media
       type: enum
       required: true
       enums: media_status
-    last_saved:
+    - name: last_saved
       description: When the media was last updated
       type: breadcrumb
       required: true
-    tags:
+    - name: tags
       description: Tags associated with the media
       type: enum_array
       required: false
       enums: media_tags
-    metadata:
+    - name: metadata
       description: Media meta data - one of several types (video, audio, image)
-      one_of:
-        - description: Video content structure
+      type: one_of
+      properties:
+        - name: video
+          description: Video content structure
           type: object
           required: false
           additional_properties: false
           properties:
-            duration:
+            - name: duration
               description: Video duration in seconds
               type: count
               required: false
-            format:
+            - name: format
               description: Video format
               type: enum
               required: true
               enums: media_format
-            quality:
+            - name: quality
               description: Video quality
               type: enum
               required: false
               enums: media_quality
-        - description: Audio content structure
+        - name: audio
+          description: Audio content structure
           type: object
           required: false
           additional_properties: false
           properties:
-            audio_url:
+            - name: audio_url
               description: Audio file URL
               type: url
               required: true
-            duration:
+            - name: duration
               description: Audio duration in seconds
               type: count
               required: false
-            format:
+            - name: format
               description: Audio format
               type: enum
               required: false
               enums: audio_format
-        - description: Image content structure
+        - name: image
+          description: Image content structure
           type: object
           required: false
           additional_properties: false
           properties:
-            image_url:
+            - name: image_url
               description: Image URL
               type: url
               required: true
-            width:
+            - name: width
               description: Image width in pixels
               type: count
               required: false
-            height:
+            - name: height
               description: Image height in pixels
               type: count
               required: false
-            format:
+            - name: format
               description: Image format
               type: enum
               required: false

@@ -1,8 +1,7 @@
-file_name: identifier.yaml
-_locked: true
 root:
+  name: identifier
   description: A unique identifier for a document
-  type: complex_primitive
+  type: complex
   json_type:
     type: string
     pattern: ^[0-9a-fA-F]{24}$

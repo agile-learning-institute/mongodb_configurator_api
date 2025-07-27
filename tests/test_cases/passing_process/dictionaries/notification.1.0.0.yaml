@@ -1,32 +1,33 @@
 file_name: notification.1.0.0.yaml
 _locked: true
 root:
+  name: notification
   description: A simple notification collection for testing
   type: object
   required: false
   properties:
-    _id:
+    - name: _id
       description: The unique identifier for notification
       type: identity
       required: true
-    user_id:
+    - name: user_id
       description: The unique identifier for the user
       type: identity
       required: true
-    title:
+    - name: title
       description: Notification title
       type: sentence
       required: true
-    message:
+    - name: message
       description: Notification message
       type: sentence
       required: true
-    status:
+    - name: status
       description: Notification status
       type: enum
       required: true
       enums: default_status
-    last_saved:
+    - name: last_saved
       description: Last saved breadcrumb
       type: breadcrumb
       required: true

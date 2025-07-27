@@ -1,5 +1,3 @@
-# docker-compose.yaml for stage0_mongodb_api testing
-
 services:
   ##################################
   # MongoDB Backing Service
@@ -63,7 +61,7 @@ services:
       - configurator
 
 ##################################
-# MongoDB configuration Service - Sets Input to /playground
+# MongoDB Configurator Playground - Uses container /playground
 ##################################
   playground_api:
     image: ghcr.io/agile-learning-institute/mongodb_configurator_api:latest

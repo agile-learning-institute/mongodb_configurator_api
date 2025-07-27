@@ -1,15 +1,15 @@
 description: A date/time range
 type: object
+additionalProperties: false
 properties:
   from:
-    description: An ISO 8601 formatted date-time string
+    description: Starting Date/Time
     type: string
     format: date-time
   to:
-    description: An ISO 8601 formatted date-time string
+    description: Ending Date/Time
     type: string
     format: date-time
-additionalProperties: false
 required:
 - from
 - to

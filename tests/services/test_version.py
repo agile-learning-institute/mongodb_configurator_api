@@ -27,7 +27,7 @@ class TestVersion(unittest.TestCase):
             "_locked": True
         }
         
-        version = Version("test_collection", version_data, self.mock_config)
+        version = Version("test_collection", version_data)
         
         self.assertEqual(version.collection_name, "test_collection")
         self.assertEqual(version.version_str, "1.0.0.1")
@@ -44,7 +44,7 @@ class TestVersion(unittest.TestCase):
             "_locked": False
         }
         
-        version = Version("test_collection", version_data, self.mock_config)
+        version = Version("test_collection", version_data)
         
         self.assertEqual(version.collection_name, "test_collection")
         self.assertEqual(version.version_str, "1.0.0.1")
@@ -56,7 +56,7 @@ class TestVersion(unittest.TestCase):
             "version": "1.0.0.1"
         }
         
-        version = Version("test_collection", version_data, self.mock_config)
+        version = Version("test_collection", version_data)
         
         self.assertEqual(version.collection_name, "test_collection")
         self.assertEqual(version.version_str, "1.0.0.1")
@@ -73,7 +73,7 @@ class TestVersion(unittest.TestCase):
             "_locked": True
         }
         
-        version = Version("test_collection", version_data, self.mock_config)
+        version = Version("test_collection", version_data)
         result = version.to_dict()
         
         expected = {
@@ -97,7 +97,7 @@ class TestVersion(unittest.TestCase):
             "_locked": False
         }
         
-        version = Version("test_collection", version_data, self.mock_config)
+        version = Version("test_collection", version_data)
         result = version.to_dict()
         
         expected = {
@@ -120,7 +120,7 @@ class TestVersion(unittest.TestCase):
             "test_data": "test_data.json"
         }
         
-        version = Version("test_collection", version_data, self.mock_config)
+        version = Version("test_collection", version_data)
         result = version.to_dict()
         
         expected = {
