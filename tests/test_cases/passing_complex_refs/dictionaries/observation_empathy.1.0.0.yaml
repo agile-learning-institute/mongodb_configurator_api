@@ -5,52 +5,60 @@ root:
   description: An empathy observation from an Empathy Mapping exercise
   type: one_of
   properties:
-    - type: object
+    - name: says_observation
+      type: object
       properties:
         - name: users
           description: Users who made the observation
           required: true
           type: array
           items:
+            name: name
             description: User Name
             type: word
         - name: says
           description: Things the user says
           type: sentence
           required: true
-    - type: object
+    - name: does_observation
+      type: object
       properties:
         - name: users
           description: Users who made the observation
           required: true
           type: array
           items:
+            name: name
             description: User Name
             type: word
         - name: does
           description: Things the user does
           type: sentence
           required: true
-    - type: object
+    - name: thinks_observation
+      type: object
       properties:
         - name: users
           description: Users who made the observation
           required: true
           type: array
           items:
+            name: name
             description: User Name
             type: word
         - name: thinks
           description: Things the user thinks
           type: sentence
           required: true
-    - type: object
+    - name: feels_observation
+      type: object
       properties:
         - name: users
           description: Users who made the observation
           required: true
           type: array
           items:
+            name: name
             description: User Name
             type: word
         - name: feels

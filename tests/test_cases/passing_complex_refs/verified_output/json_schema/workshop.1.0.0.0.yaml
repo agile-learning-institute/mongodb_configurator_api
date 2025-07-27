@@ -1,5 +1,6 @@
 description: A record of a specific design thinking workshop.
 type: object
+additionalProperties: false
 properties:
   _id:
     description: The unique identifier for a Workshop
@@ -9,26 +10,26 @@ properties:
     description: Workshop Status/State
     type: string
     enum:
-    - pending
     - active
-    - complete
     - archived
+    - complete
+    - pending
   channel_id:
     description: The discord identifier for the channel this workshop is hosted on
     type: string
-    pattern: ^[^ \t\n\r]{1,40}$
+    pattern: ^[^\s]{1,40}$
   channel_name:
     description: Workshop Name
     type: string
-    pattern: ^[^ \t\n\r]{1,40}$
+    pattern: ^[^\s]{1,40}$
   category:
     description: Discord Channel Category where this workshop channel is
     type: string
-    pattern: ^[^\t\n\r]{0,255}$
+    pattern: ^[^\t\n]{0,255}$
   guild:
     description: Discord Server where this workshop takes place
     type: string
-    pattern: ^[^\t\n\r]{0,255}$
+    pattern: ^[^\t\n]{0,255}$
   purpose:
     description: Workshop Purpose
     type: string
@@ -36,16 +37,16 @@ properties:
   when:
     description: From-To Date/Time for the Workshop Event
     type: object
+    additionalProperties: false
     properties:
       from:
-        description: An ISO 8601 formatted date-time string
+        description: Starting Date/Time
         type: string
         format: date-time
       to:
-        description: An ISO 8601 formatted date-time string
+        description: Ending Date/Time
         type: string
         format: date-time
-    additionalProperties: false
     required:
     - from
     - to
@@ -60,6 +61,7 @@ properties:
     items:
       description: A Workshop Exercise and observations
       type: object
+      additionalProperties: false
       properties:
         exercise_id:
           description: The Exercise Instructions this is using
@@ -72,47 +74,50 @@ properties:
         exercise_name:
           description: The name of the exercise
           type: string
-          pattern: ^[^ \t\n\r]{1,40}$
+          pattern: ^[^\s]{1,40}$
         status:
           description: The exercise status or state (Observe/Reflect/Make)
           type: string
           enum:
-          - pending
-          - observe
-          - reflect
-          - make
           - complete
+          - make
+          - observe
+          - pending
+          - reflect
         duration:
           description: Duration of the exercise
           type: object
+          additionalProperties: false
           properties:
             from:
-              description: An ISO 8601 formatted date-time string
+              description: Starting Date/Time
               type: string
               format: date-time
             to:
-              description: An ISO 8601 formatted date-time string
+              description: Ending Date/Time
               type: string
               format: date-time
-          additionalProperties: false
           required:
           - from
           - to
         persona:
           description: A persona observation for design thinking exercises.
           type: object
+          additionalProperties: false
           properties:
             name:
               description: The name of the persona
               type: string
-              pattern: ^[^ \t\n\r]{1,40}$
+              pattern: ^[^\s]{1,40}$
             age:
               description: The age of the persona
-              type: integer
+              type: number
+              minimum: 1
+              multipleOf: 1
             occupation:
               description: The occupation of the persona
               type: string
-              pattern: ^[^\t\n\r]{0,255}$
+              pattern: ^[^\t\n]{0,255}$
             goals:
               description: The goals of the persona
               type: string
@@ -127,14 +132,16 @@ properties:
               maxLength: 4096
           required:
           - name
-          additionalProperties: false
         observations:
           description: Observations of the exercise
           type: array
           items:
+            description: ''
+            type: one_of
             oneOf:
             - description: A stakeholder of a Stakeholder exercise
               type: object
+              additionalProperties: false
               properties:
                 users:
                   description: Users of the stakeholder
@@ -142,32 +149,34 @@ properties:
                   items:
                     description: User Name
                     type: string
-                    pattern: ^[^ \t\n\r]{1,40}$
+                    pattern: ^[^\s]{1,40}$
                 text:
                   description: Text of the stakeholder
                   type: string
-                  pattern: ^[^\t\n\r]{0,255}$
+                  pattern: ^[^\t\n]{0,255}$
                 name:
                   description: Name of the stakeholder
                   type: string
-                  pattern: ^[^\t\n\r]{0,255}$
+                  pattern: ^[^\t\n]{0,255}$
                 title:
                   description: Title of the stakeholder
                   type: string
-                  pattern: ^[^\t\n\r]{0,255}$
+                  pattern: ^[^\t\n]{0,255}$
                 roles:
                   description: Roles of the stakeholder
                   type: array
                   items:
                     description: Role Name
                     type: string
-                    pattern: ^[^\t\n\r]{0,255}$
+                    pattern: ^[^\t\n]{0,255}$
               required:
               - users
-              additionalProperties: false
-            - oneOf:
-              - description: Missing Required Description
+            - description: An empathy observation from an Empathy Mapping exercise
+              type: one_of
+              oneOf:
+              - description: ''
                 type: object
+                additionalProperties: false
                 properties:
                   users:
                     description: Users who made the observation
@@ -175,17 +184,17 @@ properties:
                     items:
                       description: User Name
                       type: string
-                      pattern: ^[^ \t\n\r]{1,40}$
+                      pattern: ^[^\s]{1,40}$
                   says:
                     description: Things the user says
                     type: string
-                    pattern: ^[^\t\n\r]{0,255}$
+                    pattern: ^[^\t\n]{0,255}$
                 required:
                 - users
                 - says
-                additionalProperties: false
-              - description: Missing Required Description
+              - description: ''
                 type: object
+                additionalProperties: false
                 properties:
                   users:
                     description: Users who made the observation
@@ -193,17 +202,17 @@ properties:
                     items:
                       description: User Name
                       type: string
-                      pattern: ^[^ \t\n\r]{1,40}$
+                      pattern: ^[^\s]{1,40}$
                   does:
                     description: Things the user does
                     type: string
-                    pattern: ^[^\t\n\r]{0,255}$
+                    pattern: ^[^\t\n]{0,255}$
                 required:
                 - users
                 - does
-                additionalProperties: false
-              - description: Missing Required Description
+              - description: ''
                 type: object
+                additionalProperties: false
                 properties:
                   users:
                     description: Users who made the observation
@@ -211,17 +220,17 @@ properties:
                     items:
                       description: User Name
                       type: string
-                      pattern: ^[^ \t\n\r]{1,40}$
+                      pattern: ^[^\s]{1,40}$
                   thinks:
                     description: Things the user thinks
                     type: string
-                    pattern: ^[^\t\n\r]{0,255}$
+                    pattern: ^[^\t\n]{0,255}$
                 required:
                 - users
                 - thinks
-                additionalProperties: false
-              - description: Missing Required Description
+              - description: ''
                 type: object
+                additionalProperties: false
                 properties:
                   users:
                     description: Users who made the observation
@@ -229,70 +238,70 @@ properties:
                     items:
                       description: User Name
                       type: string
-                      pattern: ^[^ \t\n\r]{1,40}$
+                      pattern: ^[^\s]{1,40}$
                   feels:
                     description: Things the user feels
                     type: string
-                    pattern: ^[^\t\n\r]{0,255}$
+                    pattern: ^[^\t\n]{0,255}$
                 required:
                 - users
                 - feels
-                additionalProperties: false
             - description: A hill of a Hills exercise
               type: object
+              additionalProperties: false
               properties:
                 name:
                   description: Unique Name of the hill
                   type: string
-                  pattern: ^[^ \t\n\r]{1,40}$
+                  pattern: ^[^\s]{1,40}$
                 users:
                   description: Users who made the observation
                   type: array
                   items:
                     description: User Name
                     type: string
-                    pattern: ^[^ \t\n\r]{1,40}$
+                    pattern: ^[^\s]{1,40}$
                 who:
                   description: Persona Who is the hill about
                   type: string
-                  pattern: ^[^\t\n\r]{0,255}$
+                  pattern: ^[^\t\n]{0,255}$
                 what:
                   description: What the user does
                   type: string
-                  pattern: ^[^\t\n\r]{0,255}$
+                  pattern: ^[^\t\n]{0,255}$
                 wow:
                   description: The Wow that happens when Who does What
                   type: string
-                  pattern: ^[^\t\n\r]{0,255}$
+                  pattern: ^[^\t\n]{0,255}$
               required:
               - users
-              additionalProperties: false
             - description: A priority of a Priority exercise
               type: object
+              additionalProperties: false
               properties:
                 user:
                   description: User who made the priority observation
                   type: string
-                  pattern: ^[^ \t\n\r]{1,40}$
+                  pattern: ^[^\s]{1,40}$
                 feasibility:
                   description: Hills in order of feasibility (low to high)
                   type: array
                   items:
                     description: Hill Name
                     type: string
-                    pattern: ^[^ \t\n\r]{1,40}$
+                    pattern: ^[^\s]{1,40}$
                 impact:
                   description: Hills in order of impact (low to high)
                   type: array
                   items:
                     description: Hill Name
                     type: string
-                    pattern: ^[^ \t\n\r]{1,40}$
+                    pattern: ^[^\s]{1,40}$
               required:
               - user
-              additionalProperties: false
             - description: The outcome of a Priority exercise
               type: object
+              additionalProperties: false
               properties:
                 no_brainers:
                   description: Hills that are high impact, and high feasibility
@@ -300,32 +309,35 @@ properties:
                   items:
                     description: Hill Name
                     type: string
-                    pattern: ^[^ \t\n\r]{1,40}$
+                    pattern: ^[^\s]{1,40}$
                 big_bets:
                   description: Hills that are high impact, but low feasibility
                   type: array
                   items:
                     description: Hill Name
                     type: string
-                    pattern: ^[^ \t\n\r]{1,40}$
+                    pattern: ^[^\s]{1,40}$
                 utilities:
                   description: Hills that are low impact, but high feasibility
                   type: array
                   items:
                     description: Hill Name
                     type: string
-                    pattern: ^[^ \t\n\r]{1,40}$
+                    pattern: ^[^\s]{1,40}$
                 unwise:
                   description: Hills that are low impact, and low feasibility
                   type: array
                   items:
                     description: Hill Name
                     type: string
-                    pattern: ^[^ \t\n\r]{1,40}$
-              additionalProperties: false
-            - oneOf:
-              - description: Missing Required Description
+                    pattern: ^[^\s]{1,40}$
+              required: []
+            - description: An observation for a Retrospective exercise
+              type: one_of
+              oneOf:
+              - description: ''
                 type: object
+                additionalProperties: false
                 properties:
                   users:
                     description: Users who made the observation
@@ -333,17 +345,17 @@ properties:
                     items:
                       description: User Name
                       type: string
-                      pattern: ^[^ \t\n\r]{1,40}$
+                      pattern: ^[^\s]{1,40}$
                   question:
                     description: Question that remains
                     type: string
-                    pattern: ^[^\t\n\r]{0,255}$
+                    pattern: ^[^\t\n]{0,255}$
                 required:
                 - users
                 - question
-                additionalProperties: false
-              - description: Missing Required Description
+              - description: ''
                 type: object
+                additionalProperties: false
                 properties:
                   users:
                     description: Users who made the observation
@@ -351,17 +363,17 @@ properties:
                     items:
                       description: User Name
                       type: string
-                      pattern: ^[^ \t\n\r]{1,40}$
+                      pattern: ^[^\s]{1,40}$
                   worked_well:
                     description: Something that worked well
                     type: string
-                    pattern: ^[^\t\n\r]{0,255}$
+                    pattern: ^[^\t\n]{0,255}$
                 required:
                 - users
                 - worked_well
-                additionalProperties: false
-              - description: Missing Required Description
+              - description: ''
                 type: object
+                additionalProperties: false
                 properties:
                   users:
                     description: Users who made the observation
@@ -369,17 +381,17 @@ properties:
                     items:
                       description: User Name
                       type: string
-                      pattern: ^[^ \t\n\r]{1,40}$
+                      pattern: ^[^\s]{1,40}$
                   could_be_improved:
                     description: Something that could be improved
                     type: string
-                    pattern: ^[^\t\n\r]{0,255}$
+                    pattern: ^[^\t\n]{0,255}$
                 required:
                 - users
                 - could_be_improved
-                additionalProperties: false
-              - description: Missing Required Description
+              - description: ''
                 type: object
+                additionalProperties: false
                 properties:
                   users:
                     description: Users who made the observation
@@ -387,44 +399,40 @@ properties:
                     items:
                       description: User Name
                       type: string
-                      pattern: ^[^ \t\n\r]{1,40}$
+                      pattern: ^[^\s]{1,40}$
                   ideas_to_try:
                     description: Something to try differently next time
                     type: string
-                    pattern: ^[^\t\n\r]{0,255}$
+                    pattern: ^[^\t\n]{0,255}$
                 required:
                 - users
                 - ideas_to_try
-                additionalProperties: false
       required:
       - exercise_id
       - conversation_id
       - exercise_name
       - status
-      additionalProperties: false
   last_saved:
     description: Last Saved breadcrumb
     type: object
+    additionalProperties: false
     properties:
       from_ip:
-        description: An IPv4 or IPv6 address
+        description: Http Request remote IP address
         type: string
         format: ip
       by_user:
-        description: A String of text, 1 to 40 characters with no spaces, or special
-          characters like /t or /n
+        description: ID Of User
         type: string
-        pattern: ^[^ \t\n\r]{1,40}$
+        pattern: ^[^\s]{1,40}$
       at_time:
-        description: An ISO 8601 formatted date-time string
+        description: The date-time when last updated
         type: string
         format: date-time
       correlation_id:
-        description: A String of text, 1 to 40 characters with no spaces, or special
-          characters like /t or /n
+        description: The logging correlation ID of the update transaction
         type: string
-        pattern: ^[^ \t\n\r]{1,40}$
-    additionalProperties: false
+        pattern: ^[^\s]{1,40}$
     required:
     - from_ip
     - by_user
@@ -435,5 +443,3 @@ required:
 - status
 - exercises
 - last_saved
-additionalProperties: false
-

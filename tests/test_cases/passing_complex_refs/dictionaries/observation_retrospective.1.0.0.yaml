@@ -5,55 +5,63 @@ root:
   description: An observation for a Retrospective exercise
   type: one_of
   properties:
-    - type: object
+    - name: question_observation
+      type: object
       properties:
-        - users:
+        - name: users
           description: Users who made the observation
           required: true
           type: array
           items:
+            name: name
             description: User Name
             type: word
-        - question:
+        - name: question
           description: Question that remains
           type: sentence
           required: true
-    - type: object
+    - name: worked_well_observation
+      type: object
       properties:
-        - users:
+        - name: users
           description: Users who made the observation
           required: true
           type: array
           items:
+            name: name
             description: User Name
             type: word
-        - worked_well:
+        - name: worked_well
           description: Something that worked well
           type: sentence
           required: true
-    - type: object
+    - name: could_be_improved_observation
+      type: object
       properties:
-        - users:
+        - name: users
           description: Users who made the observation
           required: true
           type: array
           items:
+            name: name
             description: User Name
             type: word
-        - could_be_improved:
+        - name: could_be_improved
           description: Something that could be improved
           type: sentence
           required: true
-    - type: object
+    - name: ideas_to_try_observation
+      type: object
       properties:
-        - users:
+        - name: users
           description: Users who made the observation
           required: true
           type: array
           items:
+            name: name
             description: User Name
             type: word
-        - ideas_to_try:
+        - name: ideas_to_try
           description: Something to try differently next time
           type: sentence
           required: true

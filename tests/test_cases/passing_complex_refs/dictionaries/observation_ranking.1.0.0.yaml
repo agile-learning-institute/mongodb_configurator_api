@@ -5,27 +5,31 @@ root:
   description: The outcome of a Priority exercise
   type: object
   properties:
-    - no_brainers:
+    - name: no_brainers
       description: Hills that are high impact, and high feasibility
       type: array
       items:
+        name: name
         description: Hill Name
         type: word
-    - big_bets:
+    - name: big_bets
       description: Hills that are high impact, but low feasibility
       type: array
       items:
+        name: name
         description: Hill Name
         type: word
-    - utilities:
+    - name: utilities
       description: Hills that are low impact, but high feasibility
       type: array
       items:
+        name: name
         description: Hill Name
         type: word
-    - unwise:
+    - name: unwise
       description: Hills that are low impact, and low feasibility
       type: array
       items:
+        name: name
         description: Hill Name
         type: word

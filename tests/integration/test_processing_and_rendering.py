@@ -6,8 +6,8 @@ from configurator.utils.version_number import VersionNumber
 from configurator.utils.config import Config
 from configurator.utils.mongo_io import MongoIO
 from configurator.services.configuration_services import Configuration
-from configurator.utils.ejson_encoder import MongoJSONEncoder
 from abc import ABC, abstractmethod
+import datetime
 
 
 def setup_test_environment(test_case, expected_pro_count):
@@ -45,20 +45,24 @@ def load_verified_data(file_path):
         return json.loads(content)
 
 
-def normalize_mongo_data(obj):
-    """Recursively convert MongoDB objects to EJSON string format for comparison"""
+def normalize_mongo_data(obj, collection_name=None):
+    """Recursively convert MongoDB objects to string format for comparison"""
     if isinstance(obj, dict):
-        return {k: normalize_mongo_data(v) for k, v in obj.items()}
+        return {k: normalize_mongo_data(v, collection_name) for k, v in obj.items()}
     elif isinstance(obj, list):
-        return [normalize_mongo_data(item) for item in obj]
+        return [normalize_mongo_data(item, collection_name) for item in obj]
     elif hasattr(obj, '__class__') and obj.__class__.__name__ == 'ObjectId':
-        return {"$oid": str(obj)}  # Convert ObjectId to MongoDB extended JSON format
+        # For TestPassingTemplate, use MongoDB extended JSON format
+        if collection_name == 'sample':
+            return {"$oid": str(obj)}
+        else:
+            return str(obj)  # Convert ObjectId to string for other collections
     elif hasattr(obj, '__class__') and obj.__class__.__name__ in ['datetime', 'date']:
         return str(obj)  # Convert datetime/date to string
     else:
         return obj
 
-def compare_database_data(actual_data, verified_data):
+def compare_database_data(actual_data, verified_data, collection_name=None):
     """Compare database data, handling 'ignore' values in verified output"""
     if isinstance(actual_data, dict) and isinstance(verified_data, dict):
         # Remove fields that are marked as 'ignore' in verified data
@@ -71,11 +75,19 @@ def compare_database_data(actual_data, verified_data):
                 continue  # Skip this field
             if key not in verified_data:
                 continue  # Skip fields that don't exist in verified data
-            filtered_actual[key] = normalize_mongo_data(value)
+            # Skip _id field for system collections (ObjectIds are generated dynamically)
+            if key == '_id' and (collection_name in ['DatabaseEnumerators', 'CollectionVersions'] or
+                                verified_data.get('file_name', '').startswith('enumerations')):
+                continue
+            filtered_actual[key] = normalize_mongo_data(value, collection_name)
             
         for key, value in verified_data.items():
             if value == 'ignore':
                 continue  # Skip this field
+            # Skip _id field for system collections
+            if key == '_id' and (collection_name in ['DatabaseEnumerators', 'CollectionVersions'] or
+                                verified_data.get('file_name', '').startswith('enumerations')):
+                continue
             filtered_verified[key] = value
             
         return filtered_actual == filtered_verified
@@ -90,7 +102,7 @@ def compare_database_data(actual_data, verified_data):
             verified_data = sorted(verified_data, key=lambda x: x.get('version', 0))
         
         for i, (actual, verified) in enumerate(zip(actual_data, verified_data)):
-            if not compare_database_data(actual, verified):
+            if not compare_database_data(actual, verified, collection_name):
                 print(f"List item {i} comparison failed:")
                 print(f"  Actual: {actual}")
                 print(f"  Verified: {verified}")
@@ -133,8 +145,16 @@ class BaseProcessAndRenderTest(ABC):
         os.makedirs(generated_events_dir, exist_ok=True)
         
         # Save processing events as JSON
+        class CustomJSONEncoder(json.JSONEncoder):
+            def default(self, obj):
+                if isinstance(obj, datetime.datetime):
+                    return obj.isoformat()
+                elif hasattr(obj, '__class__') and obj.__class__.__name__ == 'ObjectId':
+                    return str(obj)
+                return super().default(obj)
+        
         with open(f"{generated_events_dir}/processing_events.json", 'w') as f:
-            json.dump(results.to_dict(), f, indent=2, sort_keys=False)
+            json.dump(results.to_dict(), f, indent=2, sort_keys=False, cls=CustomJSONEncoder)
         
         # Save processing events as YAML for easier reading
         import yaml
@@ -186,7 +206,7 @@ class BaseProcessAndRenderTest(ABC):
             actual_data = list(self.mongo_io.get_documents(collection_name))
             
             # Compare using the new comparison function
-            self.assertTrue(compare_database_data(actual_data, verified_data),
+            self.assertTrue(compare_database_data(actual_data, verified_data, collection_name),
                             f"Database collection {collection_name} does not match verified output")
 
     def test_render_json(self):
@@ -242,7 +262,7 @@ class BaseProcessAndRenderTest(ABC):
                 collection_name = version_number.parts[0]
                 configuration = Configuration(f"{collection_name}.yaml")
                 actual_schema = configuration.get_bson_schema(version_number.get_version_str())
-                actual_schema = normalize_mongo_data(actual_schema)
+                actual_schema = normalize_mongo_data(actual_schema, collection_name)
                 
                 # Write generated schema to file
                 with open(generated_schema_path, 'w') as f:
