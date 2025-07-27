@@ -39,7 +39,7 @@ def create_type_routes():
     def update_type(file_name):
         type = Type(file_name, request.json)
         results = type.save()
-        return jsonify(results.to_dict())
+        return jsonify(results)
     
     @type_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("TYP-05", "DELETE_TYPE", "deleting type")

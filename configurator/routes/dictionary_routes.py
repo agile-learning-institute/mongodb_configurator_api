@@ -39,7 +39,7 @@ def create_dictionary_routes():
     def update_dictionary(file_name):
         dictionary = Dictionary(file_name, request.json)
         result = dictionary.save()
-        return jsonify(result.to_dict())
+        return jsonify(result)
     
     @dictionary_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("DIC-05", "DELETE_DICTIONARY", "deleting dictionary")
