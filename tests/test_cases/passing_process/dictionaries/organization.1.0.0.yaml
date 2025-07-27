@@ -29,6 +29,7 @@ root:
       type: array
       required: false
       items:
+        name: user_id
         description: A user identifier
         type: identity
         required: false

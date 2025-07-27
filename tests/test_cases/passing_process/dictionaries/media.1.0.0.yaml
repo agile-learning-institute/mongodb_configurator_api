@@ -37,7 +37,6 @@ root:
     - name: metadata
       description: Media meta data - one of several types (video, audio, image)
       type: one_of
-      name: metadata
       properties:
         - name: video
           description: Video content structure

@@ -1,5 +1,6 @@
 description: A user collection for testing the schema system
 type: object
+additionalProperties: false
 properties:
   _id:
     description: The unique identifier for a user
@@ -8,19 +9,19 @@ properties:
   user_name:
     description: Username
     type: string
-    pattern: ^[^ \t\n\r]{1,40}$
+    pattern: ^[^\s]{1,40}$
   full_name:
     description: Users Full Name
     type: string
-    pattern: ^[^\t\n\r]{0,255}$
+    pattern: ^[^\t\n]{0,255}$
   status:
     description: The status
     type: string
     enum:
     - active
     - archived
-    - published
     - draft
+    - published
     - scheduled
   categories:
     description: A users list of categorized tags
@@ -28,44 +29,45 @@ properties:
     items:
       description: A user category
       type: object
+      additionalProperties: false
       properties:
         name:
           description: Category Name assigned by the user
           type: string
-          pattern: ^[^ \t\n\r]{1,40}$
+          pattern: ^[^\s]{1,40}$
         category:
           description: The category type assigned by the user
           type: string
           enum:
-          - work
+          - education
+          - news
           - personal
           - project
           - reference
-          - education
           - technology
-          - news
+          - work
         tags:
           description: A list of enumerated values assigned by the user
           type: array
           items:
             type: string
             enum:
-            - urgent
-            - important
-            - normal
-            - low
-            - completed
-            - in_progress
             - blocked
+            - completed
+            - important
+            - in_progress
+            - low
+            - normal
             - review
+            - urgent
       required:
       - name
       - category
       - tags
-      additionalProperties: false
   preferences:
     description: User preferences and settings
     type: object
+    additionalProperties: false
     properties:
       notification_types:
         description: Types of notifications the user wants to receive
@@ -73,10 +75,10 @@ properties:
         items:
           type: string
           enum:
-          - system
-          - user
           - content
           - reminder
+          - system
+          - user
       delivery_channels:
         description: Preferred delivery channels for notifications
         type: array
@@ -84,20 +86,20 @@ properties:
           type: string
           enum:
           - email
-          - sms
-          - push
           - in_app
+          - push
+          - sms
       content_tags:
         description: Content tags the user is interested in
         type: array
         items:
           type: string
           enum:
-          - technology
           - business
-          - entertainment
           - education
+          - entertainment
           - news
+          - technology
       priority_levels:
         description: Priority levels the user wants to receive
         type: array
@@ -106,16 +108,15 @@ properties:
           enum:
           - critical
           - high
-          - medium
           - low
+          - medium
     required:
     - notification_types
     - delivery_channels
-    additionalProperties: false
   email:
     description: The person's email address
     type: string
-    pattern: ^[^ \t\n\r@]+@[^ \t\n\r@]+\.[^ \t\n\r@]+$
+    pattern: ^[^\s@]+@[^\s@]+\.[^\s@]+$
   phone:
     description: The person's phone number
     type: string
@@ -123,26 +124,24 @@ properties:
   last_saved:
     description: The last time this document was saved
     type: object
+    additionalProperties: false
     properties:
       from_ip:
-        description: An IPv4 or IPv6 address
+        description: Http Request remote IP address
         type: string
         format: ip
       by_user:
-        description: A String of text, 1 to 40 characters with no spaces, or special
-          characters like /t or /n
+        description: ID Of User
         type: string
-        pattern: ^[^ \t\n\r]{1,40}$
+        pattern: ^[^\s]{1,40}$
       at_time:
-        description: An ISO 8601 formatted date-time string
+        description: The date-time when last updated
         type: string
         format: date-time
       correlation_id:
-        description: A String of text, 1 to 40 characters with no spaces, or special
-          characters like /t or /n
+        description: The logging correlation ID of the update transaction
         type: string
-        pattern: ^[^ \t\n\r]{1,40}$
-    additionalProperties: false
+        pattern: ^[^\s]{1,40}$
     required:
     - from_ip
     - by_user
@@ -153,4 +152,3 @@ required:
 - user_name
 - status
 - last_saved
-additionalProperties: false

@@ -1,54 +1,55 @@
 {
   "bsonType": "object",
+  "additionalProperties": false,
   "properties": {
     "_id": {
       "bsonType": "objectId"
     },
     "title": {
-      "pattern": "^[^\\t\\n\\r]{0,255}$",
-      "bsonType": "string"
+      "bsonType": "string",
+      "pattern": "^[^\\t\\n]{0,255}$"
     },
     "type": {
       "bsonType": "string",
       "enum": [
-        "movie",
-        "tv_show",
+        "audio",
         "documentary",
-        "short",
         "image",
-        "audio"
+        "movie",
+        "short",
+        "tv_show"
       ]
     },
     "status": {
       "bsonType": "string",
       "enum": [
-        "published",
+        "archived",
         "draft",
         "processing",
-        "archived",
+        "published",
         "scheduled"
       ]
     },
     "last_saved": {
       "bsonType": "object",
+      "additionalProperties": false,
       "properties": {
         "from_ip": {
-          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
         },
         "by_user": {
-          "pattern": "^\\S{1,40}$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^[^\\s]{1,40}$"
         },
         "at_time": {
           "bsonType": "date"
         },
         "correlation_id": {
-          "pattern": "^\\S{1,40}$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^[^\\s]{1,40}$"
         }
       },
-      "additionalProperties": false,
       "required": [
         "from_ip",
         "by_user",
@@ -62,22 +63,24 @@
         "bsonType": "string",
         "enum": [
           "action",
-          "sci_fi",
+          "art",
+          "comedy",
           "documentary",
           "drama",
-          "comedy",
-          "thriller",
-          "art",
-          "painting",
           "music",
-          "song"
+          "painting",
+          "sci_fi",
+          "song",
+          "thriller"
         ]
       }
     },
     "metadata": {
+      "bsonType": "one_of",
       "oneOf": [
         {
           "bsonType": "object",
+          "additionalProperties": false,
           "properties": {
             "duration": {
               "bsonType": "int",
@@ -87,33 +90,33 @@
               "bsonType": "string",
               "enum": [
                 "bluray",
-                "dvd",
                 "digital",
-                "streaming",
-                "jpg"
+                "dvd",
+                "jpg",
+                "streaming"
               ]
             },
             "quality": {
               "bsonType": "string",
               "enum": [
+                "fhd",
                 "hd",
-                "uhd",
                 "sd",
-                "fhd"
+                "uhd"
               ]
             }
           },
           "required": [
             "format"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "bsonType": "object",
+          "additionalProperties": false,
           "properties": {
             "audio_url": {
-              "pattern": "^https?://[^\\s]+$",
-              "bsonType": "string"
+              "bsonType": "string",
+              "pattern": "^https?://[^\\s]+$"
             },
             "duration": {
               "bsonType": "int",
@@ -122,25 +125,25 @@
             "format": {
               "bsonType": "string",
               "enum": [
-                "mp3",
-                "wav",
                 "aac",
+                "flac",
+                "mp3",
                 "ogg",
-                "flac"
+                "wav"
               ]
             }
           },
           "required": [
             "audio_url"
-          ],
-          "additionalProperties": false
+          ]
         },
         {
           "bsonType": "object",
+          "additionalProperties": false,
           "properties": {
             "image_url": {
-              "pattern": "^https?://[^\\s]+$",
-              "bsonType": "string"
+              "bsonType": "string",
+              "pattern": "^https?://[^\\s]+$"
             },
             "width": {
               "bsonType": "int",
@@ -153,18 +156,17 @@
             "format": {
               "bsonType": "string",
               "enum": [
+                "gif",
                 "jpg",
                 "png",
-                "gif",
-                "webp",
-                "svg"
+                "svg",
+                "webp"
               ]
             }
           },
           "required": [
             "image_url"
-          ],
-          "additionalProperties": false
+          ]
         }
       ]
     }
@@ -174,6 +176,5 @@
     "title",
     "status",
     "last_saved"
-  ],
-  "additionalProperties": false
+  ]
 }

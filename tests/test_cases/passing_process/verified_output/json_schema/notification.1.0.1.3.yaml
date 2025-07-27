@@ -1,5 +1,6 @@
 description: A notification collection
 type: object
+additionalProperties: false
 properties:
   _id:
     description: The unique identifier for notification
@@ -12,27 +13,27 @@ properties:
   title:
     description: Notification title
     type: string
-    pattern: ^[^\t\n\r]{0,255}$
+    pattern: ^[^\t\n]{0,255}$
   message:
     description: Notification message
     type: string
-    pattern: ^[^\t\n\r]{0,255}$
+    pattern: ^[^\t\n]{0,255}$
   notification_type:
     description: Type of notification
     type: string
     enum:
-    - system
-    - user
     - content
     - reminder
+    - system
+    - user
   status:
     description: Notification status
     type: string
     enum:
     - active
     - archived
-    - published
     - draft
+    - published
     - scheduled
   priority:
     description: Notification priority level
@@ -40,31 +41,31 @@ properties:
     enum:
     - critical
     - high
-    - medium
     - low
+    - medium
   tags:
     description: Notification tags for categorization
     type: array
     items:
       type: string
       enum:
-      - urgent
       - important
-      - normal
       - low
+      - normal
+      - urgent
   categories:
     description: Notification categories
     type: array
     items:
       type: string
       enum:
-      - work
+      - education
+      - news
       - personal
       - project
       - reference
-      - education
       - technology
-      - news
+      - work
   channels:
     description: Delivery channels for this notification
     type: array
@@ -72,12 +73,13 @@ properties:
       type: string
       enum:
       - email
-      - sms
-      - push
       - in_app
+      - push
+      - sms
   metadata:
     description: Additional notification metadata
     type: object
+    additionalProperties: false
     properties:
       created_at:
         description: When the notification was created
@@ -98,11 +100,12 @@ properties:
       source:
         description: Source of the notification
         type: object
+        additionalProperties: false
         properties:
           collection:
             description: Source collection name
             type: string
-            pattern: ^[^ \t\n\r]{1,40}$
+            pattern: ^[^\s]{1,40}$
           document_id:
             description: Source document ID
             type: string
@@ -112,39 +115,35 @@ properties:
             type: string
             enum:
             - created
-            - updated
             - deleted
             - published
+            - updated
         required:
         - collection
         - document_id
-        additionalProperties: false
     required:
     - created_at
-    additionalProperties: false
   last_saved:
     description: Last saved breadcrumb
     type: object
+    additionalProperties: false
     properties:
       from_ip:
-        description: An IPv4 or IPv6 address
+        description: Http Request remote IP address
         type: string
         format: ip
       by_user:
-        description: A String of text, 1 to 40 characters with no spaces, or special
-          characters like /t or /n
+        description: ID Of User
         type: string
-        pattern: ^[^ \t\n\r]{1,40}$
+        pattern: ^[^\s]{1,40}$
       at_time:
-        description: An ISO 8601 formatted date-time string
+        description: The date-time when last updated
         type: string
         format: date-time
       correlation_id:
-        description: A String of text, 1 to 40 characters with no spaces, or special
-          characters like /t or /n
+        description: The logging correlation ID of the update transaction
         type: string
-        pattern: ^[^ \t\n\r]{1,40}$
-    additionalProperties: false
+        pattern: ^[^\s]{1,40}$
     required:
     - from_ip
     - by_user
@@ -160,4 +159,3 @@ required:
 - priority
 - channels
 - last_saved
-additionalProperties: false

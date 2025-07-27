@@ -1,12 +1,13 @@
 {
   "bsonType": "object",
+  "additionalProperties": false,
   "properties": {
     "_id": {
       "bsonType": "objectId"
     },
     "name": {
-      "pattern": "^[^\\t\\n\\r]{0,255}$",
-      "bsonType": "string"
+      "bsonType": "string",
+      "pattern": "^[^\\t\\n]{0,255}$"
     },
     "status": {
       "bsonType": "string",
@@ -17,24 +18,24 @@
     },
     "last_saved": {
       "bsonType": "object",
+      "additionalProperties": false,
       "properties": {
         "from_ip": {
-          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
         },
         "by_user": {
-          "pattern": "^\\S{1,40}$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^[^\\s]{1,40}$"
         },
         "at_time": {
           "bsonType": "date"
         },
         "correlation_id": {
-          "pattern": "^\\S{1,40}$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^[^\\s]{1,40}$"
         }
       },
-      "additionalProperties": false,
       "required": [
         "from_ip",
         "by_user",
@@ -49,34 +50,13 @@
       }
     },
     "website": {
-      "pattern": "^https?://[^\\s]+$",
-      "bsonType": "string"
+      "bsonType": "string",
+      "pattern": "^https?://[^\\s]+$"
     },
     "home_address": {
-      "bsonType": "object",
-      "properties": {
-        "street": {
-          "pattern": "^[^\\t\\n\\r]{0,255}$",
-          "bsonType": "string"
-        },
-        "city": {
-          "pattern": "^\\S{1,40}$",
-          "bsonType": "string"
-        },
-        "state": {
-          "pattern": "^[A-Z]{2}$",
-          "bsonType": "string"
-        },
-        "postal_code": {
-          "pattern": "^\\S{1,40}$",
-          "bsonType": "string"
-        }
-      },
-      "additionalProperties": false,
-      "required": [
-        "street",
-        "postal_code"
-      ]
+      "bsonType": "string",
+      "minLength": 1,
+      "maxLength": 100
     }
   },
   "required": [
@@ -84,6 +64,5 @@
     "name",
     "status",
     "last_saved"
-  ],
-  "additionalProperties": false
+  ]
 }

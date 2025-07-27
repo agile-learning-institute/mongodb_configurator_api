@@ -1,24 +1,25 @@
 {
   "bsonType": "object",
+  "additionalProperties": false,
   "properties": {
     "_id": {
       "bsonType": "objectId"
     },
     "user_name": {
-      "pattern": "^\\S{1,40}$",
-      "bsonType": "string"
+      "bsonType": "string",
+      "pattern": "^[^\\s]{1,40}$"
     },
     "full_name": {
-      "pattern": "^[^\\t\\n\\r]{0,255}$",
-      "bsonType": "string"
+      "bsonType": "string",
+      "pattern": "^[^\\t\\n]{0,255}$"
     },
     "status": {
       "bsonType": "string",
       "enum": [
         "active",
         "archived",
-        "published",
         "draft",
+        "published",
         "scheduled"
       ]
     },
@@ -26,21 +27,22 @@
       "bsonType": "array",
       "items": {
         "bsonType": "object",
+        "additionalProperties": false,
         "properties": {
           "name": {
-            "pattern": "^\\S{1,40}$",
-            "bsonType": "string"
+            "bsonType": "string",
+            "pattern": "^[^\\s]{1,40}$"
           },
           "category": {
             "bsonType": "string",
             "enum": [
-              "work",
+              "education",
+              "news",
               "personal",
               "project",
               "reference",
-              "education",
               "technology",
-              "news"
+              "work"
             ]
           },
           "tags": {
@@ -48,14 +50,14 @@
             "items": {
               "bsonType": "string",
               "enum": [
-                "urgent",
-                "important",
-                "normal",
-                "low",
-                "completed",
-                "in_progress",
                 "blocked",
-                "review"
+                "completed",
+                "important",
+                "in_progress",
+                "low",
+                "normal",
+                "review",
+                "urgent"
               ]
             }
           }
@@ -64,22 +66,22 @@
           "name",
           "category",
           "tags"
-        ],
-        "additionalProperties": false
+        ]
       }
     },
     "preferences": {
       "bsonType": "object",
+      "additionalProperties": false,
       "properties": {
         "notification_types": {
           "bsonType": "array",
           "items": {
             "bsonType": "string",
             "enum": [
-              "system",
-              "user",
               "content",
-              "reminder"
+              "reminder",
+              "system",
+              "user"
             ]
           }
         },
@@ -89,9 +91,9 @@
             "bsonType": "string",
             "enum": [
               "email",
-              "sms",
+              "in_app",
               "push",
-              "in_app"
+              "sms"
             ]
           }
         },
@@ -100,11 +102,11 @@
           "items": {
             "bsonType": "string",
             "enum": [
-              "technology",
               "business",
-              "entertainment",
               "education",
-              "news"
+              "entertainment",
+              "news",
+              "technology"
             ]
           }
         },
@@ -115,8 +117,8 @@
             "enum": [
               "critical",
               "high",
-              "medium",
-              "low"
+              "low",
+              "medium"
             ]
           }
         }
@@ -124,37 +126,36 @@
       "required": [
         "notification_types",
         "delivery_channels"
-      ],
-      "additionalProperties": false
+      ]
     },
     "email": {
-      "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$",
-      "bsonType": "string"
+      "bsonType": "string",
+      "pattern": "^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$"
     },
     "phone": {
-      "pattern": "^\\+1[2-9][0-9]{9}$",
-      "bsonType": "string"
+      "bsonType": "string",
+      "pattern": "^(\\+1[0-9]{10}|[0-9]{3}-[0-9]{3}-[0-9]{4})$"
     },
     "last_saved": {
       "bsonType": "object",
+      "additionalProperties": false,
       "properties": {
         "from_ip": {
-          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
         },
         "by_user": {
-          "pattern": "^\\S{1,40}$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^[^\\s]{1,40}$"
         },
         "at_time": {
           "bsonType": "date"
         },
         "correlation_id": {
-          "pattern": "^\\S{1,40}$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^[^\\s]{1,40}$"
         }
       },
-      "additionalProperties": false,
       "required": [
         "from_ip",
         "by_user",
@@ -168,6 +169,5 @@
     "user_name",
     "status",
     "last_saved"
-  ],
-  "additionalProperties": false
+  ]
 }

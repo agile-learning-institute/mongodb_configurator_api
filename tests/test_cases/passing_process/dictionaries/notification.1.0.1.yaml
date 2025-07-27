@@ -76,13 +76,13 @@ root:
           description: When the notification expires
           type: date-time
           required: false
-                    - name: source
-              description: Source of the notification
-              type: object
-              required: false
-              additional_properties: false
-              name: source
-              properties:
+        - name: source
+          description: Source of the notification
+          type: object
+          required: false
+          additional_properties: false
+          name: source
+          properties:
             - name: collection
               description: Source collection name
               type: word

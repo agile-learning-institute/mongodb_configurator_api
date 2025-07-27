@@ -128,6 +128,19 @@ class BaseProcessAndRenderTest(ABC):
         # Process configurations
         results = Configuration.process_all()
         
+        # Save processing events to generated output
+        generated_events_dir = f"{self.config.INPUT_FOLDER}/generated_output"
+        os.makedirs(generated_events_dir, exist_ok=True)
+        
+        # Save processing events as JSON
+        with open(f"{generated_events_dir}/processing_events.json", 'w') as f:
+            json.dump(results.to_dict(), f, indent=2, sort_keys=False)
+        
+        # Save processing events as YAML for easier reading
+        import yaml
+        with open(f"{generated_events_dir}/processing_events.yaml", 'w') as f:
+            yaml.dump(results.to_dict(), f, default_flow_style=False, sort_keys=False)
+        
         # Verify processing succeeded
         self.assertEqual(results.status, "SUCCESS", f"Processing failed: {results.to_dict()}")
         
@@ -179,11 +192,16 @@ class BaseProcessAndRenderTest(ABC):
     def test_render_json(self):
         """Test 2: Do JSON schemas match verified output?"""
         verified_schema_dir = f"{self.config.INPUT_FOLDER}/verified_output/json_schema"
+        generated_schema_dir = f"{self.config.INPUT_FOLDER}/generated_output/json_schema"
+        
+        # Create generated output directory if it doesn't exist
+        os.makedirs(generated_schema_dir, exist_ok=True)
         
         for filename in os.listdir(verified_schema_dir):
             if filename.endswith('.yaml'):
                 version_str = filename.replace('.yaml', '')
                 verified_schema_path = f"{verified_schema_dir}/{filename}"
+                generated_schema_path = f"{generated_schema_dir}/{filename}"
             
                 # Load verified schema
                 import yaml
@@ -195,6 +213,10 @@ class BaseProcessAndRenderTest(ABC):
                 configuration = Configuration(f"{collection_name}.yaml")
                 actual_schema = configuration.get_json_schema(version_number.get_version_str())
 
+                # Write generated schema to file
+                with open(generated_schema_path, 'w') as f:
+                    yaml.dump(actual_schema, f, default_flow_style=False, sort_keys=False)
+
                 # Compare
                 self.assertEqual(actual_schema, expected_schema,
                                 f"JSON schema for {version_str} does not match verified output")
@@ -202,11 +224,16 @@ class BaseProcessAndRenderTest(ABC):
     def test_render_bson(self):
         """Test 3: Do BSON schemas match verified output?"""
         verified_schema_dir = f"{self.config.INPUT_FOLDER}/verified_output/bson_schema"
+        generated_schema_dir = f"{self.config.INPUT_FOLDER}/generated_output/bson_schema"
+        
+        # Create generated output directory if it doesn't exist
+        os.makedirs(generated_schema_dir, exist_ok=True)
         
         for filename in os.listdir(verified_schema_dir):
             if filename.endswith('.json'):
                 version_str = filename.replace('.json', '')
                 verified_schema_path = f"{verified_schema_dir}/{filename}"
+                generated_schema_path = f"{generated_schema_dir}/{filename}"
                 
                 # Load verified schema
                 expected_schema = load_verified_data(verified_schema_path)
@@ -217,6 +244,10 @@ class BaseProcessAndRenderTest(ABC):
                 actual_schema = configuration.get_bson_schema(version_number.get_version_str())
                 actual_schema = normalize_mongo_data(actual_schema)
                 
+                # Write generated schema to file
+                with open(generated_schema_path, 'w') as f:
+                    json.dump(actual_schema, f, indent=2, sort_keys=False)
+
                 # Compare
                 self.assertEqual(actual_schema, expected_schema,
                                 f"BSON schema for {version_str} does not match verified output")

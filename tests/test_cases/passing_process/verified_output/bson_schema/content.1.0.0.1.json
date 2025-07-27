@@ -1,20 +1,21 @@
 {
   "bsonType": "object",
+  "additionalProperties": false,
   "properties": {
     "_id": {
       "bsonType": "objectId"
     },
     "title": {
-      "pattern": "^[^\\t\\n\\r]{0,255}$",
-      "bsonType": "string"
+      "bsonType": "string",
+      "pattern": "^[^\\t\\n]{0,255}$"
     },
     "subtitle": {
-      "pattern": "^[^\\t\\n\\r]{0,255}$",
-      "bsonType": "string"
+      "bsonType": "string",
+      "pattern": "^[^\\t\\n]{0,255}$"
     },
     "content_type": {
-      "pattern": "^\\S{1,40}$",
-      "bsonType": "string"
+      "bsonType": "string",
+      "pattern": "^[^\\s]{1,40}$"
     },
     "status": {
       "bsonType": "string",
@@ -28,6 +29,7 @@
     },
     "metadata": {
       "bsonType": "object",
+      "additionalProperties": false,
       "properties": {
         "created_at": {
           "bsonType": "date"
@@ -41,29 +43,28 @@
       },
       "required": [
         "created_at"
-      ],
-      "additionalProperties": false
+      ]
     },
     "last_saved": {
       "bsonType": "object",
+      "additionalProperties": false,
       "properties": {
         "from_ip": {
-          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^((25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)$"
         },
         "by_user": {
-          "pattern": "^\\S{1,40}$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^[^\\s]{1,40}$"
         },
         "at_time": {
           "bsonType": "date"
         },
         "correlation_id": {
-          "pattern": "^\\S{1,40}$",
-          "bsonType": "string"
+          "bsonType": "string",
+          "pattern": "^[^\\s]{1,40}$"
         }
       },
-      "additionalProperties": false,
       "required": [
         "from_ip",
         "by_user",
@@ -79,6 +80,5 @@
     "status",
     "author_id",
     "last_saved"
-  ],
-  "additionalProperties": false
+  ]
 }
