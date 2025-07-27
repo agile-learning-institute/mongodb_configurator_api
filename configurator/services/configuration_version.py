@@ -90,7 +90,7 @@ class Version:
             # Apply schema validation
             sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="APPLY_SCHEMA_VALIDATION")
             event.append_events([sub_event])
-            enumerations = Enumerators().get_version(self.version_str)
+            enumerations = Enumerators().get_version(f"{self.collection_name}.{self.version_str}")
             bson_schema: dict = self.get_bson_schema(enumerations)
             
             # Add schema context to event

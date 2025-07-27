@@ -3,15 +3,15 @@ type: object
 additionalProperties: false
 properties:
   _id:
-    description: A unique identifier for a document
+    description: The unique identifier for the media
     type: string
     pattern: "^[0-9a-fA-F]{24}$"
   first_name:
-    description: A String of text, 1 to 40 characters with no spaces, or special characters like /t or /n
+    description: The name of the document
     type: string
     pattern: "^[^\\s]{1,40}$"
   last_name:
-    description: A String of text, 1 to 40 characters with no spaces, or special characters like /t or /n
+    description: The last name of the document
     type: string
     pattern: "^[^\\s]{1,40}$"
   status:

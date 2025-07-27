@@ -19,12 +19,9 @@ class Enumerators:
 
     def get_version(self, version_str: str) -> Enumerations:
         """Get enumerations for a specific version string"""
-        logger.info(f"Getting enumerations for version {version_str}")
         version = VersionNumber(version_str)
         version_number = version.get_enumerator_version()
-        logger.info(f"Version number: {version_number}")
         for enumeration in self.enumerations:
-            logger.info(f"Enumeration version: {enumeration.version}")
             if enumeration.version == version_number:
                 return enumeration
 

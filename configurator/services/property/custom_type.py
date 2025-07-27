@@ -13,6 +13,7 @@ class CustomType(BaseProperty):
     def to_json_schema(self, enumerations: Enumerations, ref_stack: list = []):
         type = Type(file_name=f"{self.type}.yaml")
         the_schema = type.to_json_schema(enumerations, ref_stack)
+        the_schema["description"] = self.description
         return the_schema
 
     def to_bson_schema(self, enumerations: Enumerations, ref_stack: list = []):
