@@ -7,8 +7,8 @@ info:
   contact:
     email: devs@agile-learning.institute
   license:
-    name: Apache 2.0
-    url: http://www.apache.org/licenses/LICENSE-2.0.html
+    name: MIT
+    url: https://opensource.org/licenses/MIT
 
 servers:
   - url: http://localhost:8081
@@ -46,7 +46,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     post:
       summary: Process all Configured Collections 
       tags:
@@ -58,13 +58,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
         '500':
           description: Processing error occurred
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     patch:
       summary: Lock all Collection Configurations
       operationId: lock_all_configurations
@@ -76,13 +76,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
 
   /api/configurations/{file_name}/:
     get:
@@ -98,7 +98,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Collection configuration
+          description: Collection configuration object
           content:
             application/json:
               schema:
@@ -108,7 +108,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     put:
       summary: Save a collection configuration
       operationId: save_configuration
@@ -120,19 +120,25 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/configuration'
       responses:
         '200':
           description: Collection configuration file
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/file'
+                $ref: '#/components/schemas/configuration'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     post:
       summary: Process a collection configuration
       operationId: process_collection
@@ -150,13 +156,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     delete:
       summary: Delete a collection configuration
       operationId: delete_configuration
@@ -174,13 +180,13 @@ paths:
           content:    
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
 
   /api/configurations/collection/{name}:
     post:
@@ -211,7 +217,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
 
   /api/configurations/json_schema/{file_name}/{version}/:
     get:
@@ -245,7 +251,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
 
   /api/configurations/bson_schema/{file_name}/{version}/:
     get:
@@ -279,7 +285,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
 
   /api/dictionaries/:
     get:
@@ -299,7 +305,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     patch:
       summary: Lock all Dictionaries
       operationId: lock_all_dictionaries
@@ -311,13 +317,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
 
   /api/dictionaries/{file_name}/:
     get:
@@ -333,7 +339,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Dictionary
+          description: Dictionary object
           content:
             application/json:
               schema:
@@ -343,7 +349,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     put:
       summary: Save a dictionary
       operationId: save_dictionary
@@ -355,19 +361,25 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/dictionary'
       responses:
         '200':
           description: Dictionary file
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/file'
+                $ref: '#/components/schemas/dictionary'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     delete:
       summary: Delete a dictionary
       operationId: delete_dictionary
@@ -383,13 +395,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events' 
+                $ref: '#/components/schemas/event' 
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
 
   /api/types/:
     get:
@@ -409,7 +421,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     patch:
       summary: Lock all Types
       operationId: lock_all_types
@@ -421,13 +433,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
 
   /api/types/{file_name}/:
     get:
@@ -443,7 +455,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Type
+          description: Type object
           content:
             application/json:
               schema:
@@ -453,7 +465,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     put:
       summary: Save a type
       operationId: save_type
@@ -465,19 +477,25 @@ paths:
           required: true
           schema:
             type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/type'
       responses:
         '200':
           description: Type file
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/file'
+                $ref: '#/components/schemas/type'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
     delete:
       summary: Delete a type
       operationId: delete_type
@@ -495,13 +513,131 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
+
+  /api/enumerators/:
+    get:
+      summary: List all Enumeration Files
+      operationId: list_enumerators
+      tags:
+        - Enumerators
+      responses:
+        '200':
+          description: List of enumerator files
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/files'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/event'
+    patch:
+      summary: Lock all Enumerators
+      operationId: lock_all_enumerators
+      tags:
+        - Enumerators
+      responses:
+        '200':
+          description: All enumerators locked successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/event'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/event'
+
+  /api/enumerators/{file_name}/:
+    get:
+      summary: Get an enumerator file
+      operationId: get_enumerator
+      tags:
+        - Enumerators
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Enumerator file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/enumerations'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/event'
+    put:
+      summary: Save an enumerator file
+      operationId: save_enumerator
+      tags:
+        - Enumerators
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/enumerations'
+      responses:
+        '200':
+          description: Enumerator file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/file'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/event'
+    delete:
+      summary: Delete an enumerator file
+      operationId: delete_enumerator
+      tags:
+        - Enumerators
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Enumerator file deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/event'
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/event'
 
   /api/test_data/:
     get:
@@ -521,8 +657,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
-
+                $ref: '#/components/schemas/event'
 
   /api/test_data/{file_name}/:
     get:
@@ -580,7 +715,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/file'
+                type: array
+                items: {}
         '500':
           description: Processing error
           content:
@@ -604,13 +740,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
 
   /api/migrations/:
     get:
@@ -630,9 +766,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
-
-
+                $ref: '#/components/schemas/event'
 
   /api/migrations/{file_name}/:
     get:
@@ -690,7 +824,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/file'
+                type: array
+                items: {}
         '500':
           description: Processing error
           content:
@@ -720,120 +855,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
-
-  /api/enumerators/:
-    get:
-      summary: List all Enumeration Files
-      operationId: list_enumerators
-      tags:
-        - Enumerators
-      responses:
-        '200':
-          description: List of enumerator files
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/files'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
-    patch:
-      summary: Lock all Enumerators
-      operationId: lock_all_enumerators
-      tags:
-        - Enumerators
-      responses:
-        '200':
-          description: All enumerators locked successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
-
-
-  /api/enumerators/{file_name}/:
-    get:
-      summary: Get an enumerator file
-      operationId: get_enumerator
-      tags:
-        - Enumerators
-      parameters:
-        - name: file_name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Enumerator file
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/enumerations'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
-    put:
-      summary: Save an enumerator file
-      operationId: save_enumerator
-      tags:
-        - Enumerators
-      parameters:
-        - name: file_name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Enumerator file
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/file'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
-    delete:
-      summary: Delete an enumerator file
-      operationId: delete_enumerator
-      tags:
-        - Enumerators
-      parameters:
-        - name: file_name
-          in: path
-          required: true
-          schema:
-            type: string
-      responses:
-        '200':
-          description: Enumerator file deleted
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
 
   /api/database/:
     delete:
@@ -849,13 +871,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
         '500':
           description: Processing error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/events'
+                $ref: '#/components/schemas/event'
 
   /api/health:
     get:
@@ -889,26 +911,6 @@ paths:
         '500':
           description: Processing error
 
-  /api/configurations/lock_all/:
-    patch:
-      summary: Lock all Collection Configurations
-      operationId: lock_all_configurations
-      tags:
-        - Collection Configurations
-      responses:
-        '200':
-          description: All configurations locked successfully
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
-        '500':
-          description: Processing error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/events'
-
 components:
   schemas:
     files:
@@ -930,39 +932,35 @@ components:
         size:
           type: number
           description: Size in bytes
-    enumerators:
-      type: array
-      items:
-        type: object
-        properties:
-          name:
-            type: string
-          values:
-            type: array
-            items:
-              type: object
-              properties:
-                value:
-                  type: string
-                description:
-                  type: string
-      description: Array of enumeration objects
     enumerations:
       type: object
       properties:
+        file_name:
+          type: string
+          description: Name of the enumeration file
+        _locked:
+          type: boolean
+          description: Whether the enumeration file is locked from editing
         version:
           type: integer
           description: Version number of the enumeration
         enumerators:
-          type: object
+          type: array
           description: Dictionary of enumerator names to their value mappings
-          additionalProperties:
+          items:
             type: object
-            additionalProperties:
-              type: string
-        _locked:
-          type: boolean
-          description: Whether the enumeration file is locked from editing
+            properties:
+              name:
+                type: string
+              values:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    value:
+                      type: string
+                    description:
+                      type: string
     configuration:
       description: SchemaManager Collection Configuration
       type: object
@@ -1024,100 +1022,11 @@ components:
           default: false
         root:
           description: The root property containing the dictionary schema
-          type: object
-          properties:
-            'ref': 
-              description: Reference to another dictionary
-              type: string
-            name:
-              description: The name of the property
-              type: string
-            description:
-              description: A description of the property
-              type: string
-            type:
-              description: The type of the property
-              type: string
-              enum: 
-                - object
-                - array
-                - enum
-                - enum_array
-                - TYPE
-            required:
-              description: Whether the property is required
-              type: boolean
-              default: false
-            properties:
-              description: Properties of an Object type
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/dictionary_property'
-            additional_properties:
-              description: Should the object type allow additional properties
-              type: boolean
-            items:
-              description: Items of an Array type
-              type: array
-              items:
-                $ref: '#/components/schemas/dictionary_property'
-            enum:
-              description: Enum name for enum or enum_array types
-              type: string
-          required:
-            - description
-            - name
-            - type
+          $ref: '#/components/schemas/dictionary_property'
       required:
         - file_name
         - _locked
         - root
-    dictionary_property:
-      description: A Dictionary Property (for nested properties)
-      type: object
-      properties:
-        'ref': 
-          description: Reference to another dictionary
-          type: string
-        name:
-          description: The name of the property
-          type: string
-        description:
-          description: A description of the property
-          type: string
-        type:
-          description: The type of the property
-          type: string
-          enum: 
-            - object
-            - array
-            - enum
-            - enum_array
-            - TYPE
-        required:
-          description: Whether the property is required
-          type: boolean
-          default: false
-        properties:
-          description: Properties of an Object type
-          type: object
-          additionalProperties:
-            $ref: '#/components/schemas/dictionary_property'
-        additional_properties:
-          description: Should the object type allow additional properties
-          type: boolean
-        items:
-          description: Items of an Array type
-          type: array
-          items:
-            $ref: '#/components/schemas/dictionary_property'
-        enum:
-          description: Enum name for enum or enum_array types
-          type: string
-      required:
-        - description
-        - name
-        - type
     type:
       description: A Type with root property wrapper
       type: object
@@ -1130,112 +1039,12 @@ components:
           type: boolean
           default: false
         root:
-          description: The root property containing the type definition
+          description: The root property containing the type schema
           $ref: '#/components/schemas/type_property'
       required:
         - file_name
         - _locked
         - root
-    type_property:
-      description: A Type Property with consistent structure based on type
-      type: object
-      required:
-        - description
-        - type
-        - required
-      properties:
-        name:
-          description: The name of the property
-          type: string
-        description:
-          description: A description of the type
-          type: string
-        type:
-          description: The type of the property
-          type: string
-          enum: [object, array, simple_primitive, complex_primitive, void]
-        required:
-          description: Whether the property is required
-          type: boolean
-          default: false
-      oneOf:
-        - title: Object Type
-          description: Object type with properties and additional_properties
-          type: object
-          properties:
-            type:
-              const: object
-            properties:
-              description: Properties of the object
-              type: object
-              additionalProperties:
-                $ref: '#/components/schemas/type_property'
-            additional_properties:
-              description: Whether additional properties are allowed
-              type: boolean
-              default: false
-          required:
-            - type
-            - properties
-            - additional_properties
-        - title: Array Type
-          description: Array type with items definition
-          type: object
-          properties:
-            type:
-              const: array
-            items:
-              description: Definition of array items
-              $ref: '#/components/schemas/type_property'
-          required:
-            - type
-            - items
-        - title: Simple Primitive Type
-          description: Simple primitive with schema definition
-          type: object
-          properties:
-            type:
-              const: simple_primitive
-            schema:
-              description: Schema definition for simple primitive
-              type: object
-              additionalProperties: true
-          required:
-            - type
-            - schema
-        - title: Complex Primitive Type
-          description: Complex primitive with separate JSON and BSON type definitions
-          type: object
-          properties:
-            type:
-              const: complex_primitive
-            json_type:
-              description: JSON schema definition
-              type: object
-              additionalProperties: true
-            bson_type:
-              description: BSON schema definition
-              type: object
-              additionalProperties: true
-          required:
-            - type
-            - json_type
-            - bson_type
-        - title: Custom Type
-          description: Custom type with just core attributes
-          type: object
-          properties:
-            type:
-              description: Custom type name (e.g., 'string', 'email', etc.)
-              type: string
-              not:
-                enum: [object, array, simple_primitive, complex_primitive, void]
-
-    events:
-      description: Array of processing or validation events
-      type: array
-      items:
-        $ref: '#/components/schemas/event'
     event:
       type: object
       required: [id, type, status]
@@ -1290,3 +1099,217 @@ components:
                   - default
                   - file
                   - environment
+    property:
+      description: A Property type
+      oneOf:
+        - $ref: '#/components/schemas/type_array'
+        - $ref: '#/components/schemas/type_complex'
+        - $ref: '#/components/schemas/type_constant'
+        - $ref: '#/components/schemas/type_custom'
+        - $ref: '#/components/schemas/type_enum_array'
+        - $ref: '#/components/schemas/type_enum'
+        - $ref: '#/components/schemas/type_object'
+        - $ref: '#/components/schemas/type_one_of'
+        - $ref: '#/components/schemas/type_ref'
+        - $ref: '#/components/schemas/type_simple'
+    type_property:
+      description: A Type Property type
+      oneOf:
+        - $ref: '#/components/schemas/type_array'
+        - $ref: '#/components/schemas/type_complex'
+        - $ref: '#/components/schemas/type_custom'
+        - $ref: '#/components/schemas/type_object'
+        - $ref: '#/components/schemas/type_simple'
+    dictionary_property:
+      description: A Dictionary Property type
+      oneOf:
+        - $ref: '#/components/schemas/type_array'
+        - $ref: '#/components/schemas/type_constant'
+        - $ref: '#/components/schemas/type_custom'
+        - $ref: '#/components/schemas/type_enum_array'
+        - $ref: '#/components/schemas/type_enum'
+        - $ref: '#/components/schemas/type_object'
+        - $ref: '#/components/schemas/type_one_of'
+        - $ref: '#/components/schemas/type_ref'
+    type_array:
+      description: An Array type
+      type: object
+      properties:
+        name:
+          description: The name of the Property
+          type: string
+        description:
+          description: A description of the property
+          type: string
+        type:
+          description: Array Type Indicator
+          type: string
+          const: array
+        required:
+          description: Whether the property is required
+          type: boolean
+        items:
+          description: The items of the array
+          $ref: '#/components/schemas/property'
+    type_complex:
+        name:
+          description: The name of the Property
+          type: string
+        description:
+          description: A description of the property
+          type: string
+        type:
+          description: Complex Type Indicator
+          type: string
+          const: complex
+        required:
+          description: Whether the property is required
+          type: boolean
+        json_type:
+          description: JSON schema definition for complex type
+          type: object
+          additionalProperties: true
+        bson_type:
+          description: BSON schema definition for complex type
+          type: object
+          additionalProperties: true
+    type_constant:
+        name:
+          description: The name of the Property
+          type: string
+        description:
+          description: A description of the property
+          type: string
+        type:
+          description: Constant Type Indicator
+          type: string
+          const: constant
+        required:
+          description: Whether the property is required
+          type: boolean
+        constant:
+          description: Constant value for constant type
+          type: string
+    type_custom:
+        name:
+          description: The name of the Property
+          type: string
+        description:
+          description: A description of the property
+          type: string
+        type:
+          description: Custom Type name
+          type: string
+        required:
+          description: Whether the property is required
+          type: boolean
+    type_enum_array:
+        name:
+          description: The name of the Property
+          type: string
+        description:
+          description: A description of the property
+          type: string
+        type:
+          description: Enum Array Type Indicator
+          type: string
+          const: enum_array
+        required:
+          description: Whether the property is required
+          type: boolean
+        enums:
+          description: Enum name for enum or enum_array types
+          type: string
+    type_enum:
+        name:
+          description: The name of the Property
+          type: string
+        description:
+          description: A description of the property
+          type: string
+        type:
+          description: Enum Type Indicator
+          type: string
+          const: enum
+        required:
+          description: Whether the property is required
+          type: boolean
+        enums:
+          description: Enum name for enum or enum_array types
+          type: string
+    type_object:
+        name:
+          description: The name of the Property
+          type: string
+        description:
+          description: A description of the property
+          type: string
+        type:
+          description: Object Type Indicator
+          type: string
+          const: object
+        required:
+          description: Whether the property is required
+          type: boolean
+        additional_properties:
+          description: Whether the object type allows additional properties
+          type: boolean
+        properties:
+          description: Properties of an Object type (array of property objects)
+          type: array
+          items:
+            $ref: '#/components/schemas/property'
+    type_one_of:
+        name:
+          description: The name of the Property
+          type: string
+        description:
+          description: A description of the property
+          type: string
+        type:
+          description: OneOf Type Indicator
+          type: string
+          const: one_of
+        required:
+          description: Whether the property is required
+          type: boolean
+        properties:
+          description: Properties of an OneOf type (array of property objects)
+          type: array
+          items:
+            $ref: '#/components/schemas/property'
+    type_ref:
+        name:
+          description: The name of the property
+          type: string
+        description:
+          description: A description of the property
+          type: string
+        type:
+          description: Ref Type Indicator
+          type: string
+          const: ref
+        required:
+          description: Whether the property is required
+          type: boolean
+        ref:
+          description: Reference to another type file
+          type: string
+    type_simple:
+        name:
+          description: The name of the Property
+          type: string
+        description:
+          description: A description of the property
+          type: string
+        type:
+          description: Simple Type Indicator
+          type: string
+          const: simple
+        required:
+          description: Whether the property is required
+          type: boolean
+        schema:
+          description: Schema definition for simple type
+          type: object
+          additionalProperties: true
