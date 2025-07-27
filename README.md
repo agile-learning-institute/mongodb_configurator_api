@@ -4,6 +4,9 @@ This project builds a the [MongoDB Configurator](https://github.com/agile-learni
 
 ## Quick Start
 
+NOTE: If you want to use the Configurator - see [MongoDB Configurator](https://github.com/agile-learning-institute/mongodb_configurator) for instructions. 
+
+If you are an API developer looking to contribute - you're in the right place!
 ### Prerequisites
 
 - [Python](https://www.python.org/downloads/) 3.12 or later
@@ -39,15 +42,16 @@ export LOGGING_LEVEL=DEBUG
 #####################
 # Running test server  - uses INPUT_FOLDER setting# 
 pipenv run database     # Start the backing mongo database
-pipenv run dev          # Start the server locally - expects database to be running
+pipenv run dev          # RUn the dev server - expects database to be running
 pipenv run debug        # Start locally with DEBUG logging
 pipenv run batch        # Run locally in Batch mode (process and exit)
 
 #####################
-# Building and Testing the container (before a PR)
+# Building and Testing the container
 pipenv run container    # Build the container
-pipenv run api          # Run the DB and API containers
-pipenv run service      # Run the DB, API, and SPA containers
+pipenv run service      # DB, API and SPA containers
+pipenv run api          # DB, API containers, uses $INPUT_FOLDER
+pipenv run playground   # DB, API /playground (ignores $INPUT_FOLDER)
 # visit http://localhost:8082 
 
 pipenv run down         # Stops all testing containers
@@ -69,16 +73,24 @@ configurator/
 │   ├── configuration_routes.py     # Configuration Routes
 │   ├── database_routes.py          # Database Routes
 │   ├── dictionary_routes.py        # Dictionary Routes
-│   ├── enumerator_routes.py        # Enumerator Routes
+│   ├── enumerator_routes.py        # Enumeration Routes
 │   ├── migration_routes.py         # Migration Routes
 │   ├── test_data_routes.py         # Test Data Routes
 │   ├── type_routes.py              # Type Routes
 ├── services/                   # Processing, Rendering Models
-│   ├── configuration_services.py   # Configuration Services
-│   ├── dictionary_services.py      # Dictionary Services
-│   ├── enumerator_service.py       # Enumerator Services
-│   ├── template_service.py         # Template Services
-│   ├── type_services.py            # Type Services
+│   ├── property                    # Dictionary and Type Properties
+│   │   ├── base.py                 # Base class for all types
+│   │   ├── property.py             # Polymorphic Type factory
+│   │   ├── {name}_type.py          # Type specific with render details
+│   │   ├── ...
+│   ├── service_base.py             # Base class for file based services ⭐️
+│   ├── configuration_services.py   # ⭐️Configuration Services [Version]
+│   ├── dictionary_services.py      # ⭐️Dictionary Services
+│   ├── enumerator_service.py       # ⭐️Enumeration Services
+│   ├── type_services.py            # ⭐️Type Services
+│   ├── template_service.py         # Service to create new Config and Dictionary
+│   ├── configuration_version.py    # Configuration Version
+│   ├── enumerators.py              # Convenience wrapper for all [Enumeration]
 ├── utils/                      # Utilities
 │   ├── config.py                   # API Configuration
 │   ├── configurator_exception.py   # Exception Classes
@@ -96,23 +108,15 @@ The `tests/` directory contains python unit tests, stepci black box, and testing
 ```
 tests/
 ├── test_server.py          # Server.py unit tests
-├── integration/            # Integration tests dependent on backing services
-├── models/                 # Model class unit tests
+├── integration/            # Integration tests dependent on backing test_case
 ├── routes/                 # Route class unit tests
 ├── services/               # Service layer unit tests
-├── utils/                  # Utility unit tests
 ├── stepci/                 # API Black Box testing
+├── utils/                  # Utility unit tests
 ├── test_cases/             # Test data 
 │   ├── failing_*/          # Integration Test data for failure use cases
-│   ├── failing_not_parsable/   # Non yaml/json files
-│   ├── failing_refs/           # Circular/Missing Refs
 │   ├── passing_*/          # Integration Test data for success use cases
-│   ├── passing_complex_refs/   # one_of plus refs
-│   ├── passing_config_files/   # API Config file testing
-│   ├── passing_empty/          # Minimum valid input
-│   ├── passing_process/        # More complex processing
-│   ├── passing_template/       # Playground / new project template
-│   ├── passing_type_renders/   # Custom type render testing
+│   ├── passing_type_renders/   # Not in process_and_render tests
 │   ├── playground/         # Playground for interactive testing
 │   ├── stepci/             # Configuration for step ci testing - setup/tear down in tests
 
