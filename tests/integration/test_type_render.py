@@ -32,7 +32,6 @@ class TestTypeRender(unittest.TestCase):
         """Test rendering of all type files to JSON and BSON schemas"""
         # Arrange
         type_files = FileIO.get_documents(self.config.TYPE_FOLDER)
-        print(f"Processing type files: {type_files}")
         
         # Act & Assert
         for type_file in type_files:
