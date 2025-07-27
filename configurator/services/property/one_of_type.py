@@ -15,11 +15,12 @@ class OneOfType(BaseProperty):
         return the_dict
 
     def to_json_schema(self, enumerations: Enumerations, ref_stack: list = []):
-        the_schema = super().to_json_schema(enumerations, ref_stack)
+        the_schema = {}
+        the_schema['description'] = self.description
         the_schema['oneOf'] = [property.to_json_schema(enumerations, ref_stack) for property in self.properties]
         return the_schema
 
     def to_bson_schema(self, enumerations: Enumerations, ref_stack: list = []):
-        the_schema = super().to_bson_schema(enumerations, ref_stack)
+        the_schema = {}
         the_schema['oneOf'] = [property.to_bson_schema(enumerations, ref_stack) for property in self.properties]
         return the_schema

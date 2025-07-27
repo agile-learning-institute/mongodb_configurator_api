@@ -76,7 +76,6 @@
       }
     },
     "metadata": {
-      "bsonType": "one_of",
       "oneOf": [
         {
           "bsonType": "object",

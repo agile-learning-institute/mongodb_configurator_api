@@ -73,7 +73,6 @@ properties:
       - thriller
   metadata:
     description: Media meta data - one of several types (video, audio, image)
-    type: one_of
     oneOf:
     - description: Video content structure
       type: object

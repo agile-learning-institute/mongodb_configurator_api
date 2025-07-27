@@ -132,7 +132,6 @@
           "observations": {
             "bsonType": "array",
             "items": {
-              "bsonType": "one_of",
               "oneOf": [
                 {
                   "bsonType": "object",
@@ -170,7 +169,6 @@
                   ]
                 },
                 {
-                  "bsonType": "one_of",
                   "oneOf": [
                     {
                       "bsonType": "object",
@@ -353,7 +351,6 @@
                   "required": []
                 },
                 {
-                  "bsonType": "one_of",
                   "oneOf": [
                     {
                       "bsonType": "object",

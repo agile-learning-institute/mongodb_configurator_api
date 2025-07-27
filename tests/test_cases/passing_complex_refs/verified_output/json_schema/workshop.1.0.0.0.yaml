@@ -137,7 +137,6 @@ properties:
           type: array
           items:
             description: ''
-            type: one_of
             oneOf:
             - description: A stakeholder of a Stakeholder exercise
               type: object
@@ -172,7 +171,6 @@ properties:
               required:
               - users
             - description: An empathy observation from an Empathy Mapping exercise
-              type: one_of
               oneOf:
               - description: ''
                 type: object
@@ -333,7 +331,6 @@ properties:
                     pattern: ^[^\s]{1,40}$
               required: []
             - description: An observation for a Retrospective exercise
-              type: one_of
               oneOf:
               - description: ''
                 type: object
