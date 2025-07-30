@@ -13,6 +13,7 @@ def event_route(event_id: str, event_type: str, operation_name: str):
             try:
                 result = f(*args, **kwargs)
                 # Routes are responsible for their own serialization
+                logger.info(f"Configurator success in {operation_name}")
                 return result
             except ConfiguratorException as e:
                 logger.error(f"Configurator error in {operation_name}: {str(e)}")
