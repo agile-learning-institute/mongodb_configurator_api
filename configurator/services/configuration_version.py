@@ -8,6 +8,9 @@ from configurator.utils.version_manager import VersionManager
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.services.enumeration_service import Enumerations
 from configurator.services.enumerators import Enumerators
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Version:
     def __init__(self, collection_name: str, document: dict):
@@ -54,6 +57,7 @@ class Version:
                     "target_version": self.version_number.get_version_str()
                 }
                 event.record_success()
+                logger.info(f"Version {self.version_str} already implemented")
                 return event
             
             # Remove schema validation
@@ -61,6 +65,7 @@ class Version:
             event.append_events([sub_event])
             sub_event.append_events(mongo_io.remove_schema_validation(self.collection_name))
             sub_event.record_success()
+            logger.info(f"Schema validation removed for {self.collection_name}")
 
             # Remove indexes
             if self.drop_indexes:
@@ -69,6 +74,7 @@ class Version:
                 for index_name in self.drop_indexes:
                     sub_event.append_events(mongo_io.remove_index(self.collection_name, index_name))                    
                 sub_event.record_success()
+                logger.info(f"Indexes removed for {self.collection_name}")
 
             # Execute migrations
             if self.migrations:
@@ -78,6 +84,7 @@ class Version:
                     migration_file = os.path.join(self.config.INPUT_FOLDER, self.config.MIGRATIONS_FOLDER, filename)
                     sub_event.append_events(mongo_io.execute_migration_from_file(self.collection_name, migration_file))
                     sub_event.record_success()
+                logger.info(f"Migrations executed for {self.collection_name}")
 
             # Add indexes
             if self.add_indexes:
@@ -86,6 +93,7 @@ class Version:
                 for index in self.add_indexes:
                     sub_event.append_events(mongo_io.add_index(self.collection_name, index))
                 sub_event.record_success()
+                logger.info(f"Indexes added for {self.collection_name}")
 
             # Apply schema validation
             sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="APPLY_SCHEMA_VALIDATION")
@@ -96,6 +104,7 @@ class Version:
             # Add schema context to event
             sub_event.append_events(mongo_io.apply_schema_validation(self.collection_name, bson_schema))
             sub_event.record_success()
+            logger.info(f"Schema validation applied for {self.collection_name}")
 
             # Load test data
             if self.test_data:
@@ -105,6 +114,7 @@ class Version:
                 sub_event.data = {"test_data_path": test_data_path}
                 sub_event.append_events(mongo_io.load_json_data(self.collection_name, test_data_path))
                 sub_event.record_success()
+                logger.info(f"Test data loaded for {self.collection_name}")
 
             # Update version
             sub_event = ConfiguratorEvent(event_id="PRO-08", event_type="UPDATE_VERSION")
@@ -116,7 +126,7 @@ class Version:
             )
             sub_event.data = result
             sub_event.record_success()
-
+            logger.info(f"Version {self.version_str} processed")
             event.record_success()
             return event
         

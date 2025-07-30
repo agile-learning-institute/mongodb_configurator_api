@@ -21,7 +21,14 @@ COPY docs/ ./docs/
 COPY README.md LICENSE ./
 
 # Copy playground test cases for development/testing
-COPY tests/test_cases/passing_template /playground
+COPY tests/test_cases/passing_template/api_playground/* /playground/api_config/
+COPY tests/test_cases/passing_template/configurations/* /playground/configurations/
+COPY tests/test_cases/passing_template/dictionaries/* /playground/dictionaries/
+COPY tests/test_cases/passing_template/enumerators/* /playground/enumerators/
+COPY tests/test_cases/passing_template/migrations/* /playground/migrations/
+COPY tests/test_cases/passing_template/test_data/* /playground/test_data/
+COPY tests/test_cases/passing_template/types/* /playground/types/
+RUN chmod -R 777 /playground
 
 # Install dependencies
 RUN pipenv install --deploy --system
@@ -34,7 +41,8 @@ RUN pip install gunicorn
 
 # Create non-root user for security
 RUN useradd --create-home --shell /bin/bash app && \
-    chown -R app:app /opt/mongo_configurator
+    chown -R app:app /opt/mongo_configurator && \
+    chown -R app:app /playground
 
 # Switch to non-root user
 USER app
