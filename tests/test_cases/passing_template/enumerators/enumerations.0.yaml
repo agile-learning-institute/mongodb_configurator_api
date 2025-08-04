@@ -1,10 +1,10 @@
-version: 0
+_locked: true
 enumerators:
-  - name: default_status
-    values:
-      - value: active
-        description: Not Deleted
-      - value: archived
-        description: Soft Delete Indicator
-_locked: false
+- name: default_status
+  values:
+  - description: Not Deleted
+    value: active
+  - description: Soft Delete Indicator
+    value: archived
 file_name: enumerations.0.yaml
+version: 0

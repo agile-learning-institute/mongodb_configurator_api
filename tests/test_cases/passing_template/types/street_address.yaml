@@ -1,9 +1,11 @@
+_locked: true
+file_name: street_address.yaml
 root:
-  name: street_address
   description: A US street address
-  type: simple
+  name: street_address
+  required: false
   schema:
-    type: string
-    minLength: 1
     maxLength: 100
-  required: false 
+    minLength: 1
+    type: string
+  type: simple
