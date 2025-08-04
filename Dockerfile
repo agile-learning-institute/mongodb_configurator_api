@@ -30,11 +30,11 @@ COPY tests/test_cases/passing_template/test_data/* /playground/test_data/
 COPY tests/test_cases/passing_template/types/* /playground/types/
 RUN chmod -R 777 /playground
 
+# Create build timestamp
+RUN echo $(date +'%Y%m%d-%H%M%S') > /opt/mongo_configurator/configurator/API_BUILT_AT
+
 # Install dependencies
 RUN pipenv install --deploy --system
-
-# Create build timestamp
-RUN echo $(date +'%Y%m%d-%H%M%S') > /opt/mongo_configurator/API_BUILT_AT
 
 # Install Gunicorn for production
 RUN pip install gunicorn

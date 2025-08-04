@@ -1,8 +1,10 @@
+_locked: true
+file_name: state_code.yaml
 root:
-  name: state_code
   description: A US state code
-  type: simple
+  name: state_code
+  required: false
   schema:
-    type: string
     pattern: ^[A-Z]{2}$
-  required: false 
+    type: string
+  type: simple
