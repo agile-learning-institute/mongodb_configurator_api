@@ -3,7 +3,7 @@ description: A collection for testing
 file_name: sample.yaml
 title: Sample Collection
 versions:
-- _locked: false
+- _locked: true
   add_indexes:
   - key:
       first_name: 1
@@ -20,7 +20,7 @@ versions:
   migrations: []
   test_data: sample.1.0.0.1.json
   version: 1.0.0.1
-- _locked: false
+- _locked: true
   add_indexes:
   - key:
       full_name: 1
