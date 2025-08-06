@@ -35,3 +35,8 @@ class Enumerations(ServiceBase):
         mongo_io.upsert(self.config.ENUMERATORS_COLLECTION_NAME, {"version": self.version}, self.to_dict())
         event.record_success()
         return event
+    
+    @staticmethod
+    def lock_all(status: bool = True):
+        return ServiceBase.lock_all(Enumerations, Config.get_instance().ENUMERATOR_FOLDER, status)
+    

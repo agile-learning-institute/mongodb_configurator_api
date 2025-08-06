@@ -90,6 +90,20 @@ tests:
               version: 2
               enumerators: []
 
+      # Test lock all enumerators endpoint (should fail since not implemented)
+      - name: Lock All Enumerators
+        http:
+          url: http://${{env.host}}/api/enumerators/
+          method: PATCH
+          headers:
+            Content-Type: application/json
+          check:
+            status: /200/
+            jsonpath:
+              event_id: ENU-04
+              event_type: LOCK_ENUMERATIONS
+              status: success
+
       # Verify the PUT worked by getting individual files
       - name: Get Enumerations 1 After Put
         http:
