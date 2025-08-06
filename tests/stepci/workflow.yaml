@@ -8,8 +8,6 @@ tests:
     $ref: ./tests/stepci/observability.yaml#/observable
   configurations:
     $ref: ./tests/stepci/configurations.yaml#/tests/configurations
-  rendering:
-    $ref: ./tests/stepci/rendering.yaml#/rendering
   processing:
     $ref: ./tests/stepci/processing.yaml#/processing
   dictionaries:

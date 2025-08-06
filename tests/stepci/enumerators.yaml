@@ -7,8 +7,52 @@ tests:
   enumerators:
     name: Test Enumerators Endpoints
     steps:
-      # Create new test enumeration files (different from existing ones)
-      - name: Create Test Enumerations A
+      - name: Render JSON Schema for sample.1.0.0.1
+        http:
+          url: http://${{env.host}}/api/configurations/json_schema/sample.yaml/1.0.0.1/
+          method: GET
+          check:
+            status: /200/
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                properties:
+                  type: object
+              required:
+                - type
+                - properties
+
+      - name: Render BSON Schema for sample.1.0.0.1
+        http:
+          url: http://${{env.host}}/api/configurations/bson_schema/sample.yaml/1.0.0.1/
+          method: GET
+          check:
+            status: /200/
+            schema:
+              type: object
+              properties:
+                bsonType:
+                  type: string
+                properties:
+                  type: object
+              required:
+                - bsonType
+                - properties   
+      # GET enumerators and confirm there are 3 existing files
+      - name: Get All Enumerators (Initial)
+        http:
+          url: http://${{env.host}}/api/enumerators/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              $: /^\[.*\]$/
+            length: 3
+
+      # Add two new enumerators
+      - name: Create Test Enum A
         http:
           url: http://${{env.host}}/api/enumerators/test_enum_a.yaml/
           method: PUT
@@ -39,7 +83,7 @@ tests:
               enumerators[0].values[0].value: pending
               enumerators[0].values[0].description: Awaiting Processing
 
-      - name: Create Test Enumerations B
+      - name: Create Test Enum B
         http:
           url: http://${{env.host}}/api/enumerators/test_enum_b.yaml/
           method: PUT
@@ -71,7 +115,18 @@ tests:
               enumerators[0].values[0].value: low
               enumerators[0].values[0].description: Low Priority
 
-      # Test lock all enumerators endpoint
+      # GET enumerators and confirm there are now 5 files
+      - name: Get All Enumerators (After Adding)
+        http:
+          url: http://${{env.host}}/api/enumerators/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              $: /^\[.*\]$/
+            length: 5
+
+      # Lock all enumerators
       - name: Lock All Enumerators
         http:
           url: http://${{env.host}}/api/enumerators/
@@ -83,7 +138,7 @@ tests:
             jsonpath:
               status: SUCCESS
 
-      # Verify test files are locked by checking individual files
+      # GET the two test files and confirm they are locked with original values
       - name: Verify Test Enum A is Locked
         http:
           url: http://${{env.host}}/api/enumerators/test_enum_a.yaml/
@@ -112,7 +167,15 @@ tests:
               enumerators[0].values[0].value: low
               enumerators[0].values[0].description: Low Priority
 
-      # Unlock test files individually
+      # Try to delete a locked file (should fail with 500)
+      - name: Try to Delete Locked Test Enum A (Should Fail)
+        http:
+          url: http://${{env.host}}/api/enumerators/test_enum_a.yaml/
+          method: DELETE
+          check:
+            status: /500/
+
+      # Unlock the test files
       - name: Unlock Test Enum A
         http:
           url: http://${{env.host}}/api/enumerators/test_enum_a.yaml/
@@ -176,36 +239,7 @@ tests:
               enumerators[0].values[0].value: low
               enumerators[0].values[0].description: Low Priority
 
-      # Verify test files are unlocked by checking individual files
-      - name: Verify Test Enum A is Unlocked
-        http:
-          url: http://${{env.host}}/api/enumerators/test_enum_a.yaml/
-          method: GET
-          check:
-            status: /200/
-            jsonpath:
-              file_name: test_enum_a.yaml
-              _locked: false
-              version: 1
-              enumerators[0].name: test_status
-              enumerators[0].values[0].value: pending
-              enumerators[0].values[0].description: Awaiting Processing
-
-      - name: Verify Test Enum B is Unlocked
-        http:
-          url: http://${{env.host}}/api/enumerators/test_enum_b.yaml/
-          method: GET
-          check:
-            status: /200/
-            jsonpath:
-              file_name: test_enum_b.yaml
-              _locked: false
-              version: 2
-              enumerators[0].name: priority_level
-              enumerators[0].values[0].value: low
-              enumerators[0].values[0].description: Low Priority
-
-      # Delete the created test files (cleanup at the end)
+      # Delete the test files
       - name: Delete Test Enum A
         http:
           url: http://${{env.host}}/api/enumerators/test_enum_a.yaml/
@@ -223,3 +257,14 @@ tests:
             status: /200/
             jsonpath:
               status: SUCCESS
+
+      # GET enumerators and confirm there are back to 3 files
+      - name: Get All Enumerators (Final)
+        http:
+          url: http://${{env.host}}/api/enumerators/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              $: /^\[.*\]$/
+            length: 3
