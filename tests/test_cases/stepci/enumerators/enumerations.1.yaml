@@ -1,4 +1,4 @@
-_locked: false
+_locked: true
 enumerators:
 - name: default_status
   values:

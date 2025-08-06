@@ -90,7 +90,7 @@ tests:
               version: 2
               enumerators: []
 
-      # Test lock all enumerators endpoint (should fail since not implemented)
+      # Test lock all enumerators endpoint
       - name: Lock All Enumerators
         http:
           url: http://${{env.host}}/api/enumerators/
@@ -100,12 +100,22 @@ tests:
           check:
             status: /200/
             jsonpath:
-              event_id: ENU-04
-              event_type: LOCK_ENUMERATIONS
-              status: success
+              status: SUCCESS
 
-      # Verify the PUT worked by getting individual files
-      - name: Get Enumerations 1 After Put
+      # Verify files are locked by checking individual files
+      - name: Verify Enumerations 0 is Locked
+        http:
+          url: http://${{env.host}}/api/enumerators/enumerations.0.yaml/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              file_name: enumerations.0.yaml
+              _locked: true
+              version: 0
+              enumerators: []
+
+      - name: Verify Enumerations 1 is Locked
         http:
           url: http://${{env.host}}/api/enumerators/enumerations.1.yaml/
           method: GET
@@ -113,7 +123,7 @@ tests:
             status: /200/
             jsonpath:
               file_name: enumerations.1.yaml
-              _locked: false
+              _locked: true
               version: 1
               enumerators[0].name: default_status
               enumerators[0].values[0].value: active
@@ -122,8 +132,41 @@ tests:
               enumerators[1].values[0].value: foo
               enumerators[1].values[0].description: bar
 
-      # Restore to original state
-      - name: Restore Original Enumerations 1
+      - name: Verify Enumerations 2 is Locked
+        http:
+          url: http://${{env.host}}/api/enumerators/enumerations.2.yaml/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              file_name: enumerations.2.yaml
+              _locked: true
+              version: 2
+              enumerators: []
+
+      # Unlock files individually
+      - name: Unlock Enumerations 0
+        http:
+          url: http://${{env.host}}/api/enumerators/enumerations.0.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "file_name": "enumerations.0.yaml",
+              "_locked": false,
+              "version": 0,
+              "enumerators": []
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: enumerations.0.yaml
+              _locked: false
+              version: 0
+              enumerators: []
+
+      - name: Unlock Enumerations 1
         http:
           url: http://${{env.host}}/api/enumerators/enumerations.1.yaml/
           method: PUT
@@ -156,3 +199,100 @@ tests:
               file_name: enumerations.1.yaml
               _locked: false
               version: 1
+              enumerators[0].name: default_status
+              enumerators[0].values[0].value: active
+              enumerators[0].values[0].description: Not Deleted
+              enumerators[1].name: test_enum
+              enumerators[1].values[0].value: foo
+              enumerators[1].values[0].description: bar
+
+      - name: Unlock Enumerations 2
+        http:
+          url: http://${{env.host}}/api/enumerators/enumerations.2.yaml/
+          method: PUT
+          headers:
+            Content-Type: application/json
+          body: |
+            {
+              "file_name": "enumerations.2.yaml",
+              "_locked": false,
+              "version": 2,
+              "enumerators": []
+            }
+          check:
+            status: /200/
+            jsonpath:
+              file_name: enumerations.2.yaml
+              _locked: false
+              version: 2
+              enumerators: []
+
+      # Verify files are unlocked by checking individual files
+      - name: Verify Enumerations 0 is Unlocked
+        http:
+          url: http://${{env.host}}/api/enumerators/enumerations.0.yaml/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              file_name: enumerations.0.yaml
+              _locked: false
+              version: 0
+              enumerators: []
+
+      - name: Verify Enumerations 1 is Unlocked
+        http:
+          url: http://${{env.host}}/api/enumerators/enumerations.1.yaml/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              file_name: enumerations.1.yaml
+              _locked: false
+              version: 1
+              enumerators[0].name: default_status
+              enumerators[0].values[0].value: active
+              enumerators[0].values[0].description: Not Deleted
+              enumerators[1].name: test_enum
+              enumerators[1].values[0].value: foo
+              enumerators[1].values[0].description: bar
+
+      - name: Verify Enumerations 2 is Unlocked
+        http:
+          url: http://${{env.host}}/api/enumerators/enumerations.2.yaml/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              file_name: enumerations.2.yaml
+              _locked: false
+              version: 2
+              enumerators: []
+
+      # Delete the created files (cleanup at the end)
+      - name: Delete Enumerations 0
+        http:
+          url: http://${{env.host}}/api/enumerators/enumerations.0.yaml/
+          method: DELETE
+          check:
+            status: /200/
+            jsonpath:
+              status: SUCCESS
+
+      - name: Delete Enumerations 1
+        http:
+          url: http://${{env.host}}/api/enumerators/enumerations.1.yaml/
+          method: DELETE
+          check:
+            status: /200/
+            jsonpath:
+              status: SUCCESS
+
+      - name: Delete Enumerations 2
+        http:
+          url: http://${{env.host}}/api/enumerators/enumerations.2.yaml/
+          method: DELETE
+          check:
+            status: /200/
+            jsonpath:
+              status: SUCCESS
