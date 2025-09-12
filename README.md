@@ -32,9 +32,9 @@ pipenv run service
 pipenv run test
 
 # Select a test_case for the server
-export INPUT_FOLDER=./tests/test_cases/small_sample
-export INPUT_FOLDER=./tests/test_cases/large_sample
-export INPUT_FOLDER=./tests/test_cases/playground
+export INPUT_FOLDER=./tests/test_cases/passing_process
+export INPUT_FOLDER=./tests/test_cases/passing_template
+export INPUT_FOLDER=./tests/test_cases/stepci
 
 # Set Debug Mode if needed
 export LOGGING_LEVEL=DEBUG
@@ -139,18 +139,23 @@ The Swagger UI provides:
 
 ```bash
 # Health check
-curl -X GET http://localhost:8081/api/health
+curl -X GET http://localhost:8081/api/health | jq
 
 # Get current configuration
-curl -X GET http://localhost:8081/api/config/
+curl -X GET http://localhost:8081/api/config/ | jq
 
 # List all configurations
-curl -X GET http://localhost:8081/api/configurations/
+curl -X GET http://localhost:8081/api/configurations/ | jq
 
 # Process all configurations
-curl -X POST http://localhost:8081/api/configurations/
+curl -X POST http://localhost:8081/api/configurations/ | jq
 
 # Lock all types
-curl -X PATCH http://localhost:8081/api/types/
+curl -X PATCH http://localhost:8081/api/types/ | jq
+
+# Update a dictionary
+curl -X PUT localhost:8081/api/dictionaries/sample.1.0.0.yaml/ \
+  -H "Content-Type: application/json" \
+  --data @./temp.json | jq
 ```
 ---
