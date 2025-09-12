@@ -1,7 +1,7 @@
 _locked: true
 file_name: appointment.yaml
 root:
-  additionalProperties: false
+  additional_properties: false
   description: A date/time range
   name: appointment
   properties:

@@ -1,7 +1,7 @@
 _locked: true
 file_name: sample.1.0.0.yaml
 root:
-  additionalProperties: false
+  additional_properties: false
   description: A simple collection for testing
   name: root
   properties:

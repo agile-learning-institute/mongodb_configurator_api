@@ -1,7 +1,7 @@
 _locked: true
 file_name: breadcrumb.yaml
 root:
-  additionalProperties: false
+  additional_properties: false
   description: A tracking breadcrumb
   name: breadcrumb
   properties:

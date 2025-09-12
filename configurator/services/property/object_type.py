@@ -12,7 +12,7 @@ class ObjectType(BaseProperty):
 
     def to_dict(self):
         the_dict = super().to_dict()
-        the_dict['additionalProperties'] = self.additional_properties
+        the_dict['additional_properties'] = self.additional_properties
         the_dict['properties'] = [property.to_dict() for property in self.properties]
         return the_dict
 
