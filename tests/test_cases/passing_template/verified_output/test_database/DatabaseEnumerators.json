@@ -42,6 +42,13 @@
           {"value": "active", "description": "Not Deleted"},
           {"value": "archived", "description": "Soft Delete Indicator"}
         ]
+      },
+      {
+        "name": "test_enum",
+        "values": [
+          {"value": "foo", "description": "bar"},
+          {"value": "bar", "description": "bat"}
+        ]
       }
     ]
   }

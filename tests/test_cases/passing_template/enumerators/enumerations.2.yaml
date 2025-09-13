@@ -8,5 +8,11 @@ enumerators:
     value: active
   - description: Soft Delete Indicator
     value: archived
+- name: test_enum
+  values:
+  - description: bar
+    value: foo
+  - description: bat
+    value: bar
 file_name: enumerations.2.yaml
 version: 2
