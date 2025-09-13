@@ -7,6 +7,7 @@ This project builds a the [MongoDB Configurator](https://github.com/agile-learni
 NOTE: If you want to use the Configurator - see [MongoDB Configurator](https://github.com/agile-learning-institute/mongodb_configurator) for instructions. 
 
 If you are an API developer looking to contribute - you're in the right place!
+
 ### Prerequisites
 
 - [Python](https://www.python.org/downloads/) 3.12 or later
