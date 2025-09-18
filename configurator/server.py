@@ -25,14 +25,6 @@ def handle_exit(signum, frame):
 signal.signal(signal.SIGTERM, handle_exit)
 signal.signal(signal.SIGINT, handle_exit)
 
-# Initialize Flask App
-from flask import Flask
-from configurator.utils.ejson_encoder import MongoJSONEncoder
-project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-docs_path = os.path.join(project_root, 'docs')
-app = Flask(__name__, static_folder=docs_path, static_url_path='/docs')
-app.json = MongoJSONEncoder(app)  # Enable MongoDB object conversion
-
 # Auto-processing logic - runs when module is imported (including by Gunicorn)
 if config.AUTO_PROCESS:
     try:
@@ -55,6 +47,14 @@ if config.AUTO_PROCESS:
 if config.EXIT_AFTER_PROCESSING:
     logger.info(f"============= Exiting After Processing ===============")
     sys.exit(0)
+
+# Initialize Flask App
+from flask import Flask
+from configurator.utils.ejson_encoder import MongoJSONEncoder
+project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+docs_path = os.path.join(project_root, 'docs')
+app = Flask(__name__, static_folder=docs_path, static_url_path='/docs')
+app.json = MongoJSONEncoder(app)  # Enable MongoDB object conversion
 
 # Apply Prometheus monitoring middleware
 from prometheus_flask_exporter import PrometheusMetrics

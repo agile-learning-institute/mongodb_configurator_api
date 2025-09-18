@@ -1,14 +1,14 @@
-import json
 import os
+import json
+import yaml
 from datetime import datetime
 from pathlib import Path
-
-import yaml
-from bson import json_util
 
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 
+import logging
+logger = logging.getLogger(__name__)
 
 class File:
     """Class representing a file with its properties."""
@@ -87,7 +87,7 @@ class FileIO:
                 if extension == ".yaml":
                     return yaml.safe_load(f)
                 elif extension == ".json":
-                    return json_util.loads(f.read())
+                    return json.loads(f.read())
         except FileNotFoundError:
             event = ConfiguratorEvent(event_id="FIL-06", event_type="GET_DOCUMENT")
             event.record_failure("File not found")
@@ -110,7 +110,7 @@ class FileIO:
                 if extension == ".yaml":
                     yaml.dump(document, f)
                 elif extension == ".json":
-                    f.write(json_util.dumps(document, indent=2))
+                    f.write(json.dumps(document, indent=2))
             
         except Exception as e:
             event = ConfiguratorEvent(event_id="FIL-08", event_type="PUT_DOCUMENT")
