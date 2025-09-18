@@ -42,17 +42,11 @@ class Configuration(ServiceBase):
         enumerations = enumerators.get_version(f"{self.collection_name}.{version_str}")
         return version.get_bson_schema(enumerations)
         
-    def process(self) -> ConfiguratorEvent:
+    def process(self, mongo_io: MongoIO) -> ConfiguratorEvent:
         try:
             event = ConfiguratorEvent(event_id=f"CFG-05", event_type="PROCESS_CONFIGURATION")
             event.data = {"configuration_name": self.file_name, "version_count": len(self.versions)}
-            mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
 
-            # Process enumerations first
-            enumerators = Enumerators()
-            for enumeration in enumerators.enumerations:
-                event.append_events([enumeration.upsert(mongo_io)])
-            
             for version in self.versions:
                 event.append_events([version.process(mongo_io)])
             event.record_success()
@@ -70,15 +64,24 @@ class Configuration(ServiceBase):
         return ServiceBase.lock_all(Configuration, Config.get_instance().CONFIGURATION_FOLDER, status)
 
     @staticmethod
+    def update_enumerators(mongo_io: MongoIO) -> ConfiguratorEvent:
+        event = ConfiguratorEvent("CFG-06", "UPDATE_ENUMERATORS")
+        enumerators = Enumerators()
+        for enumeration in enumerators.enumerations:
+            event.append_events([enumeration.upsert(mongo_io)])
+
+    @staticmethod
     def process_all():
         config = Config.get_instance()
         process_event = ConfiguratorEvent("CFG-07", "PROCESS_ALL_CONFIGURATIONS")
         file_event = ConfiguratorEvent("CFG-08", "PROCESS_CONFIGURATION")
+        mongo_io = MongoIO(config.MONGO_CONNECTION_STRING, config.MONGO_DB_NAME)
         try:
+            process_event.append_events([Configuration.update_enumerators(mongo_io)])
             for file in FileIO.get_documents(config.CONFIGURATION_FOLDER):
                 file_event = ConfiguratorEvent(f"CFG-{file.file_name}", "PROCESS_CONFIGURATION")
                 process_event.append_events([file_event])
-                file_event.append_events([Configuration(file.file_name).process()])
+                file_event.append_events([Configuration(file.file_name).process(mongo_io)])
                 file_event.record_success()
             process_event.record_success()
             return process_event
@@ -92,3 +95,29 @@ class Configuration(ServiceBase):
             process_event.record_failure(f"Unexpected error processing configuration {file.file_name}")
             raise ConfiguratorException("Cannot process all configurations", process_event)
                 
+    @staticmethod
+    def process_one(file_name: str):
+        config = Config.get_instance()
+        process_event = ConfiguratorEvent("CFG-09", "PROCESS_ONE_CONFIGURATION")
+        file_event = ConfiguratorEvent("CFG-10", "PROCESS_CONFIGURATION")
+            
+        try:
+            mongo_io = MongoIO(config.MONGO_CONNECTION_STRING, config.MONGO_DB_NAME)
+            process_event.append_events([Configuration.update_enumerators(mongo_io)])
+            for file in FileIO.get_documents(config.CONFIGURATION_FOLDER):
+                file_event = ConfiguratorEvent(f"CFG-{file.file_name}", "PROCESS_CONFIGURATION")
+                process_event.append_events([file_event])
+                file_event.append_events([Configuration(file.file_name).process(mongo_io)])
+                file_event.record_success()
+            process_event.record_success()
+            return process_event
+        except ConfiguratorException as e:
+            file_event.record_failure(f"ConfiguratorException processing configuration {file.file_name}")
+            process_event.append_events([e.event])
+            process_event.record_failure(f"ConfiguratorException processing configuration {file.file_name}")
+            raise ConfiguratorException("Cannot process all configurations", process_event)
+        except Exception as e:
+            file_event.record_failure(f"Unexpected error processing configuration {file.file_name}")
+            process_event.record_failure(f"Unexpected error processing configuration {file.file_name}")
+            raise ConfiguratorException("Cannot process all configurations", process_event)
+                                

@@ -23,8 +23,8 @@ def create_configuration_routes():
     @blueprint.route('/', methods=['POST'])
     @event_route("CFG-ROUTES-02", "PROCESS_ALL_CONFIGURATIONS", "processing all configurations")
     def process_configurations():
-        result = Configuration.process_all()
-        return jsonify(result.to_dict())
+        events = Configuration.process_all()
+        return jsonify(events.to_dict())
 
     @blueprint.route('/', methods=['PATCH'])
     @event_route("CFG-ROUTES-03", "LOCK_ALL_CONFIGURATIONS", "locking all configurations")
@@ -62,9 +62,8 @@ def create_configuration_routes():
     @blueprint.route('/<file_name>/', methods=['POST'])
     @event_route("CFG-ROUTES-09", "PROCESS_CONFIGURATION", "processing configuration")
     def process_configuration(file_name):
-        configuration = Configuration(file_name)
-        event = configuration.process()
-        return jsonify(event.to_dict())
+        events = Configuration.process_one(file_name)
+        return jsonify(events.to_dict())
 
     @blueprint.route('json_schema/<file_name>/<version>/', methods=['GET'])
     @event_route("CFG-ROUTES-10", "GET_JSON_SCHEMA", "getting JSON schema")
