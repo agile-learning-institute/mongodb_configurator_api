@@ -51,6 +51,7 @@ class MongoIO:
             return self.db.get_collection(collection_name)
         except Exception as e:
             event = ConfiguratorEvent(event_id="MON-03", event_type="COLLECTION", event_data={"error": str(e), "collection": collection_name})
+            event.record_failure({"error": str(e), "collection": collection_name})
             raise ConfiguratorException(f"Failed to get/create collection {collection_name}", event)
       
     def get_documents(self, collection_name, match=None, project=None, sort_by=None):        
@@ -67,6 +68,7 @@ class MongoIO:
             return documents
         except Exception as e:
             event = ConfiguratorEvent(event_id="MON-04", event_type="GET_DOCUMENTS", event_data={"error": str(e), "collection": collection_name})
+            event.record_failure({"error": str(e), "collection": collection_name})
             raise ConfiguratorException(f"Failed to get documents from {collection_name}", event)
                 
     def upsert(self, collection_name, match, data):
@@ -81,11 +83,12 @@ class MongoIO:
             return result
         except Exception as e:
             event = ConfiguratorEvent(event_id="MON-05", event_type="UPSERT", event_data={"error": str(e), "collection": collection_name})
+            event.record_failure({"error": str(e), "collection": collection_name})
             raise ConfiguratorException(f"Failed to upsert document in {collection_name}", event)
 
     def remove_schema_validation(self, collection_name):
+        event = ConfiguratorEvent(event_id="MON-06", event_type="REMOVE_SCHEMA")
         try:
-            event = ConfiguratorEvent(event_id="MON-06", event_type="REMOVE_SCHEMA")
             self.get_collection(collection_name)
             
             command = {
@@ -167,7 +170,7 @@ class MongoIO:
             return [event]
         except Exception as e:
             event.record_failure({"error": str(e), "collection": collection_name, "file": migration_file})
-            return [event]
+            raise ConfiguratorException(f"Failed to execute migration from {migration_file}", event)
 
     def add_index(self, collection_name, index_spec):
         try:
@@ -208,7 +211,7 @@ class MongoIO:
             
         except Exception as e:
             event.record_failure({"error": str(e), "collection": collection_name})
-            return [event]
+            raise ConfiguratorException(f"Failed to apply schema validation to {collection_name}", event)
 
     def load_json_data(self, collection_name, data_file):
         event = ConfiguratorEvent(event_id="MON-11", event_type="LOAD_DATA")
