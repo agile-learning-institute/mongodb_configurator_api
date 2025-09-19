@@ -124,7 +124,7 @@ class Version:
                 event.append_events([sub_event])
                 test_data_path = os.path.join(self.config.INPUT_FOLDER, self.config.TEST_DATA_FOLDER, self.test_data)
                 sub_event.data = {"test_data_path": test_data_path}
-                mongo_io.load_json_data(self.collection_name, test_data_path)
+                sub_event.append_events(mongo_io.load_json_data(self.collection_name, test_data_path))
                 sub_event.record_success()
                 logger.info(f"Test data loaded for {self.collection_name}")
 
