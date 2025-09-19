@@ -55,13 +55,13 @@ class Configuration(ServiceBase):
             event.record_success()
             return event
         except ConfiguratorException as e:
-            logger.error(f"ConfiguratorException processing configuration {self.file_name}: {e.event.to_dict()}")
             event.record_failure(f"ConfiguratorException processing configuration {self.file_name}")
             event.append_events([e.event])
+            logger.error(f"ConfiguratorException processing configuration {self.file_name}: {e.event.to_dict()}")
             raise ConfiguratorException(f"ConfiguratorException processing configuration {self.file_name}", event)
         except Exception as e:
-            logger.error(f"Unexpected error processing configuration {self.file_name}: {str(e)}")
             event.record_failure(f"Unexpected error processing configuration {self.file_name}: {str(e)}")
+            logger.error(f"Unexpected error processing configuration {self.file_name}: {str(e)}")
             raise ConfiguratorException(f"Unexpected error processing configuration {self.file_name}: {str(e)}", event)
 
     @staticmethod
@@ -79,13 +79,13 @@ class Configuration(ServiceBase):
             event.record_success()
             return event
         except ConfiguratorException as e:
-            logger.error(f"ConfiguratorException updating enumerators - {e.event.to_dict()}")
             event.append_events([e.event])
             event.record_failure(f"ConfiguratorException updating enumerators")
+            logger.error(f"ConfiguratorException updating enumerators - {e.event.to_dict()}")
             raise ConfiguratorException("Cannot update enumerators", event)
         except Exception as e:
-            logger.error(f"Unexpected error updating enumerators: {str(e)}")
             event.record_failure(f"Unexpected error updating enumerators: {str(e)}")
+            logger.error(f"Unexpected error updating enumerators: {str(e)}")
             raise ConfiguratorException("Cannot update enumerators", event)
 
     @staticmethod
@@ -103,13 +103,13 @@ class Configuration(ServiceBase):
             process_event.record_success()
             return process_event
         except ConfiguratorException as e:
-            logger.error(f"ConfiguratorException processing all configuration: {process_event.to_dict()}")
             process_event.record_failure(f"ConfiguratorException processing all configurations")
             process_event.append_events([e.event])
+            logger.error(f"ConfiguratorException processing all configuration: {process_event.to_dict()}")
             raise ConfiguratorException("Cannot process all configurations", process_event)
         except Exception as e:
-            logger.error(f"Unexpected error {str(e)} processing all configurations: {process_event.to_dict()}")
             process_event.record_failure(f"Unexpected error {str(e)} processing all configurations")
+            logger.error(f"Unexpected error {str(e)} processing all configurations: {process_event.to_dict()}")
             raise ConfiguratorException("Cannot process all configurations", process_event)
                 
     @staticmethod
@@ -125,12 +125,12 @@ class Configuration(ServiceBase):
             process_event.record_success()
             return process_event
         except ConfiguratorException as e:
-            logger.error(f"ConfiguratorException processing configuration {file_name}: {e.event.to_dict()}")
             process_event.record_failure(f"ConfiguratorException processing configuration {file_name}")
             process_event.append_events([e.event])
+            logger.error(f"ConfiguratorException processing configuration {file_name}: {e.event.to_dict()}")
             raise ConfiguratorException("Cannot process all configurations", process_event)
         except Exception as e:
-            logger.error(f"Unexpected error {str(e)} processing configuration {file_name}: {process_event.to_dict()}")
             process_event.record_failure(f"Unexpected error {str(e)} processing configuration {file_name}")
+            logger.error(f"Unexpected error {str(e)} processing configuration {file_name}: {process_event.to_dict()}")
             raise ConfiguratorException("Cannot process all configurations", process_event)
                                 
