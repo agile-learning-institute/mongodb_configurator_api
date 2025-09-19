@@ -26,12 +26,12 @@ class Enumerations(ServiceBase):
                     the_values.add(value.get("value"))
                 return sorted(list(the_values)) 
 
-        event = ConfiguratorEvent(event_id=f"ENU-02", event_type="GET_ENUM_VALUES")
+        event = ConfiguratorEvent(event_id=f"ENU-02", event_type="ERROR", event_data=self.to_dict())
         event.record_failure(f"Enumeration {enum_name} not found")
         raise ConfiguratorException(f"Enumeration {enum_name} not found", event)
     
     def upsert(self, mongo_io: MongoIO) -> ConfiguratorEvent:
-        event = ConfiguratorEvent(event_id=f"ENU-01", event_type="UPSERT_ENUMERATION")
+        event = ConfiguratorEvent(event_id=f"ENU-01-{self.file_name}", event_type="PROCESS", event_data=self.to_dict())
         mongo_io.upsert(self.config.ENUMERATORS_COLLECTION_NAME, {"version": self.version}, self.to_dict())
         event.record_success()
         return event

@@ -27,5 +27,6 @@ class Enumerators:
 
         event = ConfiguratorEvent("ENU-06", "GET_ENUMERATION_VERSION")
         event.record_failure(f"Version {version_str} not found")
+        logger.error(f"Version {version_str} not found")
         raise ConfiguratorException(f"Version {version_str} not found", event)
 

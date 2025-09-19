@@ -27,6 +27,7 @@ class File:
             self.created_at = datetime.fromtimestamp(stat.st_ctime).isoformat()
             self.updated_at = datetime.fromtimestamp(stat.st_mtime).isoformat()
         except Exception as e:
+            logger.error(f"Exception getting file properties for {file_path}: {str(e)}")
             event = ConfiguratorEvent(event_id="FIL-01", event_type="GET_FILE_PROPERTIES", event_data={"error": str(e)})
             raise ConfiguratorException(f"Failed to get file properties for {file_path}", event)
 
@@ -52,6 +53,7 @@ class FileIO:
         
         try:
             if not os.path.exists(folder):
+                logger.error(f"Folder not found: {folder}")
                 event = ConfiguratorEvent(event_id="FIL-03", event_type="GET_DOCUMENTS")
                 event.record_failure("Folder not found")
                 raise ConfiguratorException(f"Folder not found: {folder}", event)
@@ -61,9 +63,11 @@ class FileIO:
                 if os.path.isfile(file_path):
                     files.append(File(file_path))
             return files
-        except ConfiguratorException:
-            raise
+        except ConfiguratorException as e:
+            logger.error(f"ConfiguratorException getting documents from {folder}")
+            raise e
         except Exception as e:
+            logger.error(f"Exception getting documents from {folder}: {str(e)}")
             event = ConfiguratorEvent(event_id="FIL-03", event_type="GET_DOCUMENTS")
             event.record_failure(str(e))
             raise ConfiguratorException(f"Failed to get documents from {folder}", event)
@@ -80,6 +84,7 @@ class FileIO:
         if extension not in [".yaml", ".json"]:
             event = ConfiguratorEvent(event_id="FIL-06", event_type="UNSUPPORTED_FILE_TYPE")
             event.record_failure(f"Unsupported file type: {extension}")
+            logger.error(f"Unsupported file type: {extension}")
             raise ConfiguratorException(f"Unsupported file type: {extension}", event)
         
         try:
@@ -89,10 +94,12 @@ class FileIO:
                 elif extension == ".json":
                     return json.loads(f.read())
         except FileNotFoundError:
+            logger.error(f"File not found: {file_path}")
             event = ConfiguratorEvent(event_id="FIL-06", event_type="GET_DOCUMENT")
             event.record_failure("File not found")
             raise ConfiguratorException(f"File not found: {file_path}", event)
         except Exception as e:
+            logger.error(f"Exception getting document from {file_path}: {str(e)}")
             event = ConfiguratorEvent(event_id="FIL-06", event_type="GET_DOCUMENT")
             event.record_failure(str(e))
             raise ConfiguratorException(f"Failed to get document from {file_path}", event)
@@ -111,12 +118,13 @@ class FileIO:
                     yaml.dump(document, f)
                 elif extension == ".json":
                     f.write(json.dumps(document, indent=2))
+            return FileIO.get_document(folder_name, file_name)  
             
         except Exception as e:
+            logger.error(f"Exception putting document to {file_path}: {str(e)}")
             event = ConfiguratorEvent(event_id="FIL-08", event_type="PUT_DOCUMENT")
             event.record_failure(str(e))
             raise ConfiguratorException(f"Failed to put document to {file_path}", event)
-        return FileIO.get_document(folder_name, file_name)
     
     @staticmethod
     def delete_document(folder_name: str, file_name: str) -> ConfiguratorEvent:
@@ -131,9 +139,11 @@ class FileIO:
             event.record_success()
             return event
         except FileNotFoundError:
+            logger.error(f"File not found: {file_path}")
             event.record_failure("File not found")
             raise ConfiguratorException(f"Failed to delete {file_name} from {folder_name}", event)
         except Exception as e:
+            logger.error(f"Exception deleting document from {file_path}: {str(e)}")
             event.record_failure(str(e))
             raise ConfiguratorException(f"Failed to delete {file_name} from {folder_name}", event)
     
@@ -146,7 +156,9 @@ class FileIO:
         
         try:
             return os.path.isfile(file_path)
+        
         except Exception as e:
+            logger.error(f"Exception checking if file exists: {str(e)}")
             event = ConfiguratorEvent(event_id="FIL-10", event_type="FILE_EXISTS")
             event.record_failure(str(e))
             raise ConfiguratorException(f"Failed to check if file exists: {file_path}", event)
