@@ -1,7 +1,7 @@
 from configurator.utils.config import Config
 from configurator.services.configuration_services import Configuration
 from configurator.services.dictionary_services import Dictionary
-
+from configurator.utils.mongo_io import MongoIO
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 import unittest
 import os
@@ -63,9 +63,10 @@ class TestBadReferences(unittest.TestCase):
     def test_missing_test_data_reference(self):
         """Test that a configuration referencing missing test data fails during processing"""
         config_file = "test_data.yaml"
+        mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
         with self.assertRaises(ConfiguratorException) as context:
             configuration = Configuration(config_file)
-            configuration.process()
+            configuration.process(mongo_io)
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
         self.assertEqual(exception.event.status, "FAILURE")
@@ -74,9 +75,10 @@ class TestBadReferences(unittest.TestCase):
     def test_missing_migration_reference(self):
         """Test that a configuration referencing missing migration data fails during processing"""
         config_file = "test_migrations.yaml"
+        mongo_io = MongoIO(self.config.MONGO_CONNECTION_STRING, self.config.MONGO_DB_NAME)
         with self.assertRaises(ConfiguratorException) as context:
             configuration = Configuration(config_file)
-            configuration.process()
+            configuration.process(mongo_io)
         exception = context.exception
         self.assertIsInstance(exception.event, ConfiguratorEvent)
         self.assertEqual(exception.event.status, "FAILURE")

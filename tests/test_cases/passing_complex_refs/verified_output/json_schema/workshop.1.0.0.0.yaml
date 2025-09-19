@@ -329,7 +329,6 @@ properties:
                     description: Hill Name
                     type: string
                     pattern: ^[^\s]{1,40}$
-              required: []
             - description: An observation for a Retrospective exercise
               oneOf:
               - description: ''

@@ -46,7 +46,7 @@ class Version:
 
     def process(self, mongo_io: MongoIO) -> ConfiguratorEvent:
         try:
-            event = ConfiguratorEvent(event_id=f"{self.collection_name}.{self.version_str}", event_type="PROCESS")
+            event = ConfiguratorEvent(event_id=f"PROCESS_VERSION-{self.version_str}", event_type="PROCESS")
             
             # If current version is greater than or equal to this version, skip processing
             current_version = VersionManager.get_current_version(mongo_io, self.collection_name)
@@ -61,54 +61,66 @@ class Version:
                 return event
             
             # Remove schema validation
-            sub_event = ConfiguratorEvent(event_id="PRO-01", event_type="REMOVE_SCHEMA_VALIDATION")
+            sub_event = ConfiguratorEvent(event_id="PRO-01-REMOVE_SCHEMA_VALIDATION", event_type="PROCESS_STEP")
             event.append_events([sub_event])
-            sub_event.append_events(mongo_io.remove_schema_validation(self.collection_name))
+            mongo_io.remove_schema_validation(self.collection_name)
             sub_event.record_success()
             logger.info(f"Schema validation removed for {self.collection_name}")
 
             # Remove indexes
             if self.drop_indexes:
-                sub_event = ConfiguratorEvent(event_id="PRO-02", event_type="REMOVE_INDEXES")
+                sub_event = ConfiguratorEvent(event_id="PRO-02-REMOVE_INDEXES", event_type="PROCESS_STEP")
                 event.append_events([sub_event])
                 for index_name in self.drop_indexes:
-                    sub_event.append_events(mongo_io.remove_index(self.collection_name, index_name))                    
+                    index_event = ConfiguratorEvent(event_id=f"PRO-02-{index_name}", event_type="PROCESS_STEP")
+                    sub_event.append_events([index_event])
+                    mongo_io.remove_index(self.collection_name, index_name)
+                    index_event.record_success()
+                    logger.info(f"Index {index_name} removed for {self.collection_name}")
                 sub_event.record_success()
                 logger.info(f"Indexes removed for {self.collection_name}")
 
             # Execute migrations
             if self.migrations:
-                sub_event = ConfiguratorEvent(event_id="PRO-03", event_type="EXECUTE_MIGRATIONS")
+                sub_event = ConfiguratorEvent(event_id="PRO-03-EXECUTE_MIGRATIONS", event_type="PROCESS_STEP")
                 event.append_events([sub_event])
                 for filename in self.migrations:
                     migration_file = os.path.join(self.config.INPUT_FOLDER, self.config.MIGRATIONS_FOLDER, filename)
-                    sub_event.append_events(mongo_io.execute_migration_from_file(self.collection_name, migration_file))
-                    sub_event.record_success()
+                    migration_event = ConfiguratorEvent(event_id=f"PRO-03-{filename}", event_type="EXECUTE_MIGRATION")
+                    sub_event.append_events([migration_event])
+                    mongo_io.execute_migration_from_file(self.collection_name, migration_file)
+                    migration_event.record_success()
+                    logger.info(f"Migration {filename} executed for {self.collection_name}")
+                sub_event.record_success()
                 logger.info(f"Migrations executed for {self.collection_name}")
 
             # Add indexes
             if self.add_indexes:
-                sub_event = ConfiguratorEvent(event_id="PRO-04", event_type="ADD_INDEXES")
+                sub_event = ConfiguratorEvent(event_id="PRO-04-ADD_INDEXES", event_type="PROCESS_STEP")
                 event.append_events([sub_event])
                 for index in self.add_indexes:
-                    sub_event.append_events(mongo_io.add_index(self.collection_name, index))
+                    index_event = ConfiguratorEvent(event_id=f"PRO-04-{index['name']}", event_type="ADD_INDEX")
+                    sub_event.append_events([index_event])
+                    mongo_io.add_index(self.collection_name, index)
+                    index_event.record_success()
+                    logger.info(f"Index {index['name']} added for {self.collection_name}")
                 sub_event.record_success()
                 logger.info(f"Indexes added for {self.collection_name}")
 
             # Apply schema validation
-            sub_event = ConfiguratorEvent(event_id="PRO-06", event_type="APPLY_SCHEMA_VALIDATION")
+            sub_event = ConfiguratorEvent(event_id="PRO-05-APPLY_SCHEMA_VALIDATION", event_type="PROCESS_STEP")
             event.append_events([sub_event])
             enumerations = Enumerators().get_version(f"{self.collection_name}.{self.version_str}")
             bson_schema: dict = self.get_bson_schema(enumerations)
             
             # Add schema context to event
-            sub_event.append_events(mongo_io.apply_schema_validation(self.collection_name, bson_schema))
+            mongo_io.apply_schema_validation(self.collection_name, bson_schema)
             sub_event.record_success()
             logger.info(f"Schema validation applied for {self.collection_name}")
 
             # Load test data
             if self.test_data:
-                sub_event = ConfiguratorEvent(event_id="PRO-07", event_type="LOAD_TEST_DATA")
+                sub_event = ConfiguratorEvent(event_id="PRO-06-LOAD_TEST_DATA", event_type="PROCESS_STEP")
                 event.append_events([sub_event])
                 test_data_path = os.path.join(self.config.INPUT_FOLDER, self.config.TEST_DATA_FOLDER, self.test_data)
                 sub_event.data = {"test_data_path": test_data_path}
@@ -117,7 +129,7 @@ class Version:
                 logger.info(f"Test data loaded for {self.collection_name}")
 
             # Update version
-            sub_event = ConfiguratorEvent(event_id="PRO-08", event_type="UPDATE_VERSION")
+            sub_event = ConfiguratorEvent(event_id="PRO-07-UPDATE_VERSION", event_type="PROCESS_STEP")
             event.append_events([sub_event])
             result = mongo_io.upsert(
                 self.config.VERSION_COLLECTION_NAME,

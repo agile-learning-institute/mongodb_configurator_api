@@ -229,21 +229,19 @@ class TestConfigurationRoutes(unittest.TestCase):
     def test_process_configuration_success(self, mock_configuration_class):
         """Test successful POST /api/configurations/<file_name>/."""
         # Arrange
-        mock_configuration = Mock()
-        mock_event = Mock()
-        mock_event.to_dict.return_value = {"result": "success"}
-        mock_configuration.process.return_value = mock_event
-        mock_configuration_class.return_value = mock_configuration
-
+        mock_event = ConfiguratorEvent("CFG-ROUTES-02", "PROCESS_ALL_CONFIGURATIONS")
+        mock_event.record_success()
+        mock_configuration_class.process_one.return_value = mock_event
+        
         # Act
         response = self.client.post('/api/configurations/test_config/')
 
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        # For successful responses, expect data directly, not wrapped in event envelope
-        self.assertEqual(response_data, {"result": "success"})
-
+        self.assertIn("status", response_data)
+        self.assertEqual(response_data["status"], "SUCCESS")
+        
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_process_configuration_general_exception(self, mock_configuration_class):
         """Test POST /api/configurations/<file_name>/ when Configuration raises a general exception."""

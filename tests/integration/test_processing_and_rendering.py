@@ -132,8 +132,30 @@ class BaseProcessAndRenderTest(ABC):
         """Expected number of processing events - must be implemented by subclasses"""
         pass
 
+    @property
+    @abstractmethod
+    def expected_step_count(self):
+        """Expected number of processing step events - must be implemented by subclasses"""
+        pass
+
     def tearDown(self):
         Config._instance = None
+        
+    def count_processing_events(self, events):
+        pro_count = 0
+        step_count = 0
+        if events:
+            for event in events:
+                if event.type == 'PROCESS':
+                    pro_count += 1
+                elif event.type == 'PROCESS_STEP':
+                    step_count += 1
+                
+                if event.sub_events:
+                    sub_pro_count, sub_step_count = self.count_processing_events(event.sub_events)
+                    pro_count += sub_pro_count
+                    step_count += sub_step_count
+        return pro_count, step_count
 
     def test_process(self):
         """Test 1: Does processing produce expected events and match verified database?"""
@@ -143,20 +165,6 @@ class BaseProcessAndRenderTest(ABC):
         # Save processing events to generated output
         generated_events_dir = f"{self.config.INPUT_FOLDER}/generated_output"
         os.makedirs(generated_events_dir, exist_ok=True)
-        
-        # Save processing events as JSON
-        class CustomJSONEncoder(json.JSONEncoder):
-            def default(self, obj):
-                if isinstance(obj, datetime.datetime):
-                    return obj.isoformat()
-                elif hasattr(obj, '__class__') and obj.__class__.__name__ == 'ObjectId':
-                    return str(obj)
-                return super().default(obj)
-        
-        with open(f"{generated_events_dir}/processing_events.json", 'w') as f:
-            json.dump(results.to_dict(), f, indent=2, sort_keys=False, cls=CustomJSONEncoder)
-        
-        # Save processing events as YAML for easier reading
         import yaml
         with open(f"{generated_events_dir}/processing_events.yaml", 'w') as f:
             yaml.dump(results.to_dict(), f, default_flow_style=False, sort_keys=False)
@@ -164,23 +172,9 @@ class BaseProcessAndRenderTest(ABC):
         # Verify processing succeeded
         self.assertEqual(results.status, "SUCCESS", f"Processing failed: {results.to_dict()}")
         
-        # Count processing events - need to count the version processing events
-        # The structure is: CFG-07 -> CFG-sample.yaml -> CFG-05 -> [version events]
-        # Count PRO-01 events (REMOVE_SCHEMA_VALIDATION) to see how many versions were processed
-        pro_count = 0
-        if results.sub_events:
-            config_event = results.sub_events[0]  # CFG-sample.yaml
-            if config_event.sub_events:
-                process_event = config_event.sub_events[0]  # CFG-05
-                # Count PRO-01 events (REMOVE_SCHEMA_VALIDATION) which indicates versions processed
-                for event in process_event.sub_events:
-                    if hasattr(event, 'type') and event.type == 'PROCESS':
-                        # Look for PRO-01 events within each version
-                        for sub_event in event.sub_events:
-                            if hasattr(sub_event, 'id') and sub_event.id == 'PRO-01':
-                                pro_count += 1
-        
-        self.assertEqual(pro_count, self.expected_pro_count, f"Expected {self.expected_pro_count} processing events, found {pro_count}")
+        pro_count, step_count = self.count_processing_events([results])        
+        self.assertEqual(pro_count, self.expected_pro_count, f"Expected {self.expected_pro_count} successful processing events, found {pro_count}")
+        self.assertEqual(step_count, self.expected_step_count, f"Expected {self.expected_step_count} successful processing step events, found {step_count}")
         
         # Compare database state with verified output
         verified_db_path = f"{self.config.INPUT_FOLDER}/verified_output/test_database"
@@ -281,7 +275,11 @@ class TestPassingTemplate(BaseProcessAndRenderTest, unittest.TestCase):
     
     @property
     def expected_pro_count(self):
-        return 2
+        return 8
+    
+    @property
+    def expected_step_count(self):
+        return 13
     
     def setUp(self):
         self.config, _ = setup_test_environment(self.test_case, self.expected_pro_count)
@@ -298,7 +296,11 @@ class TestPassingComplexRefs(BaseProcessAndRenderTest, unittest.TestCase):
     
     @property
     def expected_pro_count(self):
-        return 1
+        return 5
+    
+    @property
+    def expected_step_count(self):
+        return 4
     
     def setUp(self):
         self.config, _ = setup_test_environment(self.test_case, self.expected_pro_count)
@@ -315,6 +317,10 @@ class TestPassingEmpty(BaseProcessAndRenderTest, unittest.TestCase):
     
     @property
     def expected_pro_count(self):
+        return 3
+    
+    @property
+    def expected_step_count(self):
         return 0
     
     def setUp(self):
@@ -332,7 +338,11 @@ class TestPassingProcess(BaseProcessAndRenderTest, unittest.TestCase):
     
     @property
     def expected_pro_count(self):
-        return 3
+        return 22
+    
+    @property
+    def expected_step_count(self):
+        return 54
     
     def setUp(self):
         self.config, _ = setup_test_environment(self.test_case, self.expected_pro_count)
