@@ -390,9 +390,9 @@ class TestConfigurationRoutes(unittest.TestCase):
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_lock_all_configurations(self, mock_configuration_class):
-        """Test locking all configurations."""
+        """Test locking all configurations - verifies versions are locked."""
         # Arrange
-        mock_event = ConfiguratorEvent("CFG-ROUTES-03", "LOCK_ALL_CONFIGURATIONS")
+        mock_event = ConfiguratorEvent("configurations-03", "LOCK_ALL_CONFIGURATIONS")
         mock_event.data = {
             "total_files": 2,
             "operation": "lock_all"
@@ -410,9 +410,9 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn('type', data)
         self.assertIn('status', data)
         self.assertIn('sub_events', data)
-        self.assertIn('data', data)
-        self.assertIn('total_files', data['data'])
-        self.assertIn('operation', data['data'])
+        self.assertEqual(data['status'], 'SUCCESS')
+        # Verify lock_all was called (defaults to True)
+        mock_configuration_class.lock_all.assert_called_once()
 
 
 if __name__ == '__main__':

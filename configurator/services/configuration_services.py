@@ -66,7 +66,53 @@ class Configuration(ServiceBase):
 
     @staticmethod
     def lock_all(status: bool = True):
-        return ServiceBase.lock_all(Configuration, Config.get_instance().CONFIGURATION_FOLDER, status)
+        """Lock all versions in all configurations instead of the top-level documents."""
+        config = Config.get_instance()
+        lock_all_event = ConfiguratorEvent(event_id="configurations-03", event_type="LOCK_ALL_CONFIGURATIONS")
+        file_event = None
+        
+        try:
+            for file in FileIO.get_documents(config.CONFIGURATION_FOLDER):
+                file_event = ConfiguratorEvent(event_id=f"configurations-{file.file_name}", event_type="LOCK_CONFIGURATION")
+                lock_all_event.append_events([file_event])
+                
+                # Load the configuration
+                configuration = Configuration(file.file_name)
+                
+                # Lock all versions in this configuration
+                version_count = 0
+                for version in configuration.versions:
+                    version._locked = status
+                    version_count += 1
+                
+                # Update the document's versions to reflect the locked status
+                for version_dict in configuration._document.get("versions", []):
+                    version_dict["_locked"] = status
+                
+                # Save the configuration
+                configuration.save()
+                
+                file_event.data = {
+                    "file_name": file.file_name,
+                    "version_count": version_count,
+                    "status": status
+                }
+                file_event.record_success()
+                logger.info(f"Locked {version_count} versions in configuration {file.file_name}")
+            
+            lock_all_event.record_success()
+            return lock_all_event
+        except ConfiguratorException as e:
+            lock_all_event.append_events([e.event])
+            if file_event:
+                file_event.record_failure(f"ConfiguratorException locking configurations")
+            lock_all_event.record_failure(f"ConfiguratorException locking configurations")
+            raise ConfiguratorException(f"Cannot lock all configurations", lock_all_event)
+        except Exception as e:
+            if file_event:
+                file_event.record_failure(f"Unexpected error locking configurations: {str(e)}")
+            lock_all_event.record_failure(f"Unexpected error locking configurations: {str(e)}")
+            raise ConfiguratorException(f"Cannot lock all configurations", lock_all_event)
 
     @staticmethod
     def update_enumerators(mongo_io: MongoIO) -> ConfiguratorEvent:
