@@ -52,3 +52,8 @@ class ConfiguratorException(Exception):
             "message": self.message,
             "event": self.event.to_dict() if self.event else None
         }
+
+
+class ConfiguratorForbiddenException(ConfiguratorException):
+    """Exception for forbidden/access denied errors. Returns 403 status code."""
+    pass

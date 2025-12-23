@@ -1,6 +1,6 @@
 from functools import wraps
 from flask import jsonify
-from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorForbiddenException, ConfiguratorEvent
 import logging
 
 logger = logging.getLogger(__name__)
@@ -15,6 +15,13 @@ def event_route(event_id: str, event_type: str, operation_name: str):
                 # Routes are responsible for their own serialization
                 logger.info(f"Configurator success in {operation_name}")
                 return result
+            except ConfiguratorForbiddenException as e:
+                logger.warning(f"Configurator forbidden in {operation_name}: {str(e)}")
+                event = ConfiguratorEvent(event_id=event_id, event_type=event_type)
+                if hasattr(e, 'event') and e.event:
+                    event.append_events([e.event])
+                event.record_failure(f"Configurator forbidden in {operation_name}")
+                return jsonify(event.to_dict()), 403
             except ConfiguratorException as e:
                 logger.error(f"Configurator error in {operation_name}: {str(e)}")
                 event = ConfiguratorEvent(event_id=event_id, event_type=event_type)

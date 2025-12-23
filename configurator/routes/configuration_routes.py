@@ -23,18 +23,21 @@ def create_configuration_routes():
     @blueprint.route('/', methods=['POST'])
     @event_route("CFG-ROUTES-02", "PROCESS_ALL_CONFIGURATIONS", "processing all configurations")
     def process_configurations():
+        config.assert_local()
         events = Configuration.process_all()
         return jsonify(events.to_dict())
 
     @blueprint.route('/', methods=['PATCH'])
     @event_route("CFG-ROUTES-03", "LOCK_ALL_CONFIGURATIONS", "locking all configurations")
     def lock_all_configurations():
+        config.assert_local()
         result = Configuration.lock_all()
         return jsonify(result.to_dict())
 
     @blueprint.route('/collection/<collection_name>/', methods=['POST'])
     @event_route("CFG-ROUTES-04", "CREATE_COLLECTION", "creating collection")
     def create_collection(collection_name):
+        config.assert_local()
         result = TemplateService.create_collection(collection_name)
         return jsonify(result)
 
@@ -48,6 +51,7 @@ def create_configuration_routes():
     @blueprint.route('/<file_name>/', methods=['PUT'])
     @event_route("CFG-ROUTES-06", "PUT_CONFIGURATION", "updating configuration")
     def update_configuration(file_name):
+        config.assert_local()
         configuration = Configuration(file_name, request.json)
         result = configuration.save()
         return jsonify(result)
@@ -55,6 +59,7 @@ def create_configuration_routes():
     @blueprint.route('/<file_name>/', methods=['DELETE'])
     @event_route("CFG-ROUTES-07", "DELETE_CONFIGURATION", "deleting configuration")
     def delete_configuration(file_name):
+        config.assert_local()
         configuration = Configuration(file_name)
         event = configuration.delete()
         return jsonify(event.to_dict())
@@ -62,6 +67,7 @@ def create_configuration_routes():
     @blueprint.route('/<file_name>/', methods=['POST'])
     @event_route("CFG-ROUTES-09", "PROCESS_CONFIGURATION", "processing configuration")
     def process_configuration(file_name):
+        config.assert_local()
         events = Configuration.process_one(file_name)
         return jsonify(events.to_dict())
 

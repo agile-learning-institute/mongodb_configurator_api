@@ -53,13 +53,18 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
+    @patch('configurator.routes.configuration_routes.Config')
     @patch('configurator.routes.configuration_routes.Configuration')
-    def test_process_configurations_success(self, mock_configuration_class):
+    def test_process_configurations_success(self, mock_configuration_class, mock_config_class):
         """Test successful POST /api/configurations/."""
         # Arrange
         mock_event = ConfiguratorEvent("CFG-ROUTES-02", "PROCESS_ALL_CONFIGURATIONS")
         mock_event.record_success()
         mock_configuration_class.process_all.return_value = mock_event
+        
+        mock_config = Mock()
+        mock_config.assert_local.return_value = None  # No exception means success
+        mock_config_class.get_instance.return_value = mock_config
 
         # Act
         response = self.client.post('/api/configurations/')
@@ -73,6 +78,30 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("status", response_data)
         self.assertEqual(response_data["status"], "SUCCESS")
         self.assertIn("sub_events", response_data)
+
+    @patch('configurator.routes.configuration_routes.Config')
+    def test_process_configurations_not_local(self, mock_config_class):
+        """Test POST /api/configurations/ when not in local mode."""
+        # Arrange
+        from configurator.utils.configurator_exception import ConfiguratorForbiddenException, ConfiguratorEvent
+        mock_config = Mock()
+        event = ConfiguratorEvent("CFG-ASSERT-02", "ASSERT_LOCAL")
+        event.record_failure("BUILT_AT is not set to 'Local' from a file")
+        mock_config.assert_local.side_effect = ConfiguratorForbiddenException("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", event)
+        mock_config_class.get_instance.return_value = mock_config
+
+        # Act
+        response = self.client.post('/api/configurations/')
+
+        # Assert
+        self.assertEqual(response.status_code, 403)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertIn("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", str(response_data["data"]))
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_process_configurations_general_exception(self, mock_configuration_class):
@@ -127,8 +156,9 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
+    @patch('configurator.routes.configuration_routes.Config')
     @patch('configurator.routes.configuration_routes.Configuration')
-    def test_put_configuration_success(self, mock_configuration_class):
+    def test_put_configuration_success(self, mock_configuration_class, mock_config_class):
         """Test successful PUT /api/configurations/<file_name>/."""
         # Arrange
         test_data = {"name": "test_config", "version": "1.0.0", "_locked": False}
@@ -136,6 +166,10 @@ class TestConfigurationRoutes(unittest.TestCase):
         mock_configuration.to_dict.return_value = {"name": "test_config", "version": "1.0.0", "_locked": False}
         mock_configuration.save.return_value = {"name": "test_config", "version": "1.0.0", "_locked": False}
         mock_configuration_class.return_value = mock_configuration
+        
+        mock_config = Mock()
+        mock_config.assert_local.return_value = None  # No exception means success
+        mock_config_class.get_instance.return_value = mock_config
 
         # Act
         response = self.client.put('/api/configurations/test_config/', json=test_data)
@@ -145,6 +179,31 @@ class TestConfigurationRoutes(unittest.TestCase):
         response_data = response.json
         # For successful responses, expect the saved data directly
         self.assertEqual(response_data, {"name": "test_config", "version": "1.0.0", "_locked": False})
+
+    @patch('configurator.routes.configuration_routes.Config')
+    def test_put_configuration_not_local(self, mock_config_class):
+        """Test PUT /api/configurations/<file_name>/ when not in local mode."""
+        # Arrange
+        from configurator.utils.configurator_exception import ConfiguratorForbiddenException, ConfiguratorEvent
+        test_data = {"name": "test_config", "version": "1.0.0"}
+        mock_config = Mock()
+        event = ConfiguratorEvent("CFG-ASSERT-02", "ASSERT_LOCAL")
+        event.record_failure("BUILT_AT is not set to 'Local' from a file")
+        mock_config.assert_local.side_effect = ConfiguratorForbiddenException("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", event)
+        mock_config_class.get_instance.return_value = mock_config
+
+        # Act
+        response = self.client.put('/api/configurations/test_config/', json=test_data)
+
+        # Assert
+        self.assertEqual(response.status_code, 403)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertIn("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", str(response_data["data"]))
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_put_configuration_general_exception(self, mock_configuration_class):
@@ -165,8 +224,9 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
+    @patch('configurator.routes.configuration_routes.Config')
     @patch('configurator.routes.configuration_routes.Configuration')
-    def test_delete_configuration_success(self, mock_configuration_class):
+    def test_delete_configuration_success(self, mock_configuration_class, mock_config_class):
         """Test successful DELETE /api/configurations/<file_name>/."""
         # Arrange
         mock_configuration = Mock()
@@ -180,6 +240,10 @@ class TestConfigurationRoutes(unittest.TestCase):
         }
         mock_configuration.delete.return_value = mock_event
         mock_configuration_class.return_value = mock_configuration
+        
+        mock_config = Mock()
+        mock_config.assert_local.return_value = None  # No exception means success
+        mock_config_class.get_instance.return_value = mock_config
 
         # Act
         response = self.client.delete('/api/configurations/test_config/')
@@ -192,6 +256,30 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("status", response_data)
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "SUCCESS")
+
+    @patch('configurator.routes.configuration_routes.Config')
+    def test_delete_configuration_not_local(self, mock_config_class):
+        """Test DELETE /api/configurations/<file_name>/ when not in local mode."""
+        # Arrange
+        from configurator.utils.configurator_exception import ConfiguratorForbiddenException, ConfiguratorEvent
+        mock_config = Mock()
+        event = ConfiguratorEvent("CFG-ASSERT-02", "ASSERT_LOCAL")
+        event.record_failure("BUILT_AT is not set to 'Local' from a file")
+        mock_config.assert_local.side_effect = ConfiguratorForbiddenException("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", event)
+        mock_config_class.get_instance.return_value = mock_config
+
+        # Act
+        response = self.client.delete('/api/configurations/test_config/')
+
+        # Assert
+        self.assertEqual(response.status_code, 403)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertIn("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", str(response_data["data"]))
 
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_delete_configuration_general_exception(self, mock_configuration_class):
@@ -225,13 +313,18 @@ class TestConfigurationRoutes(unittest.TestCase):
         # This test is no longer applicable as we removed lock/unlock functionality
         pass
 
+    @patch('configurator.routes.configuration_routes.Config')
     @patch('configurator.routes.configuration_routes.Configuration')
-    def test_process_configuration_success(self, mock_configuration_class):
+    def test_process_configuration_success(self, mock_configuration_class, mock_config_class):
         """Test successful POST /api/configurations/<file_name>/."""
         # Arrange
         mock_event = ConfiguratorEvent("CFG-ROUTES-02", "PROCESS_ALL_CONFIGURATIONS")
         mock_event.record_success()
         mock_configuration_class.process_one.return_value = mock_event
+        
+        mock_config = Mock()
+        mock_config.assert_local.return_value = None  # No exception means success
+        mock_config_class.get_instance.return_value = mock_config
         
         # Act
         response = self.client.post('/api/configurations/test_config/')
@@ -241,6 +334,30 @@ class TestConfigurationRoutes(unittest.TestCase):
         response_data = response.json
         self.assertIn("status", response_data)
         self.assertEqual(response_data["status"], "SUCCESS")
+
+    @patch('configurator.routes.configuration_routes.Config')
+    def test_process_configuration_not_local(self, mock_config_class):
+        """Test POST /api/configurations/<file_name>/ when not in local mode."""
+        # Arrange
+        from configurator.utils.configurator_exception import ConfiguratorForbiddenException, ConfiguratorEvent
+        mock_config = Mock()
+        event = ConfiguratorEvent("CFG-ASSERT-02", "ASSERT_LOCAL")
+        event.record_failure("BUILT_AT is not set to 'Local' from a file")
+        mock_config.assert_local.side_effect = ConfiguratorForbiddenException("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", event)
+        mock_config_class.get_instance.return_value = mock_config
+
+        # Act
+        response = self.client.post('/api/configurations/test_config/')
+
+        # Assert
+        self.assertEqual(response.status_code, 403)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertIn("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", str(response_data["data"]))
         
     @patch('configurator.routes.configuration_routes.Configuration')
     def test_process_configuration_general_exception(self, mock_configuration_class):
@@ -355,11 +472,16 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
+    @patch('configurator.routes.configuration_routes.Config')
     @patch('configurator.routes.configuration_routes.TemplateService.create_collection')
-    def test_create_collection_success(self, mock_create_collection):
+    def test_create_collection_success(self, mock_create_collection, mock_config_class):
         """Test successful POST /api/configurations/collection/<file_name>."""
         # Arrange
         mock_create_collection.return_value = {"created": True}
+        
+        mock_config = Mock()
+        mock_config.assert_local.return_value = None  # No exception means success
+        mock_config_class.get_instance.return_value = mock_config
 
         # Act
         response = self.client.post('/api/configurations/collection/test_collection/')
@@ -369,6 +491,30 @@ class TestConfigurationRoutes(unittest.TestCase):
         response_data = response.json
         # For successful responses, expect data directly, not wrapped in event envelope
         self.assertEqual(response_data, {"created": True})
+
+    @patch('configurator.routes.configuration_routes.Config')
+    def test_create_collection_not_local(self, mock_config_class):
+        """Test POST /api/configurations/collection/<file_name> when not in local mode."""
+        # Arrange
+        from configurator.utils.configurator_exception import ConfiguratorForbiddenException, ConfiguratorEvent
+        mock_config = Mock()
+        event = ConfiguratorEvent("CFG-ASSERT-02", "ASSERT_LOCAL")
+        event.record_failure("BUILT_AT is not set to 'Local' from a file")
+        mock_config.assert_local.side_effect = ConfiguratorForbiddenException("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", event)
+        mock_config_class.get_instance.return_value = mock_config
+
+        # Act
+        response = self.client.post('/api/configurations/collection/test_collection/')
+
+        # Assert
+        self.assertEqual(response.status_code, 403)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertIn("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", str(response_data["data"]))
 
     @patch('configurator.routes.configuration_routes.TemplateService.create_collection')
     def test_create_collection_general_exception(self, mock_create_collection):
@@ -388,8 +534,9 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
+    @patch('configurator.routes.configuration_routes.Config')
     @patch('configurator.routes.configuration_routes.Configuration')
-    def test_lock_all_configurations(self, mock_configuration_class):
+    def test_lock_all_configurations(self, mock_configuration_class, mock_config_class):
         """Test locking all configurations - verifies versions are locked."""
         # Arrange
         mock_event = ConfiguratorEvent("configurations-03", "LOCK_ALL_CONFIGURATIONS")
@@ -399,6 +546,10 @@ class TestConfigurationRoutes(unittest.TestCase):
         }
         mock_event.record_success()
         mock_configuration_class.lock_all.return_value = mock_event
+        
+        mock_config = Mock()
+        mock_config.assert_local.return_value = None  # No exception means success
+        mock_config_class.get_instance.return_value = mock_config
 
         # Act
         response = self.client.patch('/api/configurations/')
@@ -413,6 +564,30 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertEqual(data['status'], 'SUCCESS')
         # Verify lock_all was called (defaults to True)
         mock_configuration_class.lock_all.assert_called_once()
+
+    @patch('configurator.routes.configuration_routes.Config')
+    def test_lock_all_configurations_not_local(self, mock_config_class):
+        """Test PATCH /api/configurations/ when not in local mode."""
+        # Arrange
+        from configurator.utils.configurator_exception import ConfiguratorForbiddenException, ConfiguratorEvent
+        mock_config = Mock()
+        event = ConfiguratorEvent("CFG-ASSERT-02", "ASSERT_LOCAL")
+        event.record_failure("BUILT_AT is not set to 'Local' from a file")
+        mock_config.assert_local.side_effect = ConfiguratorForbiddenException("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", event)
+        mock_config_class.get_instance.return_value = mock_config
+
+        # Act
+        response = self.client.patch('/api/configurations/')
+
+        # Assert
+        self.assertEqual(response.status_code, 403)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertIn("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", str(response_data["data"]))
 
 
 if __name__ == '__main__':

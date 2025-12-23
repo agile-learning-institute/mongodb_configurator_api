@@ -87,8 +87,9 @@ class TestDictionaryRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
+    @patch('configurator.routes.dictionary_routes.Config')
     @patch('configurator.routes.dictionary_routes.Dictionary')
-    def test_update_dictionary_success(self, mock_dictionary_class):
+    def test_update_dictionary_success(self, mock_dictionary_class, mock_config_class):
         """Test successful PUT /api/dictionaries/<file_name>."""
         # Arrange
         test_data = {"name": "test_dict", "version": "1.0.0"}
@@ -96,6 +97,10 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_saved_file = {"name": "test_dict.yaml", "path": "/path/to/test_dict.yaml"}
         mock_dictionary.save.return_value = mock_saved_file
         mock_dictionary_class.return_value = mock_dictionary
+        
+        mock_config = Mock()
+        mock_config.assert_local.return_value = None  # No exception means success
+        mock_config_class.get_instance.return_value = mock_config
 
         # Act
         response = self.client.put('/api/dictionaries/test_dict/', json=test_data)
@@ -104,6 +109,31 @@ class TestDictionaryRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         response_data = response.json
         self.assertEqual(response_data, {"name": "test_dict.yaml", "path": "/path/to/test_dict.yaml"})
+
+    @patch('configurator.routes.dictionary_routes.Config')
+    def test_update_dictionary_not_local(self, mock_config_class):
+        """Test PUT /api/dictionaries/<file_name> when not in local mode."""
+        # Arrange
+        from configurator.utils.configurator_exception import ConfiguratorForbiddenException, ConfiguratorEvent
+        test_data = {"name": "test_dict", "version": "1.0.0"}
+        mock_config = Mock()
+        event = ConfiguratorEvent("CFG-ASSERT-02", "ASSERT_LOCAL")
+        event.record_failure("BUILT_AT is not set to 'Local' from a file")
+        mock_config.assert_local.side_effect = ConfiguratorForbiddenException("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", event)
+        mock_config_class.get_instance.return_value = mock_config
+
+        # Act
+        response = self.client.put('/api/dictionaries/test_dict/', json=test_data)
+
+        # Assert
+        self.assertEqual(response.status_code, 403)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertIn("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", str(response_data["data"]))
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_update_dictionary_general_exception(self, mock_dictionary_class):
@@ -124,8 +154,9 @@ class TestDictionaryRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
+    @patch('configurator.routes.dictionary_routes.Config')
     @patch('configurator.routes.dictionary_routes.Dictionary')
-    def test_delete_dictionary_success(self, mock_dictionary_class):
+    def test_delete_dictionary_success(self, mock_dictionary_class, mock_config_class):
         """Test successful DELETE /api/dictionaries/<file_name>."""
         # Arrange
         mock_dictionary = Mock()
@@ -133,6 +164,10 @@ class TestDictionaryRoutes(unittest.TestCase):
         mock_event.to_dict.return_value = {"deleted": True}
         mock_dictionary.delete.return_value = mock_event
         mock_dictionary_class.return_value = mock_dictionary
+        
+        mock_config = Mock()
+        mock_config.assert_local.return_value = None  # No exception means success
+        mock_config_class.get_instance.return_value = mock_config
 
         # Act
         response = self.client.delete('/api/dictionaries/test_dict/')
@@ -141,6 +176,30 @@ class TestDictionaryRoutes(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         response_data = response.json
         self.assertEqual(response_data, {"deleted": True})
+
+    @patch('configurator.routes.dictionary_routes.Config')
+    def test_delete_dictionary_not_local(self, mock_config_class):
+        """Test DELETE /api/dictionaries/<file_name> when not in local mode."""
+        # Arrange
+        from configurator.utils.configurator_exception import ConfiguratorForbiddenException, ConfiguratorEvent
+        mock_config = Mock()
+        event = ConfiguratorEvent("CFG-ASSERT-02", "ASSERT_LOCAL")
+        event.record_failure("BUILT_AT is not set to 'Local' from a file")
+        mock_config.assert_local.side_effect = ConfiguratorForbiddenException("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", event)
+        mock_config_class.get_instance.return_value = mock_config
+
+        # Act
+        response = self.client.delete('/api/dictionaries/test_dict/')
+
+        # Assert
+        self.assertEqual(response.status_code, 403)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertIn("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", str(response_data["data"]))
 
     @patch('configurator.routes.dictionary_routes.Dictionary')
     def test_delete_dictionary_general_exception(self, mock_dictionary_class):
@@ -164,8 +223,9 @@ class TestDictionaryRoutes(unittest.TestCase):
 
     # Lock/unlock tests removed as functionality was removed
 
+    @patch('configurator.routes.dictionary_routes.Config')
     @patch('configurator.routes.dictionary_routes.Dictionary')
-    def test_lock_all_dictionaries(self, mock_dictionary_class):
+    def test_lock_all_dictionaries(self, mock_dictionary_class, mock_config_class):
         """Test locking all dictionaries."""
         # Arrange
         mock_event = ConfiguratorEvent("DIC-04", "LOCK_ALL_DICTIONARIES")
@@ -175,6 +235,10 @@ class TestDictionaryRoutes(unittest.TestCase):
         }
         mock_event.record_success()
         mock_dictionary_class.lock_all.return_value = mock_event
+        
+        mock_config = Mock()
+        mock_config.assert_local.return_value = None  # No exception means success
+        mock_config_class.get_instance.return_value = mock_config
 
         # Act
         response = self.client.patch('/api/dictionaries/')
@@ -189,6 +253,30 @@ class TestDictionaryRoutes(unittest.TestCase):
         self.assertIn('data', data)
         self.assertIn('total_files', data['data'])
         self.assertIn('operation', data['data'])
+
+    @patch('configurator.routes.dictionary_routes.Config')
+    def test_lock_all_dictionaries_not_local(self, mock_config_class):
+        """Test PATCH /api/dictionaries/ when not in local mode."""
+        # Arrange
+        from configurator.utils.configurator_exception import ConfiguratorForbiddenException, ConfiguratorEvent
+        mock_config = Mock()
+        event = ConfiguratorEvent("CFG-ASSERT-02", "ASSERT_LOCAL")
+        event.record_failure("BUILT_AT is not set to 'Local' from a file")
+        mock_config.assert_local.side_effect = ConfiguratorForbiddenException("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", event)
+        mock_config_class.get_instance.return_value = mock_config
+
+        # Act
+        response = self.client.patch('/api/dictionaries/')
+
+        # Assert
+        self.assertEqual(response.status_code, 403)
+        response_data = response.json
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        self.assertIn("status", response_data)
+        self.assertIn("data", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
+        self.assertIn("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", str(response_data["data"]))
 
 
 if __name__ == '__main__':

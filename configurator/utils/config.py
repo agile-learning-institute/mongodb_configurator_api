@@ -1,6 +1,7 @@
 import os
 import json
 from pathlib import Path
+from configurator.utils.configurator_exception import ConfiguratorForbiddenException, ConfiguratorEvent
 
 import logging
 logger = logging.getLogger(__name__)
@@ -190,6 +191,23 @@ class Config:
             "config_items": self.config_items,
         }    
 
+    def assert_local(self):
+        """Check if BUILT_AT is from file and has value 'Local'. Raises ConfiguratorForbiddenException if not."""
+        built_at_item = next((item for item in self.config_items if item['name'] == 'BUILT_AT'), None)
+        if built_at_item is None:
+            event = ConfiguratorEvent(event_id="CFG-ASSERT-01", event_type="ASSERT_LOCAL")
+            event.record_failure("BUILT_AT configuration item not found")
+            raise ConfiguratorForbiddenException("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", event)
+        
+        is_local = built_at_item.get('from') == 'file' and built_at_item.get('value') == 'Local'
+        if not is_local:
+            event = ConfiguratorEvent(event_id="CFG-ASSERT-02", event_type="ASSERT_LOCAL")
+            event.record_failure("BUILT_AT is not set to 'Local' from a file", {
+                "source": built_at_item.get('from'),
+                "value": built_at_item.get('value')
+            })
+            raise ConfiguratorForbiddenException("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", event)
+    
     # Singleton Getter
     @staticmethod
     def get_instance():

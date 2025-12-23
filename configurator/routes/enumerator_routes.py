@@ -23,6 +23,7 @@ def create_enumerator_routes():
     @enumerator_routes.route('/', methods=['PATCH'])
     @event_route("ENU-04", "LOCK_ENUMERATIONS", "locking all enumerations")
     def lock_enumerations():
+        config.assert_local()
         # Lock all enumeration files
         event = Enumerations.lock_all()
         return jsonify(event.to_dict())
@@ -38,6 +39,7 @@ def create_enumerator_routes():
     @enumerator_routes.route('/<file_name>/', methods=['PUT'])
     @event_route("ENU-03", "PUT_ENUMERATION", "updating enumeration")
     def put_enumeration(file_name):
+        config.assert_local()
         enumerations = Enumerations(file_name, request.json)
         result = enumerations.save()
         return jsonify(result)
@@ -46,6 +48,7 @@ def create_enumerator_routes():
     @enumerator_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("ENU-05", "DELETE_ENUMERATION", "deleting enumeration")
     def delete_enumeration(file_name):
+        config.assert_local()
         enumeration = Enumerations(file_name)
         event = enumeration.delete()
         return jsonify(event.to_dict())

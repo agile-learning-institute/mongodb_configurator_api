@@ -30,6 +30,7 @@ def create_migration_routes():
     @migration_routes.route('/<file_name>/', methods=['PUT'])
     @event_route("MIG-08", "UPDATE_MIGRATION", "updating migration")
     def put_migration(file_name):
+        config.assert_local()
         content = request.get_json(force=True)
         document = FileIO.put_document(config.MIGRATIONS_FOLDER, file_name, content)
         return jsonify(document)
@@ -38,6 +39,7 @@ def create_migration_routes():
     @migration_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("MIG-06", "DELETE_MIGRATION", "deleting migration")
     def delete_migration(file_name):
+        config.assert_local()
         event = FileIO.delete_document(config.MIGRATIONS_FOLDER, file_name)
         return jsonify(event.to_dict())
     
