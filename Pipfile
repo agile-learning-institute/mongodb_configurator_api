@@ -18,15 +18,15 @@ down = "docker compose down mongodb configurator_api configurator_spa"
 open = "sh -c 'open -a \"Google Chrome\" \"http://localhost:8082\" || google-chrome \"http://localhost:8082\" || xdg-open \"http://localhost:8082\"'"
 
 [packages]
-python-dotenv = "*"
-flask = "*"
-prometheus-flask-exporter = "*"
-pymongo = "*"
-pyyaml = ">=6.0.1"
+python-dotenv = "==1.1.1"
+flask = "==3.1.1"
+prometheus-flask-exporter = "==0.23.2"
+pymongo = "==4.13.2"
+pyyaml = "==6.0.2"
 
 [dev-packages]
-coverage = "*"
-pytest = "*"
+coverage = "==7.9.2"
+pytest = "==8.4.1"
 
 [requires]
 python_version = "3.12"
