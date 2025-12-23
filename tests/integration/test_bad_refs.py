@@ -12,13 +12,16 @@ class TestBadReferences(unittest.TestCase):
 
     def setUp(self):
         os.environ['INPUT_FOLDER'] = "./tests/test_cases/failing_refs"
+        os.environ['MONGODB_REQUIRE_TLS'] = 'false'
         Config._instance = None
         self.config = Config.get_instance()
 
     def tearDown(self):
-        # Clean up environment variable
+        # Clean up environment variables
         if 'INPUT_FOLDER' in os.environ:
             del os.environ['INPUT_FOLDER']
+        if 'MONGODB_REQUIRE_TLS' in os.environ:
+            del os.environ['MONGODB_REQUIRE_TLS']
         Config._instance = None
 
     def test_circular_reference_dictionary(self):

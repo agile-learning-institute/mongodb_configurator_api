@@ -25,11 +25,13 @@ class TestMongoIO(unittest.TestCase):
         
         os.environ['ENABLE_DROP_DATABASE'] = 'true'
         os.environ['BUILT_AT'] = 'Local'
+        os.environ['MONGODB_REQUIRE_TLS'] = 'false'
         self.config = Config.get_instance()
         self.config.initialize()
         self.test_collection_name = "test_collection"
         del os.environ['ENABLE_DROP_DATABASE']
         del os.environ['BUILT_AT']
+        del os.environ['MONGODB_REQUIRE_TLS']
         
         # Create MongoIO instance using config values
         self.mongo_io = MongoIO(

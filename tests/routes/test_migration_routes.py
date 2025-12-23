@@ -28,6 +28,10 @@ class MigrationRoutesTestCase(unittest.TestCase):
         built_at_file = os.path.join(api_config_dir, "BUILT_AT")
         with open(built_at_file, "w") as f:
             f.write("Local")
+        # Create MONGODB_REQUIRE_TLS file with value "false"
+        require_tls_file = os.path.join(api_config_dir, "MONGODB_REQUIRE_TLS")
+        with open(require_tls_file, "w") as f:
+            f.write("false")
         # Set INPUT_FOLDER environment variable
         os.environ['INPUT_FOLDER'] = self.temp_dir
         
@@ -59,6 +63,18 @@ class MigrationRoutesTestCase(unittest.TestCase):
                 'name': 'BUILT_AT',
                 'from': 'file',
                 'value': 'Local'
+            })
+        # Update MONGODB_REQUIRE_TLS property and config_item to be from file with value 'false'
+        config.MONGODB_REQUIRE_TLS = False
+        require_tls_item = next((item for item in config.config_items if item['name'] == 'MONGODB_REQUIRE_TLS'), None)
+        if require_tls_item:
+            require_tls_item['from'] = 'file'
+            require_tls_item['value'] = 'false'
+        else:
+            config.config_items.append({
+                'name': 'MONGODB_REQUIRE_TLS',
+                'from': 'file',
+                'value': 'false'
             })
         # Create some fake migration files
         self.migration1 = os.path.join(self.migrations_dir, "mig1.json")
@@ -146,6 +162,18 @@ class MigrationRoutesTestCase(unittest.TestCase):
                     'from': 'file',
                     'value': 'Local'
                 })
+        # Also ensure MONGODB_REQUIRE_TLS is set to false
+        require_tls_item = next((item for item in config.config_items if item['name'] == 'MONGODB_REQUIRE_TLS'), None)
+        if require_tls_item:
+            require_tls_item['from'] = 'file'
+            require_tls_item['value'] = 'false'
+        else:
+            config.config_items.append({
+                'name': 'MONGODB_REQUIRE_TLS',
+                'from': 'file',
+                'value': 'false'
+            })
+        config.MONGODB_REQUIRE_TLS = False
         test_data = {"migration": "test data"}
         
         # Act
@@ -173,6 +201,18 @@ class MigrationRoutesTestCase(unittest.TestCase):
                     'from': 'file',
                     'value': 'Local'
                 })
+        # Also ensure MONGODB_REQUIRE_TLS is set to false
+        require_tls_item = next((item for item in config.config_items if item['name'] == 'MONGODB_REQUIRE_TLS'), None)
+        if require_tls_item:
+            require_tls_item['from'] = 'file'
+            require_tls_item['value'] = 'false'
+        else:
+            config.config_items.append({
+                'name': 'MONGODB_REQUIRE_TLS',
+                'from': 'file',
+                'value': 'false'
+            })
+        config.MONGODB_REQUIRE_TLS = False
         resp = self.app.delete("/api/migrations/mig1.json/")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
@@ -234,6 +274,9 @@ class TestMigrationRoutes(unittest.TestCase):
         # Create BUILT_AT file with value "Local"
         built_at_file = api_config_dir / "BUILT_AT"
         built_at_file.write_text("Local")
+        # Create MONGODB_REQUIRE_TLS file with value "false"
+        require_tls_file = api_config_dir / "MONGODB_REQUIRE_TLS"
+        require_tls_file.write_text("false")
         # Set INPUT_FOLDER environment variable
         os.environ['INPUT_FOLDER'] = self.temp_dir
         # Clear and reinitialize Config

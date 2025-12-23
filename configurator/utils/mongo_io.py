@@ -17,6 +17,38 @@ class MongoIO:
 
     def __init__(self, connection_string, database_name):
         try:
+            # Validate TLS requirement
+            config = Config.get_instance()
+            requires_tls = config.MONGODB_REQUIRE_TLS
+            has_tls = connection_string.startswith("mongodb+srv://")
+            has_no_tls = connection_string.startswith("mongodb://")
+            
+            if requires_tls and not has_tls:
+                event = ConfiguratorEvent(
+                    event_id="MON-02", 
+                    event_type="TLS_VALIDATION",
+                    event_data={
+                        "connection_string_prefix": connection_string[:20] + "..." if len(connection_string) > 20 else connection_string,
+                        "requires_tls": requires_tls,
+                        "has_tls": has_tls
+                    }
+                )
+                event.record_failure("MONGODB_REQUIRE_TLS is True but connection string does not use mongodb+srv://")
+                raise ConfiguratorException("MONGODB_REQUIRE_TLS is True but connection string does not use mongodb+srv://", event)
+            
+            if not requires_tls and not has_no_tls:
+                event = ConfiguratorEvent(
+                    event_id="MON-02", 
+                    event_type="TLS_VALIDATION",
+                    event_data={
+                        "connection_string_prefix": connection_string[:20] + "..." if len(connection_string) > 20 else connection_string,
+                        "requires_tls": requires_tls,
+                        "has_tls": has_tls
+                    }
+                )
+                event.record_failure("MONGODB_REQUIRE_TLS is False but connection string uses mongodb+srv://")
+                raise ConfiguratorException("MONGODB_REQUIRE_TLS is False but connection string uses mongodb+srv://", event)
+            
             self.client = MongoClient(
                 connection_string,
                 serverSelectionTimeoutMS=2000, 
@@ -25,6 +57,9 @@ class MongoIO:
             self.client.admin.command('ping')  # Force connection
             self.db = self.client.get_database(database_name)
             logger.info(f"Connected to MongoDB: {database_name}")
+        except ConfiguratorException:
+            # Re-raise ConfiguratorException as-is
+            raise
         except Exception as e:
             event = ConfiguratorEvent(event_id="MON-01", event_type="CONNECTION", event_data={"error": str(e)})
             raise ConfiguratorException("Failed to connect to MongoDB", event)

@@ -40,6 +40,7 @@ class Config:
             self.EXIT_AFTER_PROCESSING = False
             self.LOAD_TEST_DATA = False
             self.ENABLE_DROP_DATABASE = False
+            self.MONGODB_REQUIRE_TLS = False
             self.RENDER_STACK_MAX_DEPTH = 0
     
             # Default Values grouped by value type            
@@ -68,6 +69,7 @@ class Config:
                 "EXIT_AFTER_PROCESSING": "false",
                 "LOAD_TEST_DATA": "false",
                 "ENABLE_DROP_DATABASE": "false",
+                "MONGODB_REQUIRE_TLS": "true",
             }            
             self.config_string_secrets = {  
                 "MONGO_CONNECTION_STRING": "mongodb://mongodb:27017/"
@@ -192,7 +194,7 @@ class Config:
         }    
 
     def assert_local(self):
-        """Check if BUILT_AT is from file and has value 'Local'. Raises ConfiguratorForbiddenException if not."""
+        """Check if BUILT_AT is from file and has value 'Local', and MONGODB_REQUIRE_TLS is False. Raises ConfiguratorForbiddenException if not."""
         built_at_item = next((item for item in self.config_items if item['name'] == 'BUILT_AT'), None)
         if built_at_item is None:
             event = ConfiguratorEvent(event_id="CFG-ASSERT-01", event_type="ASSERT_LOCAL")
@@ -207,6 +209,22 @@ class Config:
                 "value": built_at_item.get('value')
             })
             raise ConfiguratorForbiddenException("Write operations are only allowed when BUILT_AT is set to 'Local' from a file", event)
+        
+        # Check that MONGODB_REQUIRE_TLS is False for local environments
+        require_tls_item = next((item for item in self.config_items if item['name'] == 'MONGODB_REQUIRE_TLS'), None)
+        if require_tls_item is None:
+            event = ConfiguratorEvent(event_id="CFG-ASSERT-03", event_type="ASSERT_LOCAL")
+            event.record_failure("MONGODB_REQUIRE_TLS configuration item not found")
+            raise ConfiguratorForbiddenException("Write operations are only allowed when MONGODB_REQUIRE_TLS is set to 'false' for local environments", event)
+        
+        require_tls_value = require_tls_item.get('value', '').lower() == 'true'
+        if require_tls_value:
+            event = ConfiguratorEvent(event_id="CFG-ASSERT-04", event_type="ASSERT_LOCAL")
+            event.record_failure("MONGODB_REQUIRE_TLS is True but should be False for local environments", {
+                "value": require_tls_item.get('value'),
+                "source": require_tls_item.get('from')
+            })
+            raise ConfiguratorForbiddenException("Write operations are only allowed when MONGODB_REQUIRE_TLS is set to 'false' for local environments", event)
     
     # Singleton Getter
     @staticmethod

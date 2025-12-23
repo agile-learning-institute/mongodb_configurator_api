@@ -14,6 +14,8 @@ class TestMigrationEvents(unittest.TestCase):
     
     def setUp(self):
         """Set up test fixtures."""
+        os.environ['MONGODB_REQUIRE_TLS'] = 'false'
+        Config._instance = None
         self.config = Config.get_instance()
         self.config.INPUT_FOLDER = tempfile.mkdtemp()
         
@@ -34,6 +36,9 @@ class TestMigrationEvents(unittest.TestCase):
         """Clean up test fixtures."""
         import shutil
         shutil.rmtree(self.config.INPUT_FOLDER)
+        if 'MONGODB_REQUIRE_TLS' in os.environ:
+            del os.environ['MONGODB_REQUIRE_TLS']
+        Config._instance = None
     
     @patch('configurator.utils.mongo_io.MongoClient')
     @patch('configurator.services.configuration_version.Enumerators')

@@ -32,6 +32,7 @@ class TestConfigFiles(unittest.TestCase):
     def test_file_boolean_properties(self):
         """Test that boolean properties are loaded from api_config files."""
         self.assertEqual(self.config.AUTO_PROCESS, True)
+        self.assertEqual(self.config.MONGODB_REQUIRE_TLS, False)
 
     def test_file_secret_properties(self):
         """Test that secret properties are loaded from api_config files."""
@@ -44,6 +45,7 @@ class TestConfigFiles(unittest.TestCase):
             "MONGO_DB_NAME": "TEST_VALUE",
             "API_PORT": "9999",
             "AUTO_PROCESS": "true",
+            "MONGODB_REQUIRE_TLS": "false",
             "MONGO_CONNECTION_STRING": "secret"  # Secret fields show "secret" not actual value
         }
         

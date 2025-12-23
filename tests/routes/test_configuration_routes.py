@@ -50,6 +50,9 @@ class TestConfigurationRoutes(unittest.TestCase):
         # Create BUILT_AT file with value "Local"
         built_at_file = api_config_dir / "BUILT_AT"
         built_at_file.write_text("Local")
+        # Create MONGODB_REQUIRE_TLS file with value "false"
+        require_tls_file = api_config_dir / "MONGODB_REQUIRE_TLS"
+        require_tls_file.write_text("false")
         # Set INPUT_FOLDER environment variable
         os.environ['INPUT_FOLDER'] = self.temp_dir
         # Clear and reinitialize Config
