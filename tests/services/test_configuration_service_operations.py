@@ -242,4 +242,121 @@ class TestVersion(unittest.TestCase):
         # Assert
         self.assertEqual(version.version_str, "1.0.0.0")
         self.assertEqual(version.collection_name, "test_collection")
-        self.assertFalse(version._locked) 
+        self.assertFalse(version._locked)
+
+
+class TestConfigurationLockAll(unittest.TestCase):
+    """Test cases for Configuration.lock_all method."""
+    
+    @patch('configurator.services.configuration_services.FileIO')
+    @patch('configurator.services.service_base.FileIO')
+    @patch('configurator.services.configuration_services.Version')
+    def test_lock_all_locks_versions(self, mock_version, mock_file_io_base, mock_file_io):
+        """Test that lock_all locks all versions in all configurations."""
+        # Arrange
+        mock_file1 = Mock()
+        mock_file1.file_name = "config1.yaml"
+        mock_file2 = Mock()
+        mock_file2.file_name = "config2.yaml"
+        mock_file_io.get_documents.return_value = [mock_file1, mock_file2]
+        
+        # Mock configuration documents
+        config1_doc = {
+            "title": "Config 1",
+            "description": "First config",
+            "versions": [
+                {"version": "1.0.0", "_locked": False},
+                {"version": "1.1.0", "_locked": False}
+            ],
+            "_locked": False
+        }
+        config2_doc = {
+            "title": "Config 2",
+            "description": "Second config",
+            "versions": [
+                {"version": "2.0.0", "_locked": False}
+            ],
+            "_locked": False
+        }
+        
+        # Both FileIO mocks need to return documents
+        mock_file_io.get_document.side_effect = [config1_doc, config2_doc]
+        mock_file_io_base.get_document.side_effect = [config1_doc, config2_doc]
+        mock_file_io.put_document.return_value = {"saved": True}
+        mock_file_io_base.put_document.return_value = {"saved": True}
+        
+        # Mock Version instances
+        mock_version1 = Mock()
+        mock_version1._locked = False
+        mock_version1.version_str = "1.0.0.0"
+        mock_version1.to_dict.return_value = {"version": "1.0.0.0", "_locked": False}
+        
+        mock_version2 = Mock()
+        mock_version2._locked = False
+        mock_version2.version_str = "1.1.0.0"
+        mock_version2.to_dict.return_value = {"version": "1.1.0.0", "_locked": False}
+        
+        mock_version3 = Mock()
+        mock_version3._locked = False
+        mock_version3.version_str = "2.0.0.0"
+        mock_version3.to_dict.return_value = {"version": "2.0.0.0", "_locked": False}
+        
+        mock_version.side_effect = [mock_version1, mock_version2, mock_version3]
+        
+        # Act
+        result = Configuration.lock_all(status=True)
+        
+        # Assert
+        self.assertEqual(result.status, "SUCCESS")
+        # Verify all versions were locked
+        self.assertTrue(mock_version1._locked)
+        self.assertTrue(mock_version2._locked)
+        self.assertTrue(mock_version3._locked)
+        # Verify configurations were saved (save() uses FileIO from service_base)
+        self.assertEqual(mock_file_io_base.put_document.call_count, 2)
+        # Verify version documents were updated
+        self.assertTrue(config1_doc["versions"][0]["_locked"])
+        self.assertTrue(config1_doc["versions"][1]["_locked"])
+        self.assertTrue(config2_doc["versions"][0]["_locked"])
+    
+    @patch('configurator.services.configuration_services.FileIO')
+    @patch('configurator.services.service_base.FileIO')
+    @patch('configurator.services.configuration_services.Version')
+    def test_lock_all_unlocks_versions(self, mock_version, mock_file_io_base, mock_file_io):
+        """Test that lock_all can unlock all versions in all configurations."""
+        # Arrange
+        mock_file1 = Mock()
+        mock_file1.file_name = "config1.yaml"
+        mock_file_io.get_documents.return_value = [mock_file1]
+        
+        config1_doc = {
+            "title": "Config 1",
+            "description": "First config",
+            "versions": [
+                {"version": "1.0.0", "_locked": True}
+            ],
+            "_locked": False
+        }
+        
+        # Both FileIO mocks need to return documents
+        mock_file_io.get_document.return_value = config1_doc
+        mock_file_io_base.get_document.return_value = config1_doc
+        mock_file_io.put_document.return_value = {"saved": True}
+        mock_file_io_base.put_document.return_value = {"saved": True}
+        
+        mock_version1 = Mock()
+        mock_version1._locked = True
+        mock_version1.version_str = "1.0.0.0"
+        mock_version1.to_dict.return_value = {"version": "1.0.0.0", "_locked": True}
+        
+        mock_version.return_value = mock_version1
+        
+        # Act
+        result = Configuration.lock_all(status=False)
+        
+        # Assert
+        self.assertEqual(result.status, "SUCCESS")
+        # Verify version was unlocked
+        self.assertFalse(mock_version1._locked)
+        # Verify version document was updated
+        self.assertFalse(config1_doc["versions"][0]["_locked"]) 
