@@ -23,6 +23,15 @@ class TestConfigDefaults(unittest.TestCase):
     def test_default_boolean_properties(self):
         for key, default in self.config.config_booleans.items():
             self.assertEqual(getattr(self.config, key), (default.lower() == "true"))
+    
+    def test_mongodb_require_tls_default(self):
+        """Test that MONGODB_REQUIRE_TLS defaults to True."""
+        self.assertEqual(self.config.MONGODB_REQUIRE_TLS, True)
+        # Verify it's in config_items with correct default value
+        item = next((i for i in self.config.config_items if i['name'] == 'MONGODB_REQUIRE_TLS'), None)
+        self.assertIsNotNone(item, "MONGODB_REQUIRE_TLS config item not found")
+        self.assertEqual(item['value'], 'true')
+        self.assertEqual(item['from'], 'default')
 
     def test_default_string_secret_properties(self):
         for key, default in self.config.config_string_secrets.items():
@@ -44,6 +53,11 @@ class TestConfigDefaults(unittest.TestCase):
     def test_default_secret_ci(self):
         for key, default in self.config.config_string_secrets.items():
             self._test_config_default_value(key, "secret")
+    
+    def test_default_boolean_ci(self):
+        """Test that boolean config items show correct default values in config_items."""
+        for key, default in self.config.config_booleans.items():
+            self._test_config_default_value(key, default)
 
     def _test_config_default_value(self, config_name, expected_value):
         """Helper function to check default values."""

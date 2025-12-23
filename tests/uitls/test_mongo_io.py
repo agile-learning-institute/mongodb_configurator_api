@@ -87,6 +87,10 @@ class TestMongoIODropDatabase(unittest.TestCase):
         enable_drop_file = api_config_dir / "ENABLE_DROP_DATABASE"
         enable_drop_file.write_text("true")
         
+        # Create MONGODB_REQUIRE_TLS file (set to false for local dev tests)
+        mongodb_require_tls_file = api_config_dir / "MONGODB_REQUIRE_TLS"
+        mongodb_require_tls_file.write_text("false")
+        
         # Set MONGO_CONNECTION_STRING based on the parameter
         if mongo_connection_string_from == 'environment':
             os.environ['MONGO_CONNECTION_STRING'] = 'mongodb://custom:27017/'
@@ -217,6 +221,127 @@ class TestMongoIODropDatabase(unittest.TestCase):
         self.assertEqual(exception.event.status, "FAILURE")
         # Verify drop_database was not called
         mock_client.drop_database.assert_not_called()
+
+    @patch('configurator.utils.mongo_io.MongoClient')
+    def test_tls_validation_requires_tls_with_mongodb_srv_succeeds(self, mock_mongo_client):
+        """Test that connection succeeds when MONGODB_REQUIRE_TLS is True and connection string uses mongodb+srv://"""
+        # Arrange
+        Config._instance = None
+        os.environ['MONGODB_REQUIRE_TLS'] = 'true'
+        config = Config.get_instance()
+        
+        # Mock MongoDB client
+        mock_client = MagicMock()
+        mock_db = MagicMock()
+        mock_db.name = "test_db"
+        mock_client.get_database.return_value = mock_db
+        mock_client.admin.command.return_value = {"ok": 1}
+        mock_mongo_client.return_value = mock_client
+        
+        # Act
+        mongo_io = MongoIO("mongodb+srv://user:pass@cluster.mongodb.net/", "test_db")
+        
+        # Assert
+        self.assertIsNotNone(mongo_io.client)
+        self.assertIsNotNone(mongo_io.db)
+        mock_mongo_client.assert_called_once()
+        del os.environ['MONGODB_REQUIRE_TLS']
+        Config._instance = None
+
+    @patch('configurator.utils.mongo_io.MongoClient')
+    def test_tls_validation_requires_tls_with_mongodb_fails(self, mock_mongo_client):
+        """Test that connection fails when MONGODB_REQUIRE_TLS is True but connection string uses mongodb://"""
+        # Arrange
+        Config._instance = None
+        os.environ['MONGODB_REQUIRE_TLS'] = 'true'
+        config = Config.get_instance()
+        
+        # Act & Assert
+        with self.assertRaises(ConfiguratorException) as context:
+            MongoIO("mongodb://localhost:27017/", "test_db")
+        
+        exception = context.exception
+        self.assertIn("MONGODB_REQUIRE_TLS is True", str(exception))
+        self.assertEqual(exception.event.id, "MON-02")
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertEqual(exception.event.type, "TLS_VALIDATION")
+        # Verify MongoClient was not called
+        mock_mongo_client.assert_not_called()
+        del os.environ['MONGODB_REQUIRE_TLS']
+        Config._instance = None
+
+    @patch('configurator.utils.mongo_io.MongoClient')
+    def test_tls_validation_no_tls_required_with_mongodb_succeeds(self, mock_mongo_client):
+        """Test that connection succeeds when MONGODB_REQUIRE_TLS is False and connection string uses mongodb://"""
+        # Arrange
+        Config._instance = None
+        os.environ['MONGODB_REQUIRE_TLS'] = 'false'
+        config = Config.get_instance()
+        
+        # Mock MongoDB client
+        mock_client = MagicMock()
+        mock_db = MagicMock()
+        mock_db.name = "test_db"
+        mock_client.get_database.return_value = mock_db
+        mock_client.admin.command.return_value = {"ok": 1}
+        mock_mongo_client.return_value = mock_client
+        
+        # Act
+        mongo_io = MongoIO("mongodb://localhost:27017/", "test_db")
+        
+        # Assert
+        self.assertIsNotNone(mongo_io.client)
+        self.assertIsNotNone(mongo_io.db)
+        mock_mongo_client.assert_called_once()
+        del os.environ['MONGODB_REQUIRE_TLS']
+        Config._instance = None
+
+    @patch('configurator.utils.mongo_io.MongoClient')
+    def test_tls_validation_no_tls_required_with_mongodb_srv_fails(self, mock_mongo_client):
+        """Test that connection fails when MONGODB_REQUIRE_TLS is False but connection string uses mongodb+srv://"""
+        # Arrange
+        Config._instance = None
+        os.environ['MONGODB_REQUIRE_TLS'] = 'false'
+        config = Config.get_instance()
+        
+        # Act & Assert
+        with self.assertRaises(ConfiguratorException) as context:
+            MongoIO("mongodb+srv://user:pass@cluster.mongodb.net/", "test_db")
+        
+        exception = context.exception
+        self.assertIn("MONGODB_REQUIRE_TLS is False", str(exception))
+        self.assertEqual(exception.event.id, "MON-02")
+        self.assertEqual(exception.event.status, "FAILURE")
+        self.assertEqual(exception.event.type, "TLS_VALIDATION")
+        # Verify MongoClient was not called
+        mock_mongo_client.assert_not_called()
+        del os.environ['MONGODB_REQUIRE_TLS']
+        Config._instance = None
+
+    @patch('configurator.utils.mongo_io.MongoClient')
+    def test_tls_validation_default_true_with_mongodb_srv_succeeds(self, mock_mongo_client):
+        """Test that connection succeeds with default MONGODB_REQUIRE_TLS=True when using mongodb+srv://"""
+        # Arrange
+        Config._instance = None
+        # Don't set MONGODB_REQUIRE_TLS, should default to True
+        config = Config.get_instance()
+        
+        # Mock MongoDB client
+        mock_client = MagicMock()
+        mock_db = MagicMock()
+        mock_db.name = "test_db"
+        mock_client.get_database.return_value = mock_db
+        mock_client.admin.command.return_value = {"ok": 1}
+        mock_mongo_client.return_value = mock_client
+        
+        # Act
+        mongo_io = MongoIO("mongodb+srv://user:pass@cluster.mongodb.net/", "test_db")
+        
+        # Assert
+        self.assertIsNotNone(mongo_io.client)
+        self.assertIsNotNone(mongo_io.db)
+        mock_mongo_client.assert_called_once()
+        Config._instance = None
 
 
 if __name__ == '__main__':

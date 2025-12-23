@@ -1,6 +1,6 @@
 # MongoDB Configurator API
 
-This project builds a the [MongoDB Configurator](https://github.com/agile-learning-institute/mongodb_configurator) API. This API supports the [MongoDB Configurator SPA](https://github.com/agile-learning-institute/mongodb_configurator_spa)
+This project builds a the [MongoDB Configurator](https://github.com/agile-learning-institute/mongodb_configurator) API. This API packages configurations for deployment, and supports the [MongoDB Configurator SPA](https://github.com/agile-learning-institute/mongodb_configurator_spa)
 
 ## Quick Start
 
@@ -160,3 +160,6 @@ curl -X PUT localhost:8081/api/dictionaries/sample.1.0.0.yaml/ \
   --data @./temp.json | jq
 ```
 ---
+
+### Configurability
+The [Config utility singleton](./configurator/utils/config.py) is used to manage all API Configuration options. See the code to understand options, and the [Configurator SRE Guide](https://github.com/agile-learning-institute/mongodb_configurator/blob/main/SRE.md) for more information.

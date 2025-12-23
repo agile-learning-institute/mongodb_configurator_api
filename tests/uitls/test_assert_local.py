@@ -35,6 +35,10 @@ class TestAssertLocal(unittest.TestCase):
             built_at_file = api_config_dir / "BUILT_AT"
             built_at_file.write_text("Local")
             
+            # Create MONGODB_REQUIRE_TLS file with value "false"
+            require_tls_file = api_config_dir / "MONGODB_REQUIRE_TLS"
+            require_tls_file.write_text("false")
+            
             # Set INPUT_FOLDER environment variable
             os.environ['INPUT_FOLDER'] = temp_dir
             
@@ -123,6 +127,69 @@ class TestAssertLocal(unittest.TestCase):
             self.assertIsNotNone(context.exception.event)
             self.assertEqual(context.exception.event.status, "FAILURE")
             self.assertIn("BUILT_AT configuration item not found", str(context.exception.event.data))
+
+    def test_assert_local_raises_when_require_tls_true(self):
+        """Test that assert_local() raises ConfiguratorForbiddenException when MONGODB_REQUIRE_TLS is True."""
+        # Create a temporary directory for the test
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create api_config directory
+            api_config_dir = Path(temp_dir) / "api_config"
+            api_config_dir.mkdir()
+            
+            # Create BUILT_AT file with value "Local"
+            built_at_file = api_config_dir / "BUILT_AT"
+            built_at_file.write_text("Local")
+            
+            # Create MONGODB_REQUIRE_TLS file with value "true"
+            require_tls_file = api_config_dir / "MONGODB_REQUIRE_TLS"
+            require_tls_file.write_text("true")
+            
+            # Set INPUT_FOLDER environment variable
+            os.environ['INPUT_FOLDER'] = temp_dir
+            
+            # Get config instance
+            config = Config.get_instance()
+            
+            # Assert - should raise ConfiguratorForbiddenException
+            with self.assertRaises(ConfiguratorForbiddenException) as context:
+                config.assert_local()
+            
+            self.assertIn("Write operations are only allowed", str(context.exception))
+            self.assertIn("MONGODB_REQUIRE_TLS", str(context.exception))
+            self.assertIsNotNone(context.exception.event)
+            self.assertEqual(context.exception.event.status, "FAILURE")
+            self.assertEqual(context.exception.event.id, "CFG-ASSERT-04")
+
+    def test_assert_local_raises_when_require_tls_missing(self):
+        """Test that assert_local() raises ConfiguratorForbiddenException when MONGODB_REQUIRE_TLS config_item is missing."""
+        # Create a temporary directory for the test
+        with tempfile.TemporaryDirectory() as temp_dir:
+            # Create api_config directory
+            api_config_dir = Path(temp_dir) / "api_config"
+            api_config_dir.mkdir()
+            
+            # Create BUILT_AT file with value "Local"
+            built_at_file = api_config_dir / "BUILT_AT"
+            built_at_file.write_text("Local")
+            
+            # Set INPUT_FOLDER environment variable
+            os.environ['INPUT_FOLDER'] = temp_dir
+            
+            # Get config instance
+            config = Config.get_instance()
+            
+            # Manually remove MONGODB_REQUIRE_TLS from config_items
+            config.config_items = [item for item in config.config_items if item['name'] != 'MONGODB_REQUIRE_TLS']
+            
+            # Assert - should raise ConfiguratorForbiddenException
+            with self.assertRaises(ConfiguratorForbiddenException) as context:
+                config.assert_local()
+            
+            self.assertIn("Write operations are only allowed", str(context.exception))
+            self.assertIn("MONGODB_REQUIRE_TLS", str(context.exception))
+            self.assertIsNotNone(context.exception.event)
+            self.assertEqual(context.exception.event.status, "FAILURE")
+            self.assertEqual(context.exception.event.id, "CFG-ASSERT-03")
 
 if __name__ == '__main__':
     unittest.main()
