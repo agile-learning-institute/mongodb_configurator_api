@@ -36,7 +36,6 @@ services:
       MONGO_DB_NAME: test_database
       API_PORT: 8081
       SPA_PORT: 8082
-      INPUT_FOLDER: /input
     volumes:
       - ${INPUT_FOLDER:-./tests/test_cases/playground}:/input
     depends_on:
@@ -61,7 +60,7 @@ services:
       - configurator
 
 ##################################
-# MongoDB Configurator Playground - Uses container /playground
+# MongoDB Configurator Playground - Uses container /input
 ##################################
   playground_api:
     image: ghcr.io/agile-learning-institute/mongodb_configurator_api:latest
@@ -71,7 +70,6 @@ services:
     environment:
       API_PORT: 8081
       SPA_PORT: 8082
-      INPUT_FOLDER: /playground
     depends_on:
       mongodb:
         condition: service_healthy

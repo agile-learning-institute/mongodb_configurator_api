@@ -52,7 +52,7 @@ pipenv run batch        # Run locally in Batch mode (process and exit)
 pipenv run container    # Build the container
 pipenv run service      # DB, API and SPA containers
 pipenv run api          # DB, API containers, uses $INPUT_FOLDER
-pipenv run playground   # DB, API /playground (ignores $INPUT_FOLDER)
+pipenv run playground   # DB, API /input (ignores $INPUT_FOLDER)
 # visit http://localhost:8082 
 
 pipenv run down         # Stops all testing containers
@@ -122,7 +122,7 @@ tests/
 │   ├── stepci/             # Configuration for step ci testing - setup/tear down in tests
 
 ```
-The Docker build will package passing_template into the containers /playground folder to support playground deployments.
+The Docker build will package passing_template into the containers /input folder to support playground deployments.
 
 ## API Documentation
 
