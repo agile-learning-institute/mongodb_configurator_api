@@ -1,0 +1,9 @@
+_locked: true
+file_name: real.yaml
+root:
+  description: A Real Number
+  name: real
+  required: false
+  schema:
+    type: float
+  type: simple

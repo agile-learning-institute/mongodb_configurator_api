@@ -36,13 +36,41 @@ class Version:
 
     def get_json_schema(self, enumerations: Enumerations) -> dict:
         dictionary_filename: str = self.version_number.get_schema_filename()
-        dictionary = Dictionary(dictionary_filename)
-        return dictionary.to_json_schema(enumerations)
+        event = ConfiguratorEvent("VER-02", "GET_JSON_SCHEMA")
+        event.data = {"version": self.version_str, "dictionary": dictionary_filename}
+        try:
+            dictionary = Dictionary(dictionary_filename)
+            schema = dictionary.to_json_schema(enumerations)
+            event.record_success()
+            return schema
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure(f"Failed to get JSON schema for version {self.version_str}, dictionary {dictionary_filename}")
+            logger.error(f"Failed to get JSON schema for version {self.version_str}, dictionary {dictionary_filename}: {e.event.to_dict()}")
+            raise ConfiguratorException(f"Failed to get JSON schema for version {self.version_str}, dictionary {dictionary_filename}", event)
+        except Exception as e:
+            event.record_failure(f"Unexpected error getting JSON schema for version {self.version_str}, dictionary {dictionary_filename}: {str(e)}")
+            logger.error(f"Unexpected error getting JSON schema for version {self.version_str}, dictionary {dictionary_filename}: {str(e)}")
+            raise ConfiguratorException(f"Unexpected error getting JSON schema for version {self.version_str}, dictionary {dictionary_filename}: {str(e)}", event)
 
     def get_bson_schema(self, enumerations: Enumerations) -> dict:
         dictionary_filename: str = self.version_number.get_schema_filename()
-        dictionary = Dictionary(dictionary_filename)
-        return dictionary.to_bson_schema(enumerations)
+        event = ConfiguratorEvent("VER-03", "GET_BSON_SCHEMA")
+        event.data = {"version": self.version_str, "dictionary": dictionary_filename}
+        try:
+            dictionary = Dictionary(dictionary_filename)
+            schema = dictionary.to_bson_schema(enumerations)
+            event.record_success()
+            return schema
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure(f"Failed to get BSON schema for version {self.version_str}, dictionary {dictionary_filename}")
+            logger.error(f"Failed to get BSON schema for version {self.version_str}, dictionary {dictionary_filename}: {e.event.to_dict()}")
+            raise ConfiguratorException(f"Failed to get BSON schema for version {self.version_str}, dictionary {dictionary_filename}", event)
+        except Exception as e:
+            event.record_failure(f"Unexpected error getting BSON schema for version {self.version_str}, dictionary {dictionary_filename}: {str(e)}")
+            logger.error(f"Unexpected error getting BSON schema for version {self.version_str}, dictionary {dictionary_filename}: {str(e)}")
+            raise ConfiguratorException(f"Unexpected error getting BSON schema for version {self.version_str}, dictionary {dictionary_filename}: {str(e)}", event)
 
     def process(self, mongo_io: MongoIO) -> ConfiguratorEvent:
         try:

@@ -35,16 +35,44 @@ class Configuration(ServiceBase):
         raise ConfiguratorException(f"Version {version_str} not found in configuration {self.file_name}", event)
 
     def get_json_schema(self, version_str: str) -> dict:
-        version = self.get_version(version_str)
-        enumerators = Enumerators()
-        enumerations = enumerators.get_version(f"{self.collection_name}.{version_str}")
-        return version.get_json_schema(enumerations)
+        event = ConfiguratorEvent("CFG-03", "GET_JSON_SCHEMA")
+        event.data = {"configuration": self.file_name, "version": version_str}
+        try:
+            version = self.get_version(version_str)
+            enumerators = Enumerators()
+            enumerations = enumerators.get_version(f"{self.collection_name}.{version_str}")
+            schema = version.get_json_schema(enumerations)
+            event.record_success()
+            return schema
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure(f"Failed to get JSON schema for {self.file_name} version {version_str}")
+            logger.error(f"Failed to get JSON schema for {self.file_name} version {version_str}: {e.event.to_dict()}")
+            raise ConfiguratorException(f"Failed to get JSON schema for {self.file_name} version {version_str}", event)
+        except Exception as e:
+            event.record_failure(f"Unexpected error getting JSON schema for {self.file_name} version {version_str}: {str(e)}")
+            logger.error(f"Unexpected error getting JSON schema for {self.file_name} version {version_str}: {str(e)}")
+            raise ConfiguratorException(f"Unexpected error getting JSON schema for {self.file_name} version {version_str}: {str(e)}", event)
 
     def get_bson_schema(self, version_str: str) -> dict:
-        version = self.get_version(version_str)
-        enumerators = Enumerators()
-        enumerations = enumerators.get_version(f"{self.collection_name}.{version_str}")
-        return version.get_bson_schema(enumerations)
+        event = ConfiguratorEvent("CFG-04", "GET_BSON_SCHEMA")
+        event.data = {"configuration": self.file_name, "version": version_str}
+        try:
+            version = self.get_version(version_str)
+            enumerators = Enumerators()
+            enumerations = enumerators.get_version(f"{self.collection_name}.{version_str}")
+            schema = version.get_bson_schema(enumerations)
+            event.record_success()
+            return schema
+        except ConfiguratorException as e:
+            event.append_events([e.event])
+            event.record_failure(f"Failed to get BSON schema for {self.file_name} version {version_str}")
+            logger.error(f"Failed to get BSON schema for {self.file_name} version {version_str}: {e.event.to_dict()}")
+            raise ConfiguratorException(f"Failed to get BSON schema for {self.file_name} version {version_str}", event)
+        except Exception as e:
+            event.record_failure(f"Unexpected error getting BSON schema for {self.file_name} version {version_str}: {str(e)}")
+            logger.error(f"Unexpected error getting BSON schema for {self.file_name} version {version_str}: {str(e)}")
+            raise ConfiguratorException(f"Unexpected error getting BSON schema for {self.file_name} version {version_str}: {str(e)}", event)
         
     def process(self, mongo_io: MongoIO) -> ConfiguratorEvent:
         event = ConfiguratorEvent(event_id=f"CFG-05-{self.file_name}", event_type="PROCESS")

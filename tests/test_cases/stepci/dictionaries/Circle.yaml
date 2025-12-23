@@ -1,0 +1,18 @@
+_locked: true
+file_name: Circle.yaml
+root:
+  additional_properties: false
+  description: ''
+  name: Circle
+  properties:
+  - constant: ''
+    description: Circle Type
+    name: type
+    required: false
+    type: constant
+  - description: Circle Radius
+    name: radius
+    required: false
+    type: real
+  required: false
+  type: object

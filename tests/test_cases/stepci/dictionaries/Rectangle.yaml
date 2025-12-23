@@ -1,0 +1,22 @@
+_locked: true
+file_name: Rectangle.yaml
+root:
+  additional_properties: false
+  description: A rectangle shape
+  name: Rectangle
+  properties:
+  - constant: ''
+    description: A Rectangle Type
+    name: type
+    required: false
+    type: constant
+  - description: 'The width '
+    name: width
+    required: false
+    type: real
+  - description: The height
+    name: height
+    required: false
+    type: real
+  required: false
+  type: object

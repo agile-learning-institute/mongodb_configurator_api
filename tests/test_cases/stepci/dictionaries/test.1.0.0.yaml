@@ -1,0 +1,42 @@
+_locked: true
+file_name: test.1.0.0.yaml
+root:
+  additional_properties: false
+  description: Dictionary for test collection
+  name: root
+  properties:
+  - description: ''
+    name: _id
+    required: false
+    type: identifier
+  - description: A polymorphic list of shapes
+    items:
+      description: Array item
+      name: item
+      properties:
+      - description: A Circle Type
+        name: Circle
+        ref: Circle
+        required: false
+        type: ref
+      - description: A Square Type
+        name: Square
+        ref: Square
+        required: false
+        type: ref
+      - description: A Rectangle
+        name: Rectangle
+        ref: Rectangle
+        required: false
+        type: ref
+      required: false
+      type: one_of
+    name: list
+    required: false
+    type: array
+  - description: ''
+    name: last_saved
+    required: false
+    type: breadcrumb
+  required: false
+  type: object

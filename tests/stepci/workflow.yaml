@@ -20,4 +20,6 @@ tests:
     $ref: ./tests/stepci/migrations.yaml#/tests/migrations
   enumerators:
     $ref: ./tests/stepci/enumerators.yaml#/tests/enumerators
+  ref_defect:
+    $ref: ./tests/stepci/ref_defect.yaml#/tests/ref_defect
 
