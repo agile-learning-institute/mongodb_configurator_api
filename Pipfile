@@ -12,9 +12,10 @@ stepci = "stepci run ./tests/stepci/workflow.yaml"
 container = "docker build --tag ghcr.io/agile-learning-institute/mongodb_configurator_api:latest ."
 database = "sh -c 'pipenv run down && docker compose --profile mongodb up --detach'"
 api = "sh -c 'pipenv run down && docker compose --profile configurator-api up --detach'"
-playground = "sh -c 'pipenv run down && docker compose --profile playground up --detach && echo `Visit http://localhost:8082/`'"
-service = "sh -c 'pipenv run down && docker compose --profile configurator up --detach && echo `Visit http://localhost:8082/`'"
+playground = "sh -c 'pipenv run down && docker compose --profile playground up --detach && pipenv run open'"
+service = "sh -c 'pipenv run down && docker compose --profile configurator up --detach && pipenv run open'"
 down = "docker compose down mongodb configurator_api configurator_spa"
+open = "sh -c 'open -a \"Google Chrome\" \"http://localhost:8082\" || google-chrome \"http://localhost:8082\" || xdg-open \"http://localhost:8082\"'"
 
 [packages]
 python-dotenv = "*"

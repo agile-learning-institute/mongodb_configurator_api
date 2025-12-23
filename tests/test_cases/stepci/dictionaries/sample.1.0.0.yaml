@@ -9,14 +9,6 @@ root:
     name: _id
     required: true
     type: identifier
-  - description: The name of the document
-    name: first_name
-    required: false
-    type: word
-  - description: The last name of the document
-    name: last_name
-    required: false
-    type: word
   - description: The current status of the document
     enums: default_status
     name: status
