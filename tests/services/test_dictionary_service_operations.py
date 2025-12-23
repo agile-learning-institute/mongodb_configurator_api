@@ -180,6 +180,47 @@ class TestDictionary(unittest.TestCase):
         # Assert
         mock_file_io.delete_document.assert_called_once()
 
+    def test_init_with_root_missing_name(self):
+        """Test Dictionary initialization with root missing name - should default to 'root'"""
+        # Arrange
+        test_document = {
+            "file_name": "test.yaml",
+            "_locked": False,
+            "root": {
+                "description": "Test dictionary",
+                "type": "object",
+                "properties": []
+            }  # Missing name
+        }
+        
+        # Act
+        dictionary = Dictionary(self.test_file_name, test_document)
+        
+        # Assert
+        self.assertEqual(dictionary.file_name, self.test_file_name)
+        self.assertIsNotNone(dictionary.root)
+        # The root property should have a default name of "root"
+        self.assertEqual(dictionary.root.name, "root")
+        self.assertEqual(dictionary.root.type, "object")
+
+    def test_init_with_empty_root(self):
+        """Test Dictionary initialization with empty root dict - should default name to 'root'"""
+        # Arrange
+        test_document = {
+            "file_name": "test.yaml",
+            "_locked": False,
+            "root": {}  # Empty dict, missing name
+        }
+        
+        # Act
+        dictionary = Dictionary(self.test_file_name, test_document)
+        
+        # Assert
+        self.assertEqual(dictionary.file_name, self.test_file_name)
+        self.assertIsNotNone(dictionary.root)
+        # The root property should have a default name of "root"
+        self.assertEqual(dictionary.root.name, "root")
+
 
 if __name__ == '__main__':
     unittest.main() 

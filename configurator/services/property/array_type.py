@@ -5,7 +5,9 @@ from .property import Property
 class ArrayType(BaseProperty):
     def __init__(self, data: dict):
         super().__init__(data)
-        self.items = Property(data.get("items", {}))
+        items_data = data.get("items", {})
+        items_data = {**items_data, "name": items_data.get("name", "items")}
+        self.items = Property(items_data)
 
     def to_dict(self):
         the_dict = super().to_dict()
