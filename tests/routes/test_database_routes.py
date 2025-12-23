@@ -161,6 +161,47 @@ class TestDatabaseRoutes(unittest.TestCase):
         self.assertIn("data", response_data)
         self.assertEqual(response_data["status"], "FAILURE")
 
+    @patch('configurator.routes.database_routes.MongoIO')
+    def test_drop_database_connection_string_not_from_default(self, mock_mongo_io_class):
+        """Test DELETE /api/database when MONGO_CONNECTION_STRING is not from default."""
+        # Arrange
+        self._setup_config_for_local()
+        # Set MONGO_CONNECTION_STRING via environment variable (not default)
+        os.environ['MONGO_CONNECTION_STRING'] = 'mongodb://custom:27017/'
+        Config._instance = None
+        # Recreate blueprint with new Config
+        self.app = Flask(__name__)
+        self.app.register_blueprint(create_database_routes(), url_prefix='/api/database')
+        self.client = self.app.test_client()
+        
+        mock_mongo_io = Mock()
+        mock_event = ConfiguratorEvent(
+            "MON-12",
+            "DROP_DATABASE",
+            {
+                "error": "Drop database not allowed when MONGO_CONNECTION_STRING is not from default",
+                "source": "environment"
+            }
+        )
+        mock_mongo_io.drop_database.side_effect = ConfiguratorException(
+            "Drop database not allowed when MONGO_CONNECTION_STRING is not from default",
+            mock_event
+        )
+        mock_mongo_io_class.return_value = mock_mongo_io
+
+        # Act
+        response = self.client.delete('/api/database/')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertIsInstance(response_data, dict)
+        self.assertIn("id", response_data)
+        self.assertIn("type", response_data)
+        # Clean up
+        if 'MONGO_CONNECTION_STRING' in os.environ:
+            del os.environ['MONGO_CONNECTION_STRING']
+
     def test_drop_database_get_method_not_allowed(self):
         """Test that GET method is not allowed on /api/database."""
         # Act
