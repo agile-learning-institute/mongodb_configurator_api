@@ -1,8 +1,12 @@
 import unittest
+import os
+import tempfile
+from pathlib import Path
 from unittest.mock import patch, Mock
 from flask import Flask
 from configurator.routes.type_routes import create_type_routes
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+from configurator.utils.config import Config
 
 
 class TestTypeRoutes(unittest.TestCase):
@@ -10,6 +14,47 @@ class TestTypeRoutes(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
+        # Clear Config singleton to ensure clean state
+        Config._instance = None
+        # Store original INPUT_FOLDER if it exists
+        self._original_input_folder = os.environ.get('INPUT_FOLDER')
+        if 'INPUT_FOLDER' in os.environ:
+            del os.environ['INPUT_FOLDER']
+        
+        self.app = Flask(__name__)
+        self.app.register_blueprint(create_type_routes(), url_prefix='/api/types')
+        self.client = self.app.test_client()
+        self.temp_dir = None
+
+    def tearDown(self):
+        """Clean up after tests."""
+        # Restore original INPUT_FOLDER
+        if self._original_input_folder:
+            os.environ['INPUT_FOLDER'] = self._original_input_folder
+        elif 'INPUT_FOLDER' in os.environ:
+            del os.environ['INPUT_FOLDER']
+        # Clear Config singleton
+        Config._instance = None
+        # Clean up temp directory if created
+        if self.temp_dir and os.path.exists(self.temp_dir):
+            import shutil
+            shutil.rmtree(self.temp_dir)
+
+    def _setup_config_for_local(self):
+        """Set up Config with BUILT_AT from file with value 'Local' for write operations."""
+        # Create temporary directory
+        self.temp_dir = tempfile.mkdtemp()
+        # Create api_config directory
+        api_config_dir = Path(self.temp_dir) / "api_config"
+        api_config_dir.mkdir()
+        # Create BUILT_AT file with value "Local"
+        built_at_file = api_config_dir / "BUILT_AT"
+        built_at_file.write_text("Local")
+        # Set INPUT_FOLDER environment variable
+        os.environ['INPUT_FOLDER'] = self.temp_dir
+        # Clear and reinitialize Config
+        Config._instance = None
+        # Recreate blueprint with new Config
         self.app = Flask(__name__)
         self.app.register_blueprint(create_type_routes(), url_prefix='/api/types')
         self.client = self.app.test_client()
@@ -91,6 +136,7 @@ class TestTypeRoutes(unittest.TestCase):
     def test_update_type_success(self, mock_type_class):
         """Test successful PUT /api/types/<file_name>."""
         # Arrange
+        self._setup_config_for_local()
         test_data = {"name": "test_type", "version": "1.0.0"}
         mock_type = Mock()
         mock_saved_file = {"name": "test_type.yaml", "path": "/path/to/test_type.yaml"}
@@ -109,6 +155,7 @@ class TestTypeRoutes(unittest.TestCase):
     def test_update_type_general_exception(self, mock_type_class):
         """Test PUT /api/types/<file_name> when Type raises a general exception."""
         # Arrange
+        self._setup_config_for_local()
         mock_type_class.side_effect = Exception("Unexpected error")
         test_data = {"name": "test_type", "version": "1.0.0"}
 
@@ -128,6 +175,7 @@ class TestTypeRoutes(unittest.TestCase):
     def test_delete_type_success(self, mock_type_class):
         """Test successful DELETE /api/types/<file_name>."""
         # Arrange
+        self._setup_config_for_local()
         mock_type = Mock()
         mock_event = Mock()
         mock_event.to_dict.return_value = {"deleted": True}
@@ -146,6 +194,7 @@ class TestTypeRoutes(unittest.TestCase):
     def test_delete_type_general_exception(self, mock_type_class):
         """Test DELETE /api/types/<file_name> when Type raises a general exception."""
         # Arrange
+        self._setup_config_for_local()
         mock_type = Mock()
         mock_type.delete.side_effect = Exception("Unexpected error")
         mock_type_class.return_value = mock_type
@@ -168,6 +217,7 @@ class TestTypeRoutes(unittest.TestCase):
     def test_lock_all_types(self, mock_type_class):
         """Test locking all types."""
         # Arrange
+        self._setup_config_for_local()
         mock_event = ConfiguratorEvent("TYP-04", "LOCK_ALL_TYPES")
         mock_event.data = {
             "total_files": 2,

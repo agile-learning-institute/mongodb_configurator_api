@@ -1,8 +1,12 @@
 import unittest
+import os
+import tempfile
+from pathlib import Path
 from unittest.mock import patch, Mock
 from flask import Flask
 from configurator.routes.database_routes import create_database_routes
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+from configurator.utils.config import Config
 
 
 class TestDatabaseRoutes(unittest.TestCase):
@@ -10,6 +14,47 @@ class TestDatabaseRoutes(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
+        # Clear Config singleton to ensure clean state
+        Config._instance = None
+        # Store original INPUT_FOLDER if it exists
+        self._original_input_folder = os.environ.get('INPUT_FOLDER')
+        if 'INPUT_FOLDER' in os.environ:
+            del os.environ['INPUT_FOLDER']
+        
+        self.app = Flask(__name__)
+        self.app.register_blueprint(create_database_routes(), url_prefix='/api/database')
+        self.client = self.app.test_client()
+        self.temp_dir = None
+
+    def tearDown(self):
+        """Clean up after tests."""
+        # Restore original INPUT_FOLDER
+        if self._original_input_folder:
+            os.environ['INPUT_FOLDER'] = self._original_input_folder
+        elif 'INPUT_FOLDER' in os.environ:
+            del os.environ['INPUT_FOLDER']
+        # Clear Config singleton
+        Config._instance = None
+        # Clean up temp directory if created
+        if self.temp_dir and os.path.exists(self.temp_dir):
+            import shutil
+            shutil.rmtree(self.temp_dir)
+
+    def _setup_config_for_local(self):
+        """Set up Config with BUILT_AT from file with value 'Local' for write operations."""
+        # Create temporary directory
+        self.temp_dir = tempfile.mkdtemp()
+        # Create api_config directory
+        api_config_dir = Path(self.temp_dir) / "api_config"
+        api_config_dir.mkdir()
+        # Create BUILT_AT file with value "Local"
+        built_at_file = api_config_dir / "BUILT_AT"
+        built_at_file.write_text("Local")
+        # Set INPUT_FOLDER environment variable
+        os.environ['INPUT_FOLDER'] = self.temp_dir
+        # Clear and reinitialize Config
+        Config._instance = None
+        # Recreate blueprint with new Config
         self.app = Flask(__name__)
         self.app.register_blueprint(create_database_routes(), url_prefix='/api/database')
         self.client = self.app.test_client()
@@ -18,6 +63,7 @@ class TestDatabaseRoutes(unittest.TestCase):
     def test_drop_database_success(self, mock_mongo_io_class):
         """Test successful DELETE /api/database."""
         # Arrange
+        self._setup_config_for_local()
         mock_mongo_io = Mock()
         # Create a mock event that returns a proper to_dict() response
         mock_event = Mock()
@@ -49,6 +95,7 @@ class TestDatabaseRoutes(unittest.TestCase):
     def test_drop_database_configurator_exception(self, mock_mongo_io_class):
         """Test DELETE /api/database when MongoIO raises ConfiguratorException."""
         # Arrange
+        self._setup_config_for_local()
         mock_mongo_io = Mock()
         mock_event = ConfiguratorEvent("TEST-01", "TEST", {"error": "test"})
         mock_mongo_io.drop_database.side_effect = ConfiguratorException("Database error", mock_event)
@@ -68,6 +115,7 @@ class TestDatabaseRoutes(unittest.TestCase):
     def test_drop_database_safety_limit_exceeded(self, mock_mongo_io_class):
         """Test DELETE /api/database when collections have more than 100 documents."""
         # Arrange
+        self._setup_config_for_local()
         mock_mongo_io = Mock()
         mock_event = ConfiguratorEvent(
             "MON-14", 
@@ -96,6 +144,7 @@ class TestDatabaseRoutes(unittest.TestCase):
     def test_drop_database_general_exception(self, mock_mongo_io_class):
         """Test DELETE /api/database when MongoIO raises a general exception."""
         # Arrange
+        self._setup_config_for_local()
         mock_mongo_io = Mock()
         mock_mongo_io.drop_database.side_effect = Exception("Unexpected error")
         mock_mongo_io_class.return_value = mock_mongo_io
