@@ -9,7 +9,9 @@ from configurator.services.service_base import ServiceBase
 class Dictionary(ServiceBase):
     def __init__(self, file_name: str = None, document: dict = None):
         super().__init__(file_name, document, Config.get_instance().DICTIONARY_FOLDER)
-        self.root = Property(self._document.get("root", {}))
+        root_data = self._document.get("root", {})
+        root_data = {**root_data, "name": root_data.get("name", "root")}
+        self.root = Property(root_data)
 
     def to_dict(self):
         the_dict = super().to_dict()
