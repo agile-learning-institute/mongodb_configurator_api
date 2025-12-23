@@ -15,7 +15,8 @@ def setup_test_environment(test_case, expected_pro_count):
     # Set required environment variables
     os.environ['INPUT_FOLDER'] = f"./tests/test_cases/{test_case}"
     os.environ['ENABLE_DROP_DATABASE'] = 'true'
-    os.environ['MONGO_CONNECTION_STRING'] = "mongodb://localhost:27017/"
+    # Note: MONGO_CONNECTION_STRING is not set here to allow it to use the default value
+    # This is required for the drop_database safety check which requires connection string from "default"
     
     # Initialize config
     Config._instance = None
@@ -24,7 +25,7 @@ def setup_test_environment(test_case, expected_pro_count):
     # Clean up environment variables
     del os.environ['INPUT_FOLDER']
     del os.environ['ENABLE_DROP_DATABASE']
-    del os.environ['MONGO_CONNECTION_STRING']
+    # MONGO_CONNECTION_STRING was not set, so no need to delete it
     
     return config, expected_pro_count
 

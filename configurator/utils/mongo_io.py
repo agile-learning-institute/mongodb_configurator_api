@@ -255,6 +255,22 @@ class MongoIO:
             event.record_failure({"error": "Drop database not allowed on Non-Local Build"})
             raise ConfiguratorException("Drop database not allowed on Non-Local Build", event)
         
+        # Check that MONGO_CONNECTION_STRING is from default (safety check)
+        mongo_connection_string_item = next(
+            (item for item in config.config_items if item['name'] == 'MONGO_CONNECTION_STRING'), 
+            None
+        )
+        if mongo_connection_string_item is None:
+            event.record_failure("MONGO_CONNECTION_STRING configuration item not found")
+            raise ConfiguratorException("MONGO_CONNECTION_STRING configuration item not found", event)
+        
+        if mongo_connection_string_item.get('from') != 'default':
+            event.record_failure(
+                "Drop database not allowed when MONGO_CONNECTION_STRING is not from default",
+                {"source": mongo_connection_string_item.get('from')}
+            )
+            raise ConfiguratorException("Drop database not allowed when MONGO_CONNECTION_STRING is not from default", event)
+        
         # Check if any collections have more than 100 documents
         try:
             collections_with_many_docs = []
