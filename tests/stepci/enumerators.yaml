@@ -7,9 +7,9 @@ tests:
   enumerators:
     name: Test Enumerators Endpoints
     steps:
-      - name: Render JSON Schema for sample.1.0.0.1
+      - name: Render JSON Schema for sample.1.0.0.0
         http:
-          url: http://${{env.host}}/api/configurations/json_schema/sample.yaml/1.0.0.1/
+          url: http://${{env.host}}/api/configurations/json_schema/sample.yaml/1.0.0.0/
           method: GET
           check:
             status: /200/
@@ -24,9 +24,9 @@ tests:
                 - type
                 - properties
 
-      - name: Render BSON Schema for sample.1.0.0.1
+      - name: Render BSON Schema for sample.1.0.0.0
         http:
-          url: http://${{env.host}}/api/configurations/bson_schema/sample.yaml/1.0.0.1/
+          url: http://${{env.host}}/api/configurations/bson_schema/sample.yaml/1.0.0.0/
           method: GET
           check:
             status: /200/

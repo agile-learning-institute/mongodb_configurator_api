@@ -1,0 +1,29 @@
+_locked: true
+file_name: test_dict.yaml
+root:
+  additional_properties: false
+  description: Updated test dictionary for stepCI testing
+  name: test_dict
+  properties:
+  - description: Name field
+    name: name
+    required: false
+    schema:
+      type: string
+    type: simple
+  - description: Email field
+    name: email
+    required: false
+    schema:
+      format: email
+      type: string
+    type: simple
+  - description: Phone field
+    name: phone
+    required: false
+    schema:
+      format: us_phone
+      type: string
+    type: simple
+  required: false
+  type: object

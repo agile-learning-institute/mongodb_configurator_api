@@ -4,32 +4,8 @@ file_name: sample.yaml
 title: Sample Collection
 versions:
 - _locked: true
-  add_indexes:
-  - key:
-      first_name: 1
-      last_name: 1
-    name: nameIndex
-    options:
-      unique: true
-  - key:
-      status: 1
-    name: statusIndex
-    options:
-      unique: false
+  add_indexes: []
   drop_indexes: []
   migrations: []
-  test_data: sample.1.0.0.1.json
-  version: 1.0.0.1
-- _locked: true
-  add_indexes:
-  - key:
-      full_name: 1
-    name: fullNameIndex
-    options:
-      unique: false
-  drop_indexes:
-  - nameIndex
-  migrations:
-  - first_last_to_full_name.json
-  test_data: sample.1.0.1.2.json
-  version: 1.0.1.2
+  test_data: sample.json
+  version: 1.0.0.0

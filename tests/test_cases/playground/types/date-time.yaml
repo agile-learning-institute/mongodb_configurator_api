@@ -1,10 +1,12 @@
+_locked: true
+file_name: date-time.yaml
 root:
-  name: date-time
-  description: An ISO 8601 formatted date-time string
-  type: complex
-  json_type:
-    type: string
-    format: date-time
   bson_type:
     bsonType: date
+  description: An ISO 8601 formatted date-time string
+  json_type:
+    format: date-time
+    type: string
+  name: date-time
   required: false
+  type: complex

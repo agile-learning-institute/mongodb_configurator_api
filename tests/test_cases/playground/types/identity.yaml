@@ -1,10 +1,12 @@
+_locked: true
+file_name: identity.yaml
 root:
-  name: identity
-  description: A unique identifier for a document
-  type: complex
-  json_type:
-    type: string
-    pattern: ^[0-9a-fA-F]{24}$
   bson_type:
     bsonType: objectId
-  required: false 
+  description: A unique identifier for a document
+  json_type:
+    pattern: ^[0-9a-fA-F]{24}$
+    type: string
+  name: identity
+  required: false
+  type: complex

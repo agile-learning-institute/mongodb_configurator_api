@@ -20,11 +20,11 @@ tests:
               "description": "Test collection for stepCI testing",
               "versions": [
                 {
-                  "version": "1.0.0.1",
+                  "version": "1.0.0.0",
                   "drop_indexes": [],
                   "migrations": [],
                   "add_indexes": [],
-                  "test_data": "test_data.1.0.0.1.json"
+                  "test_data": "test_data.1.0.0.0.json"
                 }
               ]
             }
@@ -33,11 +33,11 @@ tests:
             jsonpath:
               file_name: test_config.yaml
               description: Test collection for stepCI testing
-              versions[0].version: 1.0.0.1
+              versions[0].version: 1.0.0.0
               versions[0].drop_indexes: []
               versions[0].migrations: []
               versions[0].add_indexes: []
-              versions[0].test_data: test_data.1.0.0.1.json
+              versions[0].test_data: test_data.1.0.0.0.json
 
       # Get - GET to retrieve the configuration
       - name: Get Test Configuration
@@ -63,11 +63,11 @@ tests:
               "description": "Updated test collection for stepCI testing",
               "versions": [
                 {
-                  "version": "1.0.0.1",
+                  "version": "1.0.0.0",
                   "drop_indexes": [],
                   "migrations": [],
                   "add_indexes": [],
-                  "test_data": "test_data.1.0.0.1.json"
+                  "test_data": "test_data.1.0.0.0.json"
                 }
               ]
             }
@@ -98,11 +98,11 @@ tests:
               "description": "Test collection for stepCI testing",
               "versions": [
                 {
-                  "version": "1.0.0.1",
+                  "version": "1.0.0.0",
                   "drop_indexes": [],
                   "migrations": [],
                   "add_indexes": [],
-                  "test_data": "test_data.1.0.0.1.json"
+                  "test_data": "test_data.1.0.0.0.json"
                 }
               ],
               "_locked": false
