@@ -1,0 +1,18 @@
+_locked: true
+file_name: Square.yaml
+root:
+  additional_properties: false
+  description: A square
+  name: Square
+  properties:
+  - constant: ''
+    description: A Square Type
+    name: type
+    required: false
+    type: constant
+  - description: The length/width of the square
+    name: size
+    required: false
+    type: real
+  required: false
+  type: object
