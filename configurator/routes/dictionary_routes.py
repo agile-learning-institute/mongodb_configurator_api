@@ -23,6 +23,7 @@ def create_dictionary_routes():
     @dictionary_routes.route('/', methods=['PATCH'])
     @event_route("DIC-04", "LOCK_ALL_DICTIONARIES", "locking all dictionaries")
     def lock_all_dictionaries():
+        config.assert_local()
         result = Dictionary.lock_all()
         return jsonify(result.to_dict())
     
@@ -37,6 +38,7 @@ def create_dictionary_routes():
     @dictionary_routes.route('/<file_name>/', methods=['PUT'])
     @event_route("DIC-03", "PUT_DICTIONARY", "updating dictionary")
     def update_dictionary(file_name):
+        config.assert_local()
         dictionary = Dictionary(file_name, request.json)
         result = dictionary.save()
         return jsonify(result)
@@ -44,6 +46,7 @@ def create_dictionary_routes():
     @dictionary_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("DIC-05", "DELETE_DICTIONARY", "deleting dictionary")
     def delete_dictionary(file_name):
+        config.assert_local()
         dictionary = Dictionary(file_name)
         event = dictionary.delete()
         return jsonify(event.to_dict())

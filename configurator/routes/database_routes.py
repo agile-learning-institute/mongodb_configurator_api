@@ -15,6 +15,7 @@ def create_database_routes():
     @database_routes.route('/', methods=['DELETE'])
     @event_route("DB-01", "DROP_DATABASE", "dropping database")
     def drop_database():
+        config.assert_local()
         mongo_io = MongoIO(config.MONGO_CONNECTION_STRING, config.MONGO_DB_NAME)
         event = mongo_io.drop_database()
         mongo_io.disconnect()

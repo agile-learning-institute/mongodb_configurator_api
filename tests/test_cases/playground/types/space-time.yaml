@@ -1,0 +1,37 @@
+_locked: false
+file_name: space-time.yaml
+root:
+  description: A 4 dimensional space
+  items:
+    description: A 3 dimensional matrix
+    items:
+      description: A 2-dimensional plane of the matrix
+      items:
+        description: A 1-dimensional row of the plane
+        items:
+          additionalProperties: false
+          description: The value at this point in space/time
+          name: observation
+          properties:
+          - description: The source of impactors at this point
+            name: source
+            required: false
+            type: sentence
+          - description: The number of impactors measured
+            name: impactors
+            required: false
+            type: count
+          required: false
+          type: object
+        name: row
+        required: false
+        type: array
+      name: plane
+      required: false
+      type: array
+    name: cube
+    required: false
+    type: array
+  name: timeline
+  required: false
+  type: array

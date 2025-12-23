@@ -1,8 +1,12 @@
 import unittest
+import os
+import tempfile
+from pathlib import Path
 from unittest.mock import patch, Mock
 from flask import Flask
 from configurator.routes.test_data_routes import create_test_data_routes
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
+from configurator.utils.config import Config
 
 
 class TestTestDataRoutes(unittest.TestCase):
@@ -10,6 +14,47 @@ class TestTestDataRoutes(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
+        # Clear Config singleton to ensure clean state
+        Config._instance = None
+        # Store original INPUT_FOLDER if it exists
+        self._original_input_folder = os.environ.get('INPUT_FOLDER')
+        if 'INPUT_FOLDER' in os.environ:
+            del os.environ['INPUT_FOLDER']
+        
+        self.app = Flask(__name__)
+        self.app.register_blueprint(create_test_data_routes(), url_prefix='/api/test_data')
+        self.client = self.app.test_client()
+        self.temp_dir = None
+
+    def tearDown(self):
+        """Clean up after tests."""
+        # Restore original INPUT_FOLDER
+        if self._original_input_folder:
+            os.environ['INPUT_FOLDER'] = self._original_input_folder
+        elif 'INPUT_FOLDER' in os.environ:
+            del os.environ['INPUT_FOLDER']
+        # Clear Config singleton
+        Config._instance = None
+        # Clean up temp directory if created
+        if self.temp_dir and os.path.exists(self.temp_dir):
+            import shutil
+            shutil.rmtree(self.temp_dir)
+
+    def _setup_config_for_local(self):
+        """Set up Config with BUILT_AT from file with value 'Local' for write operations."""
+        # Create temporary directory
+        self.temp_dir = tempfile.mkdtemp()
+        # Create api_config directory
+        api_config_dir = Path(self.temp_dir) / "api_config"
+        api_config_dir.mkdir()
+        # Create BUILT_AT file with value "Local"
+        built_at_file = api_config_dir / "BUILT_AT"
+        built_at_file.write_text("Local")
+        # Set INPUT_FOLDER environment variable
+        os.environ['INPUT_FOLDER'] = self.temp_dir
+        # Clear and reinitialize Config
+        Config._instance = None
+        # Recreate blueprint with new Config
         self.app = Flask(__name__)
         self.app.register_blueprint(create_test_data_routes(), url_prefix='/api/test_data')
         self.client = self.app.test_client()
@@ -89,6 +134,7 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_put_data_file_success(self, mock_file_io):
         """Test successful PUT /api/test_data/<file_name>."""
         # Arrange
+        self._setup_config_for_local()
         test_data = {"data": "test content"}
         mock_file_io.put_document.return_value = test_data
 
@@ -104,6 +150,7 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_put_data_file_general_exception(self, mock_file_io):
         """Test PUT /api/test_data/<file_name> when FileIO raises a general exception."""
         # Arrange
+        self._setup_config_for_local()
         mock_file_io.put_document.side_effect = Exception("Unexpected error")
         test_data = {"data": "test content"}
 
@@ -123,6 +170,7 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_delete_data_file_success(self, mock_file_io):
         """Test successful DELETE /api/test_data/<file_name>."""
         # Arrange
+        self._setup_config_for_local()
         mock_event = Mock()
         mock_event.status = "SUCCESS"
         mock_event.to_dict.return_value = {"id": "TST-04", "type": "DELETE_TEST_DATA", "status": "SUCCESS", "data": "test_file.json deleted"}
@@ -144,6 +192,7 @@ class TestTestDataRoutes(unittest.TestCase):
     def test_delete_data_file_general_exception(self, mock_file_io):
         """Test DELETE /api/test_data/<file_name> when FileIO raises a general exception."""
         # Arrange
+        self._setup_config_for_local()
         mock_file_io.delete_document.side_effect = Exception("Unexpected error")
 
         # Act

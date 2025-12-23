@@ -3,6 +3,7 @@ import shutil
 import tempfile
 import json
 import unittest
+from pathlib import Path
 from flask import Flask
 from configurator.server import app as real_app
 from configurator.utils.config import Config
@@ -12,13 +13,53 @@ from configurator.utils.configurator_exception import ConfiguratorException, Con
 
 class MigrationRoutesTestCase(unittest.TestCase):
     def setUp(self):
+        # Store original INPUT_FOLDER if it exists
+        self._original_input_folder = os.environ.get('INPUT_FOLDER')
+        if 'INPUT_FOLDER' in os.environ:
+            del os.environ['INPUT_FOLDER']
+        
         # Create a temp directory for migrations
         self.temp_dir = tempfile.mkdtemp()
         self.migrations_dir = os.path.join(self.temp_dir, "migrations")
         os.makedirs(self.migrations_dir, exist_ok=True)
-        # Patch config to use temp dir
-        self._original_input_folder = Config.get_instance().INPUT_FOLDER
-        Config.get_instance().INPUT_FOLDER = self.temp_dir
+        # Create api_config directory with BUILT_AT file for local mode
+        api_config_dir = os.path.join(self.temp_dir, "api_config")
+        os.makedirs(api_config_dir, exist_ok=True)
+        built_at_file = os.path.join(api_config_dir, "BUILT_AT")
+        with open(built_at_file, "w") as f:
+            f.write("Local")
+        # Set INPUT_FOLDER environment variable
+        os.environ['INPUT_FOLDER'] = self.temp_dir
+        
+        # Modify the existing Config instance to make assert_local() pass
+        # Since real_app is already initialized, we modify the existing Config instance
+        config = Config.get_instance()
+        # Update INPUT_FOLDER property
+        config.INPUT_FOLDER = self.temp_dir
+        # Ensure INPUT_FOLDER is in config_items
+        input_folder_item = next((item for item in config.config_items if item['name'] == 'INPUT_FOLDER'), None)
+        if input_folder_item:
+            input_folder_item['value'] = self.temp_dir
+            input_folder_item['from'] = 'environment'
+        else:
+            config.config_items.append({
+                'name': 'INPUT_FOLDER',
+                'value': self.temp_dir,
+                'from': 'environment'
+            })
+        # Update BUILT_AT property and config_item to be from file with value 'Local'
+        # This is what assert_local() checks
+        config.BUILT_AT = 'Local'
+        built_at_item = next((item for item in config.config_items if item['name'] == 'BUILT_AT'), None)
+        if built_at_item:
+            built_at_item['from'] = 'file'
+            built_at_item['value'] = 'Local'
+        else:
+            config.config_items.append({
+                'name': 'BUILT_AT',
+                'from': 'file',
+                'value': 'Local'
+            })
         # Create some fake migration files
         self.migration1 = os.path.join(self.migrations_dir, "mig1.json")
         self.migration2 = os.path.join(self.migrations_dir, "mig2.json")
@@ -30,8 +71,28 @@ class MigrationRoutesTestCase(unittest.TestCase):
         self.app = real_app.test_client()
 
     def tearDown(self):
-        Config.get_instance().INPUT_FOLDER = self._original_input_folder
-        shutil.rmtree(self.temp_dir)
+        # Restore original INPUT_FOLDER
+        if self._original_input_folder:
+            os.environ['INPUT_FOLDER'] = self._original_input_folder
+        elif 'INPUT_FOLDER' in os.environ:
+            del os.environ['INPUT_FOLDER']
+        # Restore Config to default state
+        config = Config.get_instance()
+        # Restore INPUT_FOLDER
+        config.INPUT_FOLDER = os.getenv("INPUT_FOLDER", "/input")
+        input_folder_item = next((item for item in config.config_items if item['name'] == 'INPUT_FOLDER'), None)
+        if input_folder_item:
+            input_folder_item['value'] = config.INPUT_FOLDER
+            input_folder_item['from'] = 'default' if not os.getenv("INPUT_FOLDER") else 'environment'
+        # Restore BUILT_AT to default
+        config.BUILT_AT = 'DEFAULT! Set in code'
+        built_at_item = next((item for item in config.config_items if item['name'] == 'BUILT_AT'), None)
+        if built_at_item:
+            built_at_item['from'] = 'default'
+            built_at_item['value'] = 'DEFAULT! Set in code'
+        # Clean up temp directory
+        if os.path.exists(self.temp_dir):
+            shutil.rmtree(self.temp_dir)
 
     def test_list_migrations(self):
         """Test GET /api/migrations/ endpoint."""
@@ -69,7 +130,22 @@ class MigrationRoutesTestCase(unittest.TestCase):
 
     def test_put_migration(self):
         """Test PUT /api/migrations/<file_name>/."""
-        # Arrange
+        # Arrange - Config is already set up for local mode in setUp
+        # Ensure Config is still in local mode (in case another test modified it)
+        config = Config.get_instance()
+        built_at_item = next((item for item in config.config_items if item['name'] == 'BUILT_AT'), None)
+        if not built_at_item or built_at_item.get('from') != 'file' or built_at_item.get('value') != 'Local':
+            # Re-setup Config for local mode
+            config.BUILT_AT = 'Local'
+            if built_at_item:
+                built_at_item['from'] = 'file'
+                built_at_item['value'] = 'Local'
+            else:
+                config.config_items.append({
+                    'name': 'BUILT_AT',
+                    'from': 'file',
+                    'value': 'Local'
+                })
         test_data = {"migration": "test data"}
         
         # Act
@@ -81,6 +157,22 @@ class MigrationRoutesTestCase(unittest.TestCase):
         self.assertEqual(data, test_data)
 
     def test_delete_migration(self):
+        # Arrange - Config is already set up for local mode in setUp
+        # Ensure Config is still in local mode (in case another test modified it)
+        config = Config.get_instance()
+        built_at_item = next((item for item in config.config_items if item['name'] == 'BUILT_AT'), None)
+        if not built_at_item or built_at_item.get('from') != 'file' or built_at_item.get('value') != 'Local':
+            # Re-setup Config for local mode
+            config.BUILT_AT = 'Local'
+            if built_at_item:
+                built_at_item['from'] = 'file'
+                built_at_item['value'] = 'Local'
+            else:
+                config.config_items.append({
+                    'name': 'BUILT_AT',
+                    'from': 'file',
+                    'value': 'Local'
+                })
         resp = self.app.delete("/api/migrations/mig1.json/")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
@@ -106,6 +198,47 @@ class TestMigrationRoutes(unittest.TestCase):
 
     def setUp(self):
         """Set up test fixtures."""
+        # Clear Config singleton to ensure clean state
+        Config._instance = None
+        # Store original INPUT_FOLDER if it exists
+        self._original_input_folder = os.environ.get('INPUT_FOLDER')
+        if 'INPUT_FOLDER' in os.environ:
+            del os.environ['INPUT_FOLDER']
+        
+        self.app = Flask(__name__)
+        self.app.register_blueprint(create_migration_routes(), url_prefix='/api/migrations')
+        self.client = self.app.test_client()
+        self.temp_dir = None
+
+    def tearDown(self):
+        """Clean up after tests."""
+        # Restore original INPUT_FOLDER
+        if self._original_input_folder:
+            os.environ['INPUT_FOLDER'] = self._original_input_folder
+        elif 'INPUT_FOLDER' in os.environ:
+            del os.environ['INPUT_FOLDER']
+        # Clear Config singleton
+        Config._instance = None
+        # Clean up temp directory if created
+        if self.temp_dir and os.path.exists(self.temp_dir):
+            import shutil
+            shutil.rmtree(self.temp_dir)
+
+    def _setup_config_for_local(self):
+        """Set up Config with BUILT_AT from file with value 'Local' for write operations."""
+        # Create temporary directory
+        self.temp_dir = tempfile.mkdtemp()
+        # Create api_config directory
+        api_config_dir = Path(self.temp_dir) / "api_config"
+        api_config_dir.mkdir()
+        # Create BUILT_AT file with value "Local"
+        built_at_file = api_config_dir / "BUILT_AT"
+        built_at_file.write_text("Local")
+        # Set INPUT_FOLDER environment variable
+        os.environ['INPUT_FOLDER'] = self.temp_dir
+        # Clear and reinitialize Config
+        Config._instance = None
+        # Recreate blueprint with new Config
         self.app = Flask(__name__)
         self.app.register_blueprint(create_migration_routes(), url_prefix='/api/migrations')
         self.client = self.app.test_client()
@@ -185,6 +318,7 @@ class TestMigrationRoutes(unittest.TestCase):
     def test_put_migration_success(self, mock_file_io):
         """Test successful PUT /api/migrations/<file_name>."""
         # Arrange
+        self._setup_config_for_local()
         test_data = {"name": "test_migration", "operations": []}
         mock_file_io.put_document.return_value = test_data
 
@@ -201,6 +335,7 @@ class TestMigrationRoutes(unittest.TestCase):
     def test_put_migration_general_exception(self, mock_file_io):
         """Test PUT /api/migrations/<file_name> when FileIO raises a general exception."""
         # Arrange
+        self._setup_config_for_local()
         mock_file_io.put_document.side_effect = Exception("Unexpected error")
         test_data = {"name": "test_migration", "operations": []}
 
@@ -221,6 +356,7 @@ class TestMigrationRoutes(unittest.TestCase):
     def test_delete_migration_success(self, mock_file_io, mock_exists):
         """Test successful DELETE /api/migrations/<file_name>."""
         # Arrange
+        self._setup_config_for_local()
         mock_exists.return_value = True
         mock_event = Mock()
         mock_event.status = "SUCCESS"
@@ -243,6 +379,7 @@ class TestMigrationRoutes(unittest.TestCase):
     def test_delete_migration_general_exception(self, mock_file_io):
         """Test DELETE /api/migrations/<file_name> when FileIO raises a general exception."""
         # Arrange
+        self._setup_config_for_local()
         mock_event = Mock()
         mock_event.status = "FAILURE"
         mock_event.to_dict.return_value = {"id": "MIG-06", "type": "DELETE_MIGRATION", "status": "FAILURE", "data": "Unexpected error"}

@@ -23,6 +23,7 @@ def create_type_routes():
     @type_routes.route('/', methods=['PATCH'])
     @event_route("TYP-04", "LOCK_ALL_TYPES", "locking all types")
     def lock_all_types():
+        config.assert_local()
         result = Type.lock_all()
         return jsonify(result.to_dict())
 
@@ -37,6 +38,7 @@ def create_type_routes():
     @type_routes.route('/<file_name>/', methods=['PUT'])
     @event_route("TYP-03", "PUT_TYPE", "updating type")
     def update_type(file_name):
+        config.assert_local()
         type = Type(file_name, request.json)
         results = type.save()
         return jsonify(results)
@@ -44,6 +46,7 @@ def create_type_routes():
     @type_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("TYP-05", "DELETE_TYPE", "deleting type")
     def delete_type(file_name):
+        config.assert_local()
         type = Type(file_name)
         event = type.delete()
         return jsonify(event.to_dict())

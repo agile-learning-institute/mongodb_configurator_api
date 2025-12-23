@@ -33,12 +33,14 @@ def create_test_data_routes():
     @test_data_routes.route('/<file_name>/', methods=['PUT'])
     @event_route("TST-03", "PUT_TEST_DATA", "updating test data")
     def update_test_data(file_name):
+        config.assert_local()
         data = FileIO.put_document(config.TEST_DATA_FOLDER, file_name, request.json)
         return jsonify(data)
         
     @test_data_routes.route('/<file_name>/', methods=['DELETE'])
     @event_route("TST-04", "DELETE_TEST_DATA", "deleting test data")
     def delete_test_data(file_name):
+        config.assert_local()
         event = FileIO.delete_document(config.TEST_DATA_FOLDER, file_name)
         return jsonify(event.to_dict())
         
