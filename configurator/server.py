@@ -35,10 +35,10 @@ if config.AUTO_PROCESS:
             logger.info(f"Processing Configuration: {file.file_name}")
             configuration = Configuration(file.file_name)
             event.append_events([configuration.process()])
-        logger.info(f"Processing Output: {app.json.dumps(event.to_dict())}")
+        logger.info(f"Processing Output: {json.dumps(event.to_dict())}")
         logger.info(f"============= Auto Processing is Completed ===============")
     except ConfiguratorException as e:
-        logger.error(f"Configurator error processing all configurations: {app.json.dumps(e.to_dict())}")
+        logger.error(f"Configurator error processing all configurations: {json.dumps(e.to_dict())}")
         sys.exit(1)
     except Exception as e:
         logger.error(f"Unexpected error processing all configurations: {str(e)}")

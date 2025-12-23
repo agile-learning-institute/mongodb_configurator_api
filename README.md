@@ -1,6 +1,6 @@
 # MongoDB Configurator API
 
-This project builds a the [MongoDB Configurator](https://github.com/agile-learning-institute/mongodb_configurator) API. This API packages configurations for deployment, and supports the [MongoDB Configurator SPA](https://github.com/agile-learning-institute/mongodb_configurator_spa)
+This project builds the [MongoDB Configurator](https://github.com/agile-learning-institute/mongodb_configurator) API. This API packages configurations for deployment, and supports the [MongoDB Configurator SPA](https://github.com/agile-learning-institute/mongodb_configurator_spa)
 
 ## Quick Start
 
@@ -43,7 +43,7 @@ export LOGGING_LEVEL=DEBUG
 #####################
 # Running test server  - uses INPUT_FOLDER setting# 
 pipenv run database     # Start the backing mongo database
-pipenv run dev          # RUn the dev server - expects database to be running
+pipenv run dev          # Run the dev server - expects database to be running
 pipenv run debug        # Start locally with DEBUG logging
 pipenv run batch        # Run locally in Batch mode (process and exit)
 
@@ -162,4 +162,26 @@ curl -X PUT localhost:8081/api/dictionaries/sample.1.0.0.yaml/ \
 ---
 
 ### Configurability
+
+**IMPORTANT**: The MongoDB Configurator API is designed with an intentional security model that reflects its three primary use cases:
+
+### Use Case 1: Data Engineer (Local Development)
+- **Purpose**: Edit and create configuration files locally
+- **Security Posture**: Minimal security overhead - intentionally permissive
+- **Configuration**: `BUILT_AT=Local` (from file), `MONGODB_REQUIRE_TLS=false`
+- **Capabilities**: Full write access to all configuration files. Note that these configurations are still in git change management, so changes aren't permanent till committed. This mode Will only run with a local containerized MongoDB backing database.
+
+### Use Case 2: Software Engineer (Local Development)
+- **Purpose**: Apply packaged configurations in local dev database, view deployed configurations
+- **Security Posture**: Minimal security overhead - read operations and local processing
+- **Configuration**: `BUILT_AT=<timestamp>` (from file), `MONGODB_REQUIRE_TLS=false`
+- **Capabilities**: Read access, local database operations, configuration viewing
+
+### Use Case 3: Cloud/Production (Batch Processing)
+- **Purpose**: Apply packaged configurations in production databases
+- **Security Posture**: Secure batch-style runtime with no API access
+- **Configuration**: `BUILT_AT=<timestamp>`, `MONGODB_REQUIRE_TLS=true`, `AUTO_PROCESS=true`, `EXIT_AFTER_PROCESSING=true`
+- **Capabilities**: No API, batch processing, secure MongoDB connections
+
+
 The [Config utility singleton](./configurator/utils/config.py) is used to manage all API Configuration options. See the code to understand options, and the [Configurator SRE Guide](https://github.com/agile-learning-institute/mongodb_configurator/blob/main/SRE.md) for more information.
