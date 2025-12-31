@@ -96,7 +96,7 @@ class FileIO:
         except FileNotFoundError:
             logger.error(f"File not found: {file_path}")
             event = ConfiguratorEvent(event_id="FIL-06", event_type="GET_DOCUMENT")
-            event.record_failure("File not found")
+            event.record_failure("File not found", {"file_name": file_name, "file_path": file_path, "folder_name": folder_name})
             raise ConfiguratorException(f"File not found: {file_path}", event)
         except Exception as e:
             logger.error(f"Exception getting document from {file_path}: {str(e)}")
@@ -140,7 +140,7 @@ class FileIO:
             return event
         except FileNotFoundError:
             logger.error(f"File not found: {file_path}")
-            event.record_failure("File not found")
+            event.record_failure("File not found", {"file_name": file_name, "file_path": file_path, "folder_name": folder_name})
             raise ConfiguratorException(f"Failed to delete {file_name} from {folder_name}", event)
         except Exception as e:
             logger.error(f"Exception deleting document from {file_path}: {str(e)}")
