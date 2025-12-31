@@ -257,6 +257,19 @@ class MongoIO:
                 from bson import json_util
                 data = json_util.loads(file.read())
             
+            # Skip empty arrays - no documents to load
+            if not data or len(data) == 0:
+                logger.info(f"Skipping empty JSON array from {data_file} for collection: {collection_name}")
+                event.data = {
+                    "collection": collection_name,
+                    "data_file": os.path.basename(data_file),
+                    "documents_loaded": 0,
+                    "skipped": True,
+                    "reason": "empty_json_array"
+                }
+                event.record_success()
+                return [event]
+            
             logger.info(f"Loading {len(data)} documents from {data_file} into collection: {collection_name}")
             result = collection.insert_many(data)
             

@@ -215,5 +215,42 @@ class TestMongoIO(unittest.TestCase):
             import os
             os.unlink(temp_file)
 
+    def test_load_json_data_empty_array(self):
+        """Test loading empty JSON array from file - should skip without error."""
+        # Create a temporary JSON file with empty array
+        test_data = []
+        
+        with tempfile.NamedTemporaryFile(mode='w', suffix='.json', delete=False) as f:
+            json.dump(test_data, f)
+            temp_file = f.name
+        
+        try:
+            events = self.mongo_io.load_json_data("test_load_collection_empty", temp_file)
+            self.assertEqual(len(events), 1)
+            self.assertEqual(events[0].status, "SUCCESS")
+            self.assertEqual(events[0].data["documents_loaded"], 0)
+            
+            # Verify the event data includes skip information
+            self.assertIn("collection", events[0].data)
+            self.assertIn("data_file", events[0].data)
+            self.assertIn("documents_loaded", events[0].data)
+            self.assertIn("skipped", events[0].data)
+            self.assertIn("reason", events[0].data)
+            self.assertEqual(events[0].data["collection"], "test_load_collection_empty")
+            self.assertEqual(events[0].data["documents_loaded"], 0)
+            self.assertTrue(events[0].data["skipped"])
+            self.assertEqual(events[0].data["reason"], "empty_json_array")
+            
+            # Verify insert_many_result is NOT present (since we skipped the insert)
+            self.assertNotIn("insert_many_result", events[0].data)
+            
+            # Verify no documents were actually inserted into the collection
+            collection = self.mongo_io.get_collection("test_load_collection_empty")
+            doc_count = collection.count_documents({})
+            self.assertEqual(doc_count, 0)
+        finally:
+            import os
+            os.unlink(temp_file)
+
 if __name__ == '__main__':
     unittest.main()
