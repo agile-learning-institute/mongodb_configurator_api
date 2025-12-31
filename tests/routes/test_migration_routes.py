@@ -5,7 +5,6 @@ import json
 import unittest
 from pathlib import Path
 from flask import Flask
-from configurator.server import app as real_app
 from configurator.utils.config import Config
 from unittest.mock import patch, Mock
 from configurator.routes.migration_routes import create_migration_routes
@@ -32,50 +31,16 @@ class MigrationRoutesTestCase(unittest.TestCase):
         require_tls_file = os.path.join(api_config_dir, "MONGODB_REQUIRE_TLS")
         with open(require_tls_file, "w") as f:
             f.write("false")
-        # Set INPUT_FOLDER environment variable
+        
+        # Set environment variables BEFORE initializing Config
         os.environ['INPUT_FOLDER'] = self.temp_dir
         
-        # Modify the existing Config instance to make assert_local() pass
-        # Since real_app is already initialized, we modify the existing Config instance
-        config = Config.get_instance()
-        # Update INPUT_FOLDER property
-        config.INPUT_FOLDER = self.temp_dir
-        # Ensure INPUT_FOLDER is in config_items
-        input_folder_item = next((item for item in config.config_items if item['name'] == 'INPUT_FOLDER'), None)
-        if input_folder_item:
-            input_folder_item['value'] = self.temp_dir
-            input_folder_item['from'] = 'environment'
-        else:
-            config.config_items.append({
-                'name': 'INPUT_FOLDER',
-                'value': self.temp_dir,
-                'from': 'environment'
-            })
-        # Update BUILT_AT property and config_item to be from file with value 'Local'
-        # This is what assert_local() checks
-        config.BUILT_AT = 'Local'
-        built_at_item = next((item for item in config.config_items if item['name'] == 'BUILT_AT'), None)
-        if built_at_item:
-            built_at_item['from'] = 'file'
-            built_at_item['value'] = 'Local'
-        else:
-            config.config_items.append({
-                'name': 'BUILT_AT',
-                'from': 'file',
-                'value': 'Local'
-            })
-        # Update MONGODB_REQUIRE_TLS property and config_item to be from file with value 'false'
-        config.MONGODB_REQUIRE_TLS = False
-        require_tls_item = next((item for item in config.config_items if item['name'] == 'MONGODB_REQUIRE_TLS'), None)
-        if require_tls_item:
-            require_tls_item['from'] = 'file'
-            require_tls_item['value'] = 'false'
-        else:
-            config.config_items.append({
-                'name': 'MONGODB_REQUIRE_TLS',
-                'from': 'file',
-                'value': 'false'
-            })
+        # Clear Config singleton and create fresh Flask app so Config initializes with env vars
+        Config._instance = None
+        self.app = Flask(__name__)
+        self.app.register_blueprint(create_migration_routes(), url_prefix='/api/migrations')
+        self.app = self.app.test_client()
+        
         # Create some fake migration files
         self.migration1 = os.path.join(self.migrations_dir, "mig1.json")
         self.migration2 = os.path.join(self.migrations_dir, "mig2.json")
@@ -83,8 +48,6 @@ class MigrationRoutesTestCase(unittest.TestCase):
             json.dump([{"$addFields": {"foo": "bar"}}], f)
         with open(self.migration2, "w") as f:
             json.dump([{"$unset": ["foo"]}], f)
-        # Use Flask test client
-        self.app = real_app.test_client()
 
     def tearDown(self):
         # Restore original INPUT_FOLDER
@@ -92,20 +55,8 @@ class MigrationRoutesTestCase(unittest.TestCase):
             os.environ['INPUT_FOLDER'] = self._original_input_folder
         elif 'INPUT_FOLDER' in os.environ:
             del os.environ['INPUT_FOLDER']
-        # Restore Config to default state
-        config = Config.get_instance()
-        # Restore INPUT_FOLDER
-        config.INPUT_FOLDER = os.getenv("INPUT_FOLDER", "/input")
-        input_folder_item = next((item for item in config.config_items if item['name'] == 'INPUT_FOLDER'), None)
-        if input_folder_item:
-            input_folder_item['value'] = config.INPUT_FOLDER
-            input_folder_item['from'] = 'default' if not os.getenv("INPUT_FOLDER") else 'environment'
-        # Restore BUILT_AT to default
-        config.BUILT_AT = 'DEFAULT! Set in code'
-        built_at_item = next((item for item in config.config_items if item['name'] == 'BUILT_AT'), None)
-        if built_at_item:
-            built_at_item['from'] = 'default'
-            built_at_item['value'] = 'DEFAULT! Set in code'
+        # Clear Config singleton for next test
+        Config._instance = None
         # Clean up temp directory
         if os.path.exists(self.temp_dir):
             shutil.rmtree(self.temp_dir)
@@ -143,37 +94,19 @@ class MigrationRoutesTestCase(unittest.TestCase):
         self.assertIn("status", data)
         self.assertIn("data", data)
         self.assertEqual(data["status"], "FAILURE")
+        # Verify file_name is included in event data for file not found errors
+        # The route decorator wraps the FileIO exception in a sub-event
+        self.assertIn("sub_events", data)
+        self.assertGreater(len(data["sub_events"]), 0)
+        sub_event_data = data["sub_events"][0].get("data", {})
+        self.assertIn("file_name", sub_event_data)
+        self.assertEqual(sub_event_data["file_name"], "doesnotexist.json")
+        self.assertIn("file_path", sub_event_data)
+        self.assertIn("folder_name", sub_event_data)
 
     def test_put_migration(self):
         """Test PUT /api/migrations/<file_name>/."""
         # Arrange - Config is already set up for local mode in setUp
-        # Ensure Config is still in local mode (in case another test modified it)
-        config = Config.get_instance()
-        built_at_item = next((item for item in config.config_items if item['name'] == 'BUILT_AT'), None)
-        if not built_at_item or built_at_item.get('from') != 'file' or built_at_item.get('value') != 'Local':
-            # Re-setup Config for local mode
-            config.BUILT_AT = 'Local'
-            if built_at_item:
-                built_at_item['from'] = 'file'
-                built_at_item['value'] = 'Local'
-            else:
-                config.config_items.append({
-                    'name': 'BUILT_AT',
-                    'from': 'file',
-                    'value': 'Local'
-                })
-        # Also ensure MONGODB_REQUIRE_TLS is set to false
-        require_tls_item = next((item for item in config.config_items if item['name'] == 'MONGODB_REQUIRE_TLS'), None)
-        if require_tls_item:
-            require_tls_item['from'] = 'file'
-            require_tls_item['value'] = 'false'
-        else:
-            config.config_items.append({
-                'name': 'MONGODB_REQUIRE_TLS',
-                'from': 'file',
-                'value': 'false'
-            })
-        config.MONGODB_REQUIRE_TLS = False
         test_data = {"migration": "test data"}
         
         # Act
@@ -186,33 +119,6 @@ class MigrationRoutesTestCase(unittest.TestCase):
 
     def test_delete_migration(self):
         # Arrange - Config is already set up for local mode in setUp
-        # Ensure Config is still in local mode (in case another test modified it)
-        config = Config.get_instance()
-        built_at_item = next((item for item in config.config_items if item['name'] == 'BUILT_AT'), None)
-        if not built_at_item or built_at_item.get('from') != 'file' or built_at_item.get('value') != 'Local':
-            # Re-setup Config for local mode
-            config.BUILT_AT = 'Local'
-            if built_at_item:
-                built_at_item['from'] = 'file'
-                built_at_item['value'] = 'Local'
-            else:
-                config.config_items.append({
-                    'name': 'BUILT_AT',
-                    'from': 'file',
-                    'value': 'Local'
-                })
-        # Also ensure MONGODB_REQUIRE_TLS is set to false
-        require_tls_item = next((item for item in config.config_items if item['name'] == 'MONGODB_REQUIRE_TLS'), None)
-        if require_tls_item:
-            require_tls_item['from'] = 'file'
-            require_tls_item['value'] = 'false'
-        else:
-            config.config_items.append({
-                'name': 'MONGODB_REQUIRE_TLS',
-                'from': 'file',
-                'value': 'false'
-            })
-        config.MONGODB_REQUIRE_TLS = False
         resp = self.app.delete("/api/migrations/mig1.json/")
         self.assertEqual(resp.status_code, 200)
         data = resp.get_json()
@@ -232,6 +138,15 @@ class MigrationRoutesTestCase(unittest.TestCase):
         self.assertIn("status", data)
         self.assertIn("data", data)
         self.assertEqual(data["status"], "FAILURE")
+        # Verify file_name is included in event data for file not found errors
+        # The route decorator wraps the FileIO exception in a sub-event
+        self.assertIn("sub_events", data)
+        self.assertGreater(len(data["sub_events"]), 0)
+        sub_event_data = data["sub_events"][0].get("data", {})
+        self.assertIn("file_name", sub_event_data)
+        self.assertEqual(sub_event_data["file_name"], "doesnotexist.json")
+        self.assertIn("file_path", sub_event_data)
+        self.assertIn("folder_name", sub_event_data)
 
 class TestMigrationRoutes(unittest.TestCase):
     """Test cases for migration routes."""
