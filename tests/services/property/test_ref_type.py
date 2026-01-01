@@ -102,7 +102,7 @@ class TestRefType(unittest.TestCase):
             "ref": "Circle"
         }
         prop = RefType(data)
-        enumerations = Enumerations("test", "0")
+        enumerations = Enumerations("test.yaml", {"version": 0, "enumerators": []})
         
         # Call to_json_schema
         result = prop.to_json_schema(enumerations)
@@ -126,7 +126,7 @@ class TestRefType(unittest.TestCase):
             "ref": "Circle.yaml"
         }
         prop = RefType(data)
-        enumerations = Enumerations("test", "0")
+        enumerations = Enumerations("test.yaml", {"version": 0, "enumerators": []})
         
         # Call to_json_schema
         result = prop.to_json_schema(enumerations)
@@ -151,7 +151,7 @@ class TestRefType(unittest.TestCase):
             "ref": "Missing"
         }
         prop = RefType(data)
-        enumerations = Enumerations("test", "0")
+        enumerations = Enumerations("test.yaml", {"version": 0, "enumerators": []})
         
         # Call to_json_schema and expect ConfiguratorException
         with self.assertRaises(ConfiguratorException) as context:

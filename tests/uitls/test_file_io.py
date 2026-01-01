@@ -160,6 +160,11 @@ class TestFileIO(unittest.TestCase):
             self.file_io.get_document("", "nonexistent.yaml")
         
         self.assertEqual(context.exception.event.status, "FAILURE")
+        # Verify file_name is included in event data
+        self.assertIn("file_name", context.exception.event.data)
+        self.assertEqual(context.exception.event.data["file_name"], "nonexistent.yaml")
+        self.assertIn("file_path", context.exception.event.data)
+        self.assertIn("folder_name", context.exception.event.data)
 
     def test_put_document_yaml(self):
         """Test put_document with YAML file"""
@@ -209,6 +214,11 @@ class TestFileIO(unittest.TestCase):
             self.file_io.delete_document("", "nonexistent.yaml")
         
         self.assertEqual(context.exception.event.status, "FAILURE")
+        # Verify file_name is included in event data
+        self.assertIn("file_name", context.exception.event.data)
+        self.assertEqual(context.exception.event.data["file_name"], "nonexistent.yaml")
+        self.assertIn("file_path", context.exception.event.data)
+        self.assertIn("folder_name", context.exception.event.data)
 
     def test_lock_unlock_success(self):
         """Test lock_unlock functionality - removed as no longer supported"""
