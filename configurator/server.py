@@ -64,21 +64,13 @@ logger.info(f"============= Routes Registered ===============")
 if config.AUTO_PROCESS:
     try:
         logger.info(f"============= Auto Processing is Starting ===============")
-        mongo_io = MongoIO(config.MONGO_CONNECTION_STRING, config.MONGO_DB_NAME)
-        event = ConfiguratorEvent(event_id="AUTO-00", event_type="PROCESS")
-        files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-        for file in files:
-            logger.info(f"Processing Configuration: {file.file_name}")
-            configuration = Configuration(file.file_name)
-            event.append_events([configuration.process(mongo_io)])
-        logger.info(f"Processing Output: {app.json.dumps(event.to_dict())}")
+        events = Configuration.process_all()
+        logger.info(f"Processing Output: {app.json.dumps(events.to_dict())}")
         logger.info(f"============= Auto Processing is Completed ===============")
     except ConfiguratorException as e:
         logger.error(f"Configurator error processing all configurations: {app.json.dumps(e.to_dict())}")
-        sys.exit(1)
     except Exception as e:
         logger.error(f"Unexpected error processing all configurations: {str(e)}")
-        sys.exit(1)
 
 if config.EXIT_AFTER_PROCESSING:
     logger.info(f"============= Exiting After Processing ===============")
