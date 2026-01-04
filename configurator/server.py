@@ -8,6 +8,7 @@ from configurator.services.configuration_services import Configuration
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
 from configurator.utils.file_io import FileIO
+from configurator.utils.mongo_io import MongoIO
 config = Config.get_instance()
 
 # Initialize Logging
@@ -29,12 +30,13 @@ signal.signal(signal.SIGINT, handle_exit)
 if config.AUTO_PROCESS:
     try:
         logger.info(f"============= Auto Processing is Starting ===============")
+        mongo_io = MongoIO(config.MONGO_CONNECTION_STRING, config.MONGO_DB_NAME)
         event = ConfiguratorEvent(event_id="AUTO-00", event_type="PROCESS")
         files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
         for file in files:
             logger.info(f"Processing Configuration: {file.file_name}")
             configuration = Configuration(file.file_name)
-            event.append_events([configuration.process()])
+            event.append_events([configuration.process(mongo_io)])
         logger.info(f"Processing Output: {json.dumps(event.to_dict())}")
         logger.info(f"============= Auto Processing is Completed ===============")
     except ConfiguratorException as e:
