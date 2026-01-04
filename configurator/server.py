@@ -26,32 +26,8 @@ def handle_exit(signum, frame):
 signal.signal(signal.SIGTERM, handle_exit)
 signal.signal(signal.SIGINT, handle_exit)
 
-# Auto-processing logic - runs when module is imported (including by Gunicorn)
-if config.AUTO_PROCESS:
-    try:
-        logger.info(f"============= Auto Processing is Starting ===============")
-        mongo_io = MongoIO(config.MONGO_CONNECTION_STRING, config.MONGO_DB_NAME)
-        event = ConfiguratorEvent(event_id="AUTO-00", event_type="PROCESS")
-        files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
-        for file in files:
-            logger.info(f"Processing Configuration: {file.file_name}")
-            configuration = Configuration(file.file_name)
-            event.append_events([configuration.process(mongo_io)])
-        logger.info(f"Processing Output: {json.dumps(event.to_dict())}")
-        logger.info(f"============= Auto Processing is Completed ===============")
-    except ConfiguratorException as e:
-        logger.error(f"Configurator error processing all configurations: {json.dumps(e.to_dict())}")
-        sys.exit(1)
-    except Exception as e:
-        logger.error(f"Unexpected error processing all configurations: {str(e)}")
-        sys.exit(1)
-
-if config.EXIT_AFTER_PROCESSING:
-    logger.info(f"============= Exiting After Processing ===============")
-    sys.exit(0)
-
 # Initialize Flask App
-from flask import Flask
+from flask import Flask, jsonify
 from configurator.utils.ejson_encoder import MongoJSONEncoder
 project_root = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 docs_path = os.path.join(project_root, 'docs')
@@ -83,6 +59,30 @@ app.register_blueprint(create_enumerator_routes(), url_prefix='/api/enumerators'
 app.register_blueprint(create_migration_routes(), url_prefix='/api/migrations')
 
 logger.info(f"============= Routes Registered ===============")
+
+# Auto-processing logic - runs when module is imported (including by Gunicorn)
+if config.AUTO_PROCESS:
+    try:
+        logger.info(f"============= Auto Processing is Starting ===============")
+        mongo_io = MongoIO(config.MONGO_CONNECTION_STRING, config.MONGO_DB_NAME)
+        event = ConfiguratorEvent(event_id="AUTO-00", event_type="PROCESS")
+        files = FileIO.get_documents(config.CONFIGURATION_FOLDER)
+        for file in files:
+            logger.info(f"Processing Configuration: {file.file_name}")
+            configuration = Configuration(file.file_name)
+            event.append_events([configuration.process(mongo_io)])
+        logger.info(f"Processing Output: {app.json.dumps(event.to_dict())}")
+        logger.info(f"============= Auto Processing is Completed ===============")
+    except ConfiguratorException as e:
+        logger.error(f"Configurator error processing all configurations: {app.json.dumps(e.to_dict())}")
+        sys.exit(1)
+    except Exception as e:
+        logger.error(f"Unexpected error processing all configurations: {str(e)}")
+        sys.exit(1)
+
+if config.EXIT_AFTER_PROCESSING:
+    logger.info(f"============= Exiting After Processing ===============")
+    sys.exit(0)
 
 # Start the server (only when run directly, not when imported by Gunicorn)
 if __name__ == "__main__":
