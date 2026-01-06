@@ -79,7 +79,7 @@ class TestConstantType(unittest.TestCase):
             result = prop.to_bson_schema(mock_enum)
             
             self.assertEqual(result["bsonType"], "string")
-            self.assertEqual(result["const"], "test_value")
+            self.assertEqual(result["enum"], ["test_value"])
 
     def test_constant_type_init_defaults(self):
         """Test ConstantType initialization with defaults"""
