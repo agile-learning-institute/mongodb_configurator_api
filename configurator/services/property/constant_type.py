@@ -21,5 +21,5 @@ class ConstantType(BaseProperty):
     def to_bson_schema(self, enumerations: Enumerations, ref_stack: list = []):
         the_schema = super().to_bson_schema(enumerations, ref_stack)
         the_schema['bsonType'] = 'string'
-        the_schema['const'] = self.constant
+        the_schema['enum'] = [self.constant]
         return the_schema
