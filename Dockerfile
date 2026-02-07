@@ -48,12 +48,11 @@ RUN useradd --create-home --shell /bin/bash app && \
 # Switch to non-root user
 USER app
 
-# Expose the port
-EXPOSE 8081
-
-# Set environment variables
+# Default API port (override with ARG when building; extenders set ENV API_PORT in their image)
+ARG API_PORT=8081
 ENV PYTHONPATH=/opt/mongo_configurator/configurator
-ENV API_PORT=8081
+ENV API_PORT=${API_PORT}
+EXPOSE ${API_PORT}
 
-# Command to run the application
-CMD ["gunicorn", "--bind", "0.0.0.0:8081", "--timeout", "10", "--preload", "configurator.server:app"]
+# Bind at runtime using API_PORT so extenders can set ENV API_PORT and expose their port
+CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${API_PORT} --timeout 10 --preload configurator.server:app"]
