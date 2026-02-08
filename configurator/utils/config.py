@@ -42,6 +42,7 @@ class Config:
             self.ENABLE_DROP_DATABASE = False
             self.MONGODB_REQUIRE_TLS = False
             self.RENDER_STACK_MAX_DEPTH = 0
+            self.UI_HEADER = ''
     
             # Default Values grouped by value type            
             self.config_strings = {
@@ -58,6 +59,7 @@ class Config:
                 "MIGRATIONS_FOLDER": "migrations",
                 "API_CONFIG_FOLDER": "api_config",
                 "ENUMERATOR_FOLDER": "enumerators",
+                "UI_HEADER": "MongoDB Configurator",
             }
             self.config_ints = {
                 "API_PORT": "8081",
