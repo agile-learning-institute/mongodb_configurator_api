@@ -54,5 +54,5 @@ ENV PYTHONPATH=/opt/mongo_configurator/configurator
 ENV API_PORT=${API_PORT}
 EXPOSE ${API_PORT}
 
-# Bind at runtime using API_PORT so extenders can set ENV API_PORT and expose their port
+# Shell form expands API_PORT at runtime so extenders can set ENV API_PORT without replacing CMD.
 CMD ["sh", "-c", "gunicorn --bind 0.0.0.0:${API_PORT} --timeout 10 --preload configurator.server:app"]
