@@ -1,6 +1,6 @@
-# Default dictionary template for new collections.
+# Default dictionary template for new collections (playground/Docker).
 # Placeholders: {{collection_name}}, {{description}}
-# Override via: {INPUT_FOLDER}/{API_CONFIG_FOLDER}/templates/default_new_dictionary.yaml
+# Same as built-in: configurator/templates/default_new_dictionary.yaml
 name: root
 description: "{{description}}"
 type: object

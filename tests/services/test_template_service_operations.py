@@ -113,7 +113,20 @@ class TestTemplateService(unittest.TestCase):
         result = _load_dictionary_template("my_collection", "Custom description")
         self.assertIn("name", result)
         self.assertEqual(result.get("description"), "Custom description")
-        self.assertEqual(result.get("type"), "void")
+        self.assertEqual(result.get("type"), "object")
+        self.assertIn("properties", result)
+        self.assertGreater(len(result["properties"]), 0)
+
+    def test_load_configuration_template_returns_add_indexes(self):
+        """Test that configuration template returns add_indexes."""
+        from configurator.services.template_service import _load_configuration_template
+        result = _load_configuration_template("my_collection")
+        self.assertIn("add_indexes", result)
+        indexes = result["add_indexes"]
+        self.assertGreater(len(indexes), 0)
+        index_names = [idx["name"] for idx in indexes]
+        self.assertIn("nameIndex", index_names)
+        self.assertIn("statusIndex", index_names)
 
 
 if __name__ == '__main__':

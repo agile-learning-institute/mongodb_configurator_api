@@ -1,0 +1,25 @@
+# Default configuration template for new collections.
+# Placeholders: {{collection_name}}
+# Override via: {INPUT_FOLDER}/{API_CONFIG_FOLDER}/templates/default_new_configuration.yaml
+# Defines default add_indexes for the initial version.
+add_indexes:
+  - name: nameIndex
+    key:
+      name: 1
+    options:
+      unique: false
+  - name: statusIndex
+    key:
+      status: 1
+    options:
+      unique: false
+  - name: createdIndex
+    key:
+      created.at_time: 1
+    options:
+      unique: false
+  - name: savedIndex
+    key:
+      last_saved.at_time: 1
+    options:
+      unique: false

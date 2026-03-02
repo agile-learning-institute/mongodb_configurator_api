@@ -15,6 +15,29 @@ logger = logging.getLogger(__name__)
 NEW_COLLECTION_VERSION = "1.0.0.0"
 
 
+def _load_configuration_template(collection_name: str) -> dict:
+    """
+    Load the configuration template (add_indexes for initial version).
+    Override: {INPUT_FOLDER}/{API_CONFIG_FOLDER}/templates/default_new_configuration.yaml
+    Built-in: configurator/templates/default_new_configuration.yaml
+    """
+    config = Config.get_instance()
+    override_path = Path(config.INPUT_FOLDER, config.API_CONFIG_FOLDER, "templates", "default_new_configuration.yaml")
+
+    if override_path.exists():
+        with open(override_path, "r", encoding="utf-8") as f:
+            template_content = yaml.safe_load(f)
+    else:
+        configurator_dir = Path(__file__).parent.parent
+        builtin_path = configurator_dir / "templates" / "default_new_configuration.yaml"
+        with open(builtin_path, "r", encoding="utf-8") as f:
+            template_content = yaml.safe_load(f)
+
+    content_str = yaml.dump(template_content)
+    content_str = content_str.replace("{{collection_name}}", collection_name)
+    return yaml.safe_load(content_str)
+
+
 def _load_dictionary_template(collection_name: str, description: str = "") -> dict:
     """
     Load the dictionary template. Checks api_config path first, then built-in default.
@@ -84,6 +107,9 @@ class TemplateService:
 
     @staticmethod
     def _new_configuration(collection_name: str, file_name: str, test_data_file_name: str, description: str = ""):
+        config_template = _load_configuration_template(collection_name)
+        add_indexes = config_template.get("add_indexes", [])
+
         document = {
             "file_name": file_name,
             "title": f"{collection_name} Configuration",
@@ -93,7 +119,7 @@ class TemplateService:
                     "version": NEW_COLLECTION_VERSION,
                     "test_data": test_data_file_name,
                     "migrations": [],
-                    "add_indexes": [],
+                    "add_indexes": add_indexes,
                     "drop_indexes": [],
                 }
             ],

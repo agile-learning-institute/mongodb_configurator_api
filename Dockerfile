@@ -22,6 +22,7 @@ COPY README.md LICENSE ./
 
 # Copy playground test cases for development/testing to /input
 COPY tests/test_cases/passing_template/api_playground/* /input/api_config/
+COPY tests/test_cases/passing_template/api_playground/templates/ /input/api_config/templates/
 COPY tests/test_cases/passing_template/configurations/* /input/configurations/
 COPY tests/test_cases/passing_template/dictionaries/* /input/dictionaries/
 COPY tests/test_cases/passing_template/enumerators/* /input/enumerators/

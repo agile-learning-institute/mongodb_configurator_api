@@ -65,18 +65,57 @@ pipenv run stepci
 
 ```
 
-### Custom Dictionary Template (for API extenders)
+### Custom Templates (for API extenders)
 
-The API uses a default dictionary template when creating new collections via `POST /api/configurations/collection/{name}`. To provide a custom template:
+The API uses default templates when creating new collections via `POST /api/configurations/collection/{name}`.
 
-1. Create your template file (e.g. `default_new_dictionary.yaml`) with placeholders `{{collection_name}}` and `{{description}}`
-2. In your extended Dockerfile, copy it to `/input/api_config/templates/default_new_dictionary.yaml`:
-   ```dockerfile
-   COPY your_templates/default_new_dictionary.yaml /input/api_config/templates/
-   ```
-3. Ensure the `api_config/templates/` directory exists in your image
+#### Dictionary template (`default_new_dictionary.yaml`)
 
-The API checks `{INPUT_FOLDER}/{API_CONFIG_FOLDER}/templates/default_new_dictionary.yaml` first (API_CONFIG_FOLDER defaults to `api_config`); if it exists, that template is used instead of the built-in default. The built-in default is a simple root with `type: void`.
+**Default value**: An object root with `_id`, `name`, `description`, `status`, `created`, `last_saved`:
+```yaml
+name: root
+description: "{{description}}"
+type: object
+properties:
+  - name: _id
+    type: identifier
+    required: true
+  - name: name
+    type: word
+    required: true
+  - name: description
+    type: sentence
+    required: false
+  - name: status
+    type: enum
+    enums: default_status
+    required: true
+  - name: created
+    type: breadcrumb
+    required: true
+  - name: last_saved
+    type: breadcrumb
+    required: true
+```
+
+**Location** (checked in order):
+1. **Override**: `{INPUT_FOLDER}/{API_CONFIG_FOLDER}/templates/default_new_dictionary.yaml`
+2. **Built-in**: `configurator/templates/default_new_dictionary.yaml`
+
+#### Configuration template (`default_new_configuration.yaml`)
+
+**Default value**: Default `add_indexes` for the initial version (nameIndex, statusIndex, createdIndex, savedIndex).
+
+**Location** (checked in order):
+1. **Override**: `{INPUT_FOLDER}/{API_CONFIG_FOLDER}/templates/default_new_configuration.yaml`
+2. **Built-in**: `configurator/templates/default_new_configuration.yaml`
+
+**Playground/Docker**: The Dockerfile loads `tests/test_cases/passing_template/api_playground/templates/` into `/input/api_config/templates/`. Both templates are included.
+
+To provide custom templates in your extended image:
+1. Create your template files with placeholders `{{collection_name}}` and `{{description}}` (dictionary only)
+2. Copy to `/input/api_config/templates/` in your Dockerfile
+3. Ensure the `api_config/templates/` directory exists
 
 ## Separation of Concerns
 The /configurator directory contains source code.
@@ -135,7 +174,7 @@ tests/
 │   ├── stepci/             # Configuration for step ci testing - setup/tear down in tests
 
 ```
-The Docker build will package passing_template into the containers /input folder to support playground deployments.
+The Docker build packages `passing_template` into the container's `/input` folder for playground deployments. The `api_playground/` subfolder (config files and `templates/default_new_dictionary.yaml`) is copied to `/input/api_config/`.
 
 ## API Documentation
 

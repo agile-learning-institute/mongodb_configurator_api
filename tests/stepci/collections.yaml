@@ -14,7 +14,7 @@ tests:
           check:
             status: /200/
             jsonpath:
-              "[0].collection_name": /sample|test|Rectangle|Circle|Square/
-              "[0].configuration_file": /.+\.yaml$/
-              "[0].latest_dictionary_file": /.+\.yaml$/
-              "[0].latest_version": /\d+\.\d+\.\d+\.\d+/
+              $[0].collection_name: /sample|test|Rectangle|Circle|Square/
+              $[0].configuration_file: /.+\.yaml$/
+              $[0].latest_dictionary_file: /.+\.yaml$/
+              $[0].latest_version: /\d+\.\d+\.\d+\.\d+/
