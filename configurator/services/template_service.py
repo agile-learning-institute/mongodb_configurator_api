@@ -17,12 +17,12 @@ NEW_COLLECTION_VERSION = "1.0.0.0"
 
 def _load_dictionary_template(collection_name: str, description: str = "") -> dict:
     """
-    Load the dictionary template. Checks override path first, then built-in default.
-    Override: {INPUT_FOLDER}/api_config/templates/default_new_dictionary.yaml
-    Built-in: configurator/templates/default_new_dictionary.yaml
+    Load the dictionary template. Checks api_config path first, then built-in default.
+    Override: {INPUT_FOLDER}/{API_CONFIG_FOLDER}/templates/default_new_dictionary.yaml
+    Built-in: configurator/templates/default_new_dictionary.yaml (simple root with type: void)
     """
     config = Config.get_instance()
-    override_path = Path(config.INPUT_FOLDER, "api_config", "templates", "default_new_dictionary.yaml")
+    override_path = Path(config.INPUT_FOLDER, config.API_CONFIG_FOLDER, "templates", "default_new_dictionary.yaml")
 
     if override_path.exists():
         with open(override_path, "r", encoding="utf-8") as f:

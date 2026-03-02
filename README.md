@@ -76,7 +76,7 @@ The API uses a default dictionary template when creating new collections via `PO
    ```
 3. Ensure the `api_config/templates/` directory exists in your image
 
-The API checks `{INPUT_FOLDER}/api_config/templates/default_new_dictionary.yaml` first; if it exists, that template is used instead of the built-in default.
+The API checks `{INPUT_FOLDER}/{API_CONFIG_FOLDER}/templates/default_new_dictionary.yaml` first (API_CONFIG_FOLDER defaults to `api_config`); if it exists, that template is used instead of the built-in default. The built-in default is a simple root with `type: void`.
 
 ## Separation of Concerns
 The /configurator directory contains source code.

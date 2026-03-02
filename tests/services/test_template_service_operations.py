@@ -113,7 +113,7 @@ class TestTemplateService(unittest.TestCase):
         result = _load_dictionary_template("my_collection", "Custom description")
         self.assertIn("name", result)
         self.assertEqual(result.get("description"), "Custom description")
-        self.assertIn("properties", result)
+        self.assertEqual(result.get("type"), "void")
 
 
 if __name__ == '__main__':

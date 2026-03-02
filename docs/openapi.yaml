@@ -276,7 +276,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/configuration'
+                $ref: '#/components/schemas/create_collection_response'
         '500':
           description: Internal server error
           content:
@@ -338,7 +338,7 @@ paths:
         '200':
           description: Schema
           content:
-            text/json:
+            application/json:
               schema:
                 type: object
         '500':
@@ -372,7 +372,7 @@ paths:
         '200':
           description: Schema
           content:
-            text/json:
+            application/json:
               schema:
                 type: object
         '500':
@@ -1094,19 +1094,47 @@ components:
                       type: string
                     description:
                       type: string
+    create_collection_response:
+      description: Response from POST /api/configurations/collection/{name}
+      type: object
+      required:
+        - configuration_file
+        - dictionary_file
+        - test_data_file
+        - version
+      properties:
+        configuration_file:
+          type: string
+          description: Name of the created configuration file (e.g., my_collection.yaml)
+        dictionary_file:
+          type: string
+          description: Name of the created dictionary file (e.g., my_collection.1.0.0.yaml)
+        test_data_file:
+          type: string
+          description: Name of the created test data file (e.g., my_collection.1.0.0.0.json)
+        version:
+          type: string
+          description: Initial version string (1.0.0.0)
     configuration:
       description: SchemaManager Collection Configuration
       type: object
       required:
-        - name
+        - file_name
         - versions
       properties:
-        name:
-          description: The name of the MongoDB collection
+        file_name:
+          description: Name of the configuration file (e.g., sample.yaml)
+          type: string
+        title:
+          description: Display title for the collection
           type: string
         description:
           description: A description of the MongoDB collection
           type: string
+        _locked:
+          description: Whether the configuration is locked from modification
+          type: boolean
+          default: false
         versions:
           description: List of version configurations in chronological order
           type: array
@@ -1264,6 +1292,7 @@ components:
         - $ref: '#/components/schemas/type_object'
         - $ref: '#/components/schemas/type_one_of'
         - $ref: '#/components/schemas/type_ref'
+        - $ref: '#/components/schemas/type_simple'
     type_array:
       description: An Array type
       type: object
@@ -1285,6 +1314,9 @@ components:
           description: The items of the array
           $ref: '#/components/schemas/property'
     type_complex:
+      description: A Complex type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1307,6 +1339,9 @@ components:
           type: object
           additionalProperties: true
     type_constant:
+      description: A Constant type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1324,6 +1359,9 @@ components:
           description: Constant value for constant type
           type: string
     type_custom:
+      description: A Custom type (e.g., void)
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1337,6 +1375,9 @@ components:
           description: Whether the property is required
           type: boolean
     type_enum_array:
+      description: An Enum Array type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1354,6 +1395,9 @@ components:
           description: Enum name for enum or enum_array types
           type: string
     type_enum:
+      description: An Enum type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1371,6 +1415,9 @@ components:
           description: Enum name for enum or enum_array types
           type: string
     type_object:
+      description: An Object type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1393,6 +1440,9 @@ components:
           items:
             $ref: '#/components/schemas/property'
     type_one_of:
+      description: A OneOf type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1412,6 +1462,9 @@ components:
           items:
             $ref: '#/components/schemas/property'
     type_ref:
+      description: A Ref type
+      type: object
+      properties:
         name:
           description: The name of the property
           type: string
@@ -1429,6 +1482,9 @@ components:
           description: Reference to another type file
           type: string
     type_simple:
+      description: A Simple type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
