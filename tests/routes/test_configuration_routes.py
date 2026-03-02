@@ -436,6 +436,40 @@ class TestConfigurationRoutes(unittest.TestCase):
         self.assertEqual(response_data["status"], "FAILURE")
 
     @patch('configurator.routes.configuration_routes.Configuration')
+    def test_get_json_schema_latest_success(self, mock_configuration_class):
+        """Test successful GET /api/configurations/json_schema/<file_name>/latest/."""
+        # Arrange
+        mock_configuration = Mock()
+        mock_configuration.get_json_schema_latest.return_value = {"type": "object", "title": "latest"}
+        mock_configuration_class.return_value = mock_configuration
+
+        # Act
+        response = self.client.get('/api/configurations/json_schema/sample.yaml/latest/')
+
+        # Assert
+        self.assertEqual(response.status_code, 200)
+        response_data = response.json
+        self.assertEqual(response_data, {"type": "object", "title": "latest"})
+        mock_configuration.get_json_schema_latest.assert_called_once()
+
+    @patch('configurator.routes.configuration_routes.Configuration')
+    def test_get_json_schema_latest_general_exception(self, mock_configuration_class):
+        """Test GET /api/configurations/json_schema/<file_name>/latest/ when Configuration raises exception."""
+        # Arrange
+        mock_configuration = Mock()
+        mock_configuration.get_json_schema_latest.side_effect = Exception("Unexpected error")
+        mock_configuration_class.return_value = mock_configuration
+
+        # Act
+        response = self.client.get('/api/configurations/json_schema/sample.yaml/latest/')
+
+        # Assert
+        self.assertEqual(response.status_code, 500)
+        response_data = response.json
+        self.assertIn("status", response_data)
+        self.assertEqual(response_data["status"], "FAILURE")
+
+    @patch('configurator.routes.configuration_routes.Configuration')
     def test_get_json_schema_success(self, mock_configuration_class):
         """Test successful GET /api/configurations/json_schema/<file_name>/<version>/."""
         # Arrange

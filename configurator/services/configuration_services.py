@@ -34,6 +34,20 @@ class Configuration(ServiceBase):
         logger.error(f"Version {version_str} not found in configuration {self.file_name}")
         raise ConfiguratorException(f"Version {version_str} not found in configuration {self.file_name}", event)
 
+    def get_latest_version(self) -> Version:
+        """Return the latest version from the configuration (by version number)."""
+        if not self.versions:
+            event = ConfiguratorEvent("CFG-02", "GET_LATEST_VERSION")
+            event.record_failure(f"No versions found in configuration {self.file_name}")
+            logger.error(f"No versions found in configuration {self.file_name}")
+            raise ConfiguratorException(f"No versions found in configuration {self.file_name}", event)
+        return max(self.versions, key=lambda v: v.version_number)
+
+    def get_json_schema_latest(self) -> dict:
+        """Get JSON schema for the latest version defined in this configuration."""
+        latest_version = self.get_latest_version()
+        return self.get_json_schema(latest_version.version_str)
+
     def get_json_schema(self, version_str: str) -> dict:
         event = ConfiguratorEvent("CFG-03", "GET_JSON_SCHEMA")
         event.data = {"configuration": self.file_name, "version": version_str}
@@ -161,6 +175,34 @@ class Configuration(ServiceBase):
             event.record_failure(f"Unexpected error updating enumerators: {str(e)}")
             logger.error(f"Unexpected error updating enumerators: {str(e)}")
             raise ConfiguratorException("Cannot update enumerators", event)
+
+    @staticmethod
+    def get_collections_summary() -> list:
+        """
+        Return a collection-centric view: one summary per configuration.
+        Each item: collection_name, configuration_file, latest_dictionary_file, latest_version, _locked.
+        """
+        config = Config.get_instance()
+        result = []
+        for file in FileIO.get_documents(config.CONFIGURATION_FOLDER):
+            try:
+                configuration = Configuration(file.file_name)
+                latest = configuration.get_latest_version()
+                result.append({
+                    "collection_name": configuration.collection_name,
+                    "configuration_file": configuration.file_name,
+                    "latest_dictionary_file": latest.version_number.get_schema_filename(),
+                    "latest_version": latest.version_str,
+                    "_locked": latest._locked,
+                    "description": configuration.description or "",
+                })
+            except ConfiguratorException as e:
+                logger.warning(f"Skipping {file.file_name}: {e}")
+                continue
+            except Exception as e:
+                logger.warning(f"Skipping {file.file_name}: {e}")
+                continue
+        return result
 
     @staticmethod
     def process_all():

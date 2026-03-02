@@ -6,6 +6,8 @@ env:
 tests:
   observable:
     $ref: ./tests/stepci/observability.yaml#/observable
+  collections:
+    $ref: ./tests/stepci/collections.yaml#/tests/collections
   configurations:
     $ref: ./tests/stepci/configurations.yaml#/tests/configurations
   processing:

@@ -65,6 +65,19 @@ pipenv run stepci
 
 ```
 
+### Custom Dictionary Template (for API extenders)
+
+The API uses a default dictionary template when creating new collections via `POST /api/configurations/collection/{name}`. To provide a custom template:
+
+1. Create your template file (e.g. `default_new_dictionary.yaml`) with placeholders `{{collection_name}}` and `{{description}}`
+2. In your extended Dockerfile, copy it to `/input/api_config/templates/default_new_dictionary.yaml`:
+   ```dockerfile
+   COPY your_templates/default_new_dictionary.yaml /input/api_config/templates/
+   ```
+3. Ensure the `api_config/templates/` directory exists in your image
+
+The API checks `{INPUT_FOLDER}/api_config/templates/default_new_dictionary.yaml` first; if it exists, that template is used instead of the built-in default.
+
 ## Separation of Concerns
 The /configurator directory contains source code.
 ```

@@ -168,6 +168,40 @@ class TestConfiguration(unittest.TestCase):
                 # Assert
                 self.assertEqual(result, {"schema": "json"})
 
+    @patch('configurator.services.configuration_services.Configuration.get_json_schema')
+    def test_get_json_schema_latest_calls_get_json_schema_with_latest_version(self, mock_get_json_schema):
+        """Test get_json_schema_latest calls get_json_schema with the latest version string."""
+        mock_get_json_schema.return_value = {"schema": "json_latest"}
+        config = Configuration(self.test_file_name, self.test_document)
+        result = config.get_json_schema_latest()
+        self.assertEqual(result, {"schema": "json_latest"})
+        # Versions are 1.0.0 and 1.1.0 -> latest is 1.1.0.0
+        mock_get_json_schema.assert_called_once_with("1.1.0.0")
+
+    def test_get_latest_version_returns_last_when_ordered(self):
+        """Test get_latest_version returns the version with highest version number."""
+        from configurator.services.configuration_version import Version
+        doc = {
+            "title": "Test",
+            "description": "Test",
+            "versions": [
+                {"version": "1.0.0"},
+                {"version": "1.1.0"},
+                {"version": "2.0.0"}
+            ]
+        }
+        config = Configuration("test.yaml", doc)
+        latest = config.get_latest_version()
+        self.assertEqual(latest.version_str, "2.0.0.0")
+
+    def test_get_latest_version_empty_raises(self):
+        """Test get_latest_version raises when no versions exist."""
+        doc = {"title": "Test", "description": "Test", "versions": []}
+        config = Configuration("test.yaml", doc)
+        with self.assertRaises(ConfiguratorException) as ctx:
+            config.get_latest_version()
+        self.assertIn("No versions found", str(ctx.exception))
+
     def test_get_bson_schema(self):
         """Test Configuration get_bson_schema method"""
         # Arrange
@@ -243,6 +277,37 @@ class TestVersion(unittest.TestCase):
         self.assertEqual(version.version_str, "1.0.0.0")
         self.assertEqual(version.collection_name, "test_collection")
         self.assertFalse(version._locked)
+
+
+class TestGetCollectionsSummary(unittest.TestCase):
+    """Test cases for Configuration.get_collections_summary."""
+
+    @patch('configurator.services.service_base.FileIO')
+    @patch('configurator.services.configuration_services.FileIO')
+    def test_get_collections_summary_returns_summaries(self, mock_file_io_cfg, mock_file_io_base):
+        """Test get_collections_summary returns correct structure."""
+        mock_file = Mock()
+        mock_file.file_name = "sample.yaml"
+        mock_file_io_cfg.get_documents.return_value = [mock_file]
+
+        config_doc = {
+            "title": "Sample",
+            "description": "Test",
+            "versions": [
+                {"version": "1.0.0.0", "drop_indexes": [], "add_indexes": [], "migrations": [], "test_data": "sample.json", "_locked": False}
+            ],
+            "_locked": False
+        }
+        mock_file_io_base.get_document.return_value = config_doc
+
+        result = Configuration.get_collections_summary()
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["collection_name"], "sample")
+        self.assertEqual(result[0]["configuration_file"], "sample.yaml")
+        self.assertEqual(result[0]["latest_dictionary_file"], "sample.1.0.0.yaml")
+        self.assertEqual(result[0]["latest_version"], "1.0.0.0")
+        self.assertFalse(result[0]["_locked"])
 
 
 class TestConfigurationLockAll(unittest.TestCase):

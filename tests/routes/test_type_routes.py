@@ -62,17 +62,14 @@ class TestTypeRoutes(unittest.TestCase):
         self.app.register_blueprint(create_type_routes(), url_prefix='/api/types')
         self.client = self.app.test_client()
 
-    @patch('configurator.routes.type_routes.FileIO')
-    def test_get_types_success(self, mock_file_io):
+    @patch('configurator.routes.type_routes.Type')
+    def test_get_types_success(self, mock_type_class):
         """Test successful GET /api/types."""
-        # Arrange
-        # Create mock File objects with to_dict() method
-        mock_file1 = Mock()
-        mock_file1.to_dict.return_value = {"name": "type1.yaml"}
-        mock_file2 = Mock()
-        mock_file2.to_dict.return_value = {"name": "type2.yaml"}
-        mock_files = [mock_file1, mock_file2]
-        mock_file_io.get_documents.return_value = mock_files
+        # Arrange - Type.get_types_summary returns lightweight list
+        mock_type_class.get_types_summary.return_value = [
+            {"file_name": "type1.yaml", "created_at": "2024-01-01", "updated_at": "2024-01-01", "size": 100, "_locked": False, "description": "Type 1 description"},
+            {"file_name": "type2.yaml", "created_at": "2024-01-01", "updated_at": "2024-01-01", "size": 100, "_locked": False, "description": "Type 2 description"},
+        ]
 
         # Act
         response = self.client.get('/api/types/')
@@ -80,14 +77,17 @@ class TestTypeRoutes(unittest.TestCase):
         # Assert
         self.assertEqual(response.status_code, 200)
         response_data = response.json
-        # For successful responses, expect data directly, not wrapped in event envelope
-        self.assertEqual(response_data, [{"name": "type1.yaml"}, {"name": "type2.yaml"}])
+        self.assertEqual(len(response_data), 2)
+        self.assertEqual(response_data[0]["file_name"], "type1.yaml")
+        self.assertEqual(response_data[0]["description"], "Type 1 description")
+        self.assertEqual(response_data[1]["file_name"], "type2.yaml")
+        self.assertEqual(response_data[1]["description"], "Type 2 description")
 
-    @patch('configurator.routes.type_routes.FileIO')
-    def test_get_types_general_exception(self, mock_file_io):
-        """Test GET /api/types when FileIO raises a general exception."""
+    @patch('configurator.routes.type_routes.Type')
+    def test_get_types_general_exception(self, mock_type_class):
+        """Test GET /api/types when Type.get_types_summary raises a general exception."""
         # Arrange
-        mock_file_io.get_documents.side_effect = Exception("Unexpected error")
+        mock_type_class.get_types_summary.side_effect = Exception("Unexpected error")
 
         # Act
         response = self.client.get('/api/types/')

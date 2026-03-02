@@ -1,7 +1,10 @@
 import unittest
-from unittest.mock import patch, MagicMock, Mock
-from configurator.services.template_service import TemplateService
+import tempfile
 import os
+from pathlib import Path
+from unittest.mock import patch, Mock
+
+from configurator.services.template_service import TemplateService
 from configurator.utils.configurator_exception import ConfiguratorException, ConfiguratorEvent
 from configurator.utils.config import Config
 
@@ -11,128 +14,107 @@ class TestTemplateService(unittest.TestCase):
 
     def setUp(self):
         """Set up test environment"""
+        Config._instance = None
         self.test_collection_name = "test_collection"
-        self.test_configuration_file = "test_collection.yaml"
-        self.test_dictionary_file = "test_collection.0.0.1.yaml"
+        self._original_input_folder = os.environ.get('INPUT_FOLDER')
 
-    @patch('configurator.services.template_service.Configuration')
-    @patch('configurator.services.template_service.Dictionary')
+    def tearDown(self):
+        """Clean up after tests."""
+        Config._instance = None
+        if self._original_input_folder:
+            os.environ['INPUT_FOLDER'] = self._original_input_folder
+        elif 'INPUT_FOLDER' in os.environ:
+            del os.environ['INPUT_FOLDER']
+
+    def _setup_temp_input_folder(self):
+        """Create temp directory with api_config for local mode."""
+        self.temp_dir = tempfile.mkdtemp()
+        api_config = Path(self.temp_dir) / "api_config"
+        api_config.mkdir()
+        (api_config / "BUILT_AT").write_text("Local")
+        (api_config / "MONGODB_REQUIRE_TLS").write_text("false")
+        for folder in ["configurations", "dictionaries", "test_data"]:
+            (Path(self.temp_dir) / folder).mkdir()
+        os.environ['INPUT_FOLDER'] = self.temp_dir
+        Config._instance = None
+        return self.temp_dir
+
+    @patch('configurator.services.service_base.FileIO')
     @patch('configurator.services.template_service.FileIO')
-    def test_new_configuration(self, mock_file_io, mock_dictionary, mock_configuration):
-        """Test TemplateService.new_configuration method"""
-        # Arrange
-        mock_config_instance = Mock()
-        mock_configuration.return_value = mock_config_instance
-        
-        # Act
-        result = TemplateService.new_configuration(self.test_collection_name, self.test_configuration_file)
-        
-        # Assert
-        self.assertEqual(result, mock_config_instance)
-        mock_configuration.assert_called_once_with(
-            self.test_configuration_file,
-            {
-                "file_name": self.test_configuration_file,
-                "title": f"{self.test_collection_name} Configuration",
-                "description": f"Collection for managing {self.test_collection_name}",
-                "versions": [{"version": "0.0.1.0"}]
-            }
-        )
+    def test_create_collection_creates_config_dictionary_test_data(self, mock_file_io, mock_file_io_base):
+        """Test create_collection creates config, dictionary, and test_data files."""
+        mock_file_io.file_exists.return_value = False
+        mock_file_io.put_document.return_value = {}
+        mock_file_io_base.put_document.return_value = {}
 
-    @patch('configurator.services.template_service.Configuration')
-    @patch('configurator.services.template_service.Dictionary')
-    @patch('configurator.services.template_service.FileIO')
-    def test_new_dictionary(self, mock_file_io, mock_dictionary, mock_configuration):
-        """Test TemplateService.new_dictionary method"""
-        # Arrange
-        mock_dict_instance = Mock()
-        mock_dictionary.return_value = mock_dict_instance
-        
-        # Act
-        result = TemplateService.new_dictionary(self.test_collection_name, self.test_dictionary_file)
-        
-        # Assert
-        self.assertEqual(result, mock_dict_instance)
-        mock_dictionary.assert_called_once_with(
-            self.test_dictionary_file,
-            {
-                "file_name": self.test_dictionary_file,
-                "root": {
-                    "name": "root",
-                    "description": f"A {self.test_collection_name} collection for testing the schema system",
-                    "type": "object",
-                    "properties": [
-                        {
-                            "name": "_id",
-                            "description": "A unique identifier",
-                            "type": "identifier",
-                            "required": True
-                        },
-                        {
-                            "name": "name",
-                            "description": "The name",
-                            "type": "word",
-                            "required": True
-                        },
-                        {
-                            "name": "status",
-                            "description": "The current status",
-                            "type": "enum",
-                            "enums": "default_status",
-                            "required": True
-                        },
-                        {
-                            "name": "last_saved",
-                            "description": "The last time this document was saved",
-                            "type": "breadcrumb",
-                            "required": True
-                        }
-                    ]
-                }
-            }
-        )
+        self._setup_temp_input_folder()
 
-    def test_new_configuration_without_file_name(self):
-        """Test TemplateService.new_configuration method without file name"""
-        with self.assertRaises(ConfiguratorException) as context:
-            TemplateService.new_configuration(None)
-        
-        config = Config.get_instance()
-        self.assertIn(f"{config.CONFIGURATION_FOLDER} file name is required", str(context.exception))
+        result = TemplateService.create_collection(self.test_collection_name)
 
-    def test_new_dictionary_without_file_name(self):
-        """Test TemplateService.new_dictionary method without file name"""
-        with self.assertRaises(ConfiguratorException) as context:
-            TemplateService.new_dictionary(None)
-        
-        config = Config.get_instance()
-        self.assertIn(f"{config.DICTIONARY_FOLDER} file name is required", str(context.exception))
+        self.assertEqual(result["configuration_file"], "test_collection.yaml")
+        self.assertEqual(result["dictionary_file"], "test_collection.1.0.0.yaml")
+        self.assertEqual(result["test_data_file"], "test_collection.1.0.0.0.json")
+        self.assertEqual(result["version"], "1.0.0.0")
 
-    def test_create_collection_defects(self):
-        """Test TemplateService.create_collection method - all defects have been fixed"""
-        # All defects have been resolved:
-        # 1. ✅ Static method no longer uses 'self' parameter incorrectly (Defect #8)
-        # 2. ✅ No longer references 'self.config', 'self.file_name', 'self.dictionary_file_name'
-        # 3. ✅ Properly handles file names
-        # 4. ✅ Version constructor is called with correct arguments
-        # 5. ✅ FileIO.file_exists() method now exists (Defect #12)
-    
-        # Act & Assert - should execute successfully past the file_exists calls
-        # The method should work, but may fail due to missing directories/files
-        # which is expected in a test environment
-        try:
-            TemplateService.create_collection(self.test_collection_name)
-            # If we get here, all defects are fixed
-            self.assertTrue(True, "All TemplateService defects have been resolved")
-        except Exception as e:
-            # The method should execute past the file_exists calls, but may fail
-            # when trying to save files due to missing directories
-            # This confirms that all the original defects are fixed
-            self.assertTrue(
-                "Failed to put document" in str(e) or "No such file or directory" in str(e),
-                f"Unexpected exception: {e}"
+        # Should have saved config (via Configuration.save), dictionary (via Dictionary.save), and test_data
+        total_put_calls = mock_file_io.put_document.call_count + mock_file_io_base.put_document.call_count
+        self.assertGreaterEqual(total_put_calls, 3)
+
+    def test_create_collection_raises_when_config_exists(self):
+        """Test create_collection raises when configuration already exists."""
+        with patch('configurator.services.template_service.FileIO') as mock_file_io:
+            mock_file_io.file_exists.side_effect = lambda folder, name: (
+                name == "test_collection.yaml" if folder == "configurations" else False
             )
+
+            self._setup_temp_input_folder()
+
+            with self.assertRaises(ConfiguratorException) as ctx:
+                TemplateService.create_collection(self.test_collection_name)
+            self.assertIn("already exists", str(ctx.exception))
+
+    def test_create_collection_raises_when_dictionary_exists(self):
+        """Test create_collection raises when dictionary already exists."""
+        with patch('configurator.services.template_service.FileIO') as mock_file_io:
+            def file_exists(folder, name):
+                if folder == "configurations":
+                    return name == "test_collection.yaml"
+                if folder == "dictionaries":
+                    return name == "test_collection.1.0.0.yaml"
+                return False
+            mock_file_io.file_exists.side_effect = file_exists
+
+            self._setup_temp_input_folder()
+
+            with self.assertRaises(ConfiguratorException) as ctx:
+                TemplateService.create_collection(self.test_collection_name)
+            self.assertIn("already exists", str(ctx.exception))
+
+    @patch('configurator.services.service_base.FileIO')
+    @patch('configurator.services.template_service.FileIO')
+    def test_create_collection_with_description(self, mock_file_io, mock_file_io_base):
+        """Test create_collection accepts optional description."""
+        mock_file_io.file_exists.return_value = False
+        mock_file_io.put_document.return_value = {}
+        mock_file_io_base.put_document.return_value = {}
+
+        self._setup_temp_input_folder()
+
+        result = TemplateService.create_collection(
+            self.test_collection_name,
+            description="My custom description"
+        )
+        self.assertEqual(result["version"], "1.0.0.0")
+        self.assertEqual(result["dictionary_file"], "test_collection.1.0.0.yaml")
+
+    def test_load_dictionary_template_substitutes_placeholders(self):
+        """Test that template placeholders are substituted."""
+        from configurator.services.template_service import _load_dictionary_template
+        result = _load_dictionary_template("my_collection", "Custom description")
+        self.assertIn("name", result)
+        self.assertEqual(result.get("description"), "Custom description")
+        self.assertIn("properties", result)
 
 
 if __name__ == '__main__':
-    unittest.main() 
+    unittest.main()
