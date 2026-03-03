@@ -210,6 +210,9 @@ curl -X PATCH http://localhost:8081/api/types/ | jq
 curl -X PUT localhost:8081/api/dictionaries/sample.1.0.0.yaml/ \
   -H "Content-Type: application/json" \
   --data @./temp.json | jq
+
+# Delete a configuration (also removes orphaned dictionaries and test_data)
+curl -X DELETE http://localhost:8081/api/configurations/sample.yaml/ | jq
 ```
 ---
 

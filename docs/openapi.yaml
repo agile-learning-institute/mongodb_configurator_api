@@ -219,6 +219,11 @@ paths:
                 $ref: '#/components/schemas/event'
     delete:
       summary: Delete a collection configuration
+      description: |
+        Deletes the configuration file and its directly orphaned dictionaries and test_data.
+        For each version in the configuration, the corresponding dictionary file (schema) and
+        test_data file (if referenced) are deleted when they exist. Locked configurations
+        cannot be deleted.
       operationId: delete_configuration
       tags:
         - Collection Configurations
@@ -230,7 +235,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Collection configuration deleted
+          description: Collection configuration and orphaned dictionaries/test_data deleted
           content:    
             application/json:
               schema:

@@ -106,6 +106,35 @@ class Configuration(ServiceBase):
             logger.error(f"Unexpected error processing configuration {self.file_name}: {str(e)}")
             raise ConfiguratorException(f"Unexpected error processing configuration {self.file_name}: {str(e)}", event)
 
+    def delete(self):
+        """Delete configuration and its directly orphaned dictionaries and test_data."""
+        if self._locked:
+            event = ConfiguratorEvent(event_id=f"{self.config.CONFIGURATION_FOLDER}-02", event_type="DELETE_CONFIGURATION")
+            raise ConfiguratorException(f"Cannot delete locked {self.config.CONFIGURATION_FOLDER}", event)
+
+        # Collect directly orphaned dictionaries and test_data from versions
+        dictionary_files = set()
+        test_data_files = set()
+        for version in self.versions:
+            dictionary_files.add(version.version_number.get_schema_filename())
+            if version.test_data:
+                test_data_files.add(version.test_data)
+
+        # Delete orphaned dictionaries
+        for file_name in dictionary_files:
+            if FileIO.file_exists(Config.get_instance().DICTIONARY_FOLDER, file_name):
+                FileIO.delete_document(Config.get_instance().DICTIONARY_FOLDER, file_name)
+                logger.info(f"Deleted orphaned dictionary {file_name}")
+
+        # Delete orphaned test_data
+        for file_name in test_data_files:
+            if FileIO.file_exists(Config.get_instance().TEST_DATA_FOLDER, file_name):
+                FileIO.delete_document(Config.get_instance().TEST_DATA_FOLDER, file_name)
+                logger.info(f"Deleted orphaned test_data {file_name}")
+
+        # Delete the configuration
+        return FileIO.delete_document(self._folder_name, self.file_name)
+
     @staticmethod
     def lock_all(status: bool = True):
         """Lock all versions in all configurations instead of the top-level documents."""

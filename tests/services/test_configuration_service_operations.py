@@ -114,22 +114,62 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(result, {"saved": "document"})
         mock_file_io.put_document.assert_called_once()
 
-    @patch('configurator.services.service_base.FileIO')
+    @patch('configurator.services.configuration_services.FileIO')
     @patch('configurator.services.configuration_services.Version')
     def test_delete_unlocked_configuration(self, mock_version, mock_file_io):
         """Test Configuration delete method for unlocked configuration"""
-        # Arrange
-        mock_version_instances = [Mock(), Mock()]
-        mock_version.side_effect = mock_version_instances
+        # Arrange - mock Version instances with version_number and test_data
+        mock_v1 = Mock()
+        mock_v1.version_number.get_schema_filename.return_value = "test.1.0.0.yaml"
+        mock_v1.test_data = None
+        mock_v2 = Mock()
+        mock_v2.version_number.get_schema_filename.return_value = "test.1.1.0.yaml"
+        mock_v2.test_data = None
+        mock_version.side_effect = [mock_v1, mock_v2]
+        mock_file_io.file_exists.return_value = False  # no orphan files exist
         mock_file_io.delete_document.return_value = Mock()
-        
+
         config = Configuration(self.test_file_name, self.test_document)
-        
+
         # Act
         result = config.delete()
-        
-        # Assert
-        mock_file_io.delete_document.assert_called_once()
+
+        # Assert - config file deleted; file_exists checked for orphan dicts
+        mock_file_io.delete_document.assert_called_once_with(
+            Config.get_instance().CONFIGURATION_FOLDER, self.test_file_name
+        )
+
+    @patch('configurator.services.configuration_services.FileIO')
+    @patch('configurator.services.configuration_services.Version')
+    def test_delete_configuration_deletes_orphaned_dictionaries_and_test_data(self, mock_version, mock_file_io):
+        """Test Configuration delete removes directly orphaned dictionaries and test_data."""
+        # Arrange - versions with dictionaries and test_data
+        mock_v1 = Mock()
+        mock_v1.version_number.get_schema_filename.return_value = "test.1.0.0.yaml"
+        mock_v1.test_data = "test.1.0.0.0.json"
+        mock_v2 = Mock()
+        mock_v2.version_number.get_schema_filename.return_value = "test.1.1.0.yaml"
+        mock_v2.test_data = None  # shared dict, no test_data
+        mock_version.side_effect = [mock_v1, mock_v2]
+        mock_file_io.file_exists.return_value = True  # orphans exist
+        mock_file_io.delete_document.return_value = Mock()
+
+        config = Configuration(self.test_file_name, self.test_document)
+
+        # Act
+        config.delete()
+
+        # Assert - delete_document called for 2 dicts, 1 test_data, 1 config
+        cfg = Config.get_instance()
+        expected_calls = [
+            (cfg.DICTIONARY_FOLDER, "test.1.0.0.yaml"),
+            (cfg.DICTIONARY_FOLDER, "test.1.1.0.yaml"),
+            (cfg.TEST_DATA_FOLDER, "test.1.0.0.0.json"),
+            (cfg.CONFIGURATION_FOLDER, self.test_file_name),
+        ]
+        self.assertEqual(mock_file_io.delete_document.call_count, 4)
+        for i, (folder, file_name) in enumerate(expected_calls):
+            mock_file_io.delete_document.assert_any_call(folder, file_name)
 
     @patch('configurator.services.configuration_services.Version')
     def test_delete_locked_configuration(self, mock_version):
