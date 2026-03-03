@@ -34,6 +34,20 @@ class Configuration(ServiceBase):
         logger.error(f"Version {version_str} not found in configuration {self.file_name}")
         raise ConfiguratorException(f"Version {version_str} not found in configuration {self.file_name}", event)
 
+    def get_latest_version(self) -> Version:
+        """Return the latest version from the configuration (by version number)."""
+        if not self.versions:
+            event = ConfiguratorEvent("CFG-02", "GET_LATEST_VERSION")
+            event.record_failure(f"No versions found in configuration {self.file_name}")
+            logger.error(f"No versions found in configuration {self.file_name}")
+            raise ConfiguratorException(f"No versions found in configuration {self.file_name}", event)
+        return max(self.versions, key=lambda v: v.version_number)
+
+    def get_json_schema_latest(self) -> dict:
+        """Get JSON schema for the latest version defined in this configuration."""
+        latest_version = self.get_latest_version()
+        return self.get_json_schema(latest_version.version_str)
+
     def get_json_schema(self, version_str: str) -> dict:
         event = ConfiguratorEvent("CFG-03", "GET_JSON_SCHEMA")
         event.data = {"configuration": self.file_name, "version": version_str}
@@ -91,6 +105,35 @@ class Configuration(ServiceBase):
             event.record_failure(f"Unexpected error processing configuration {self.file_name}: {str(e)}")
             logger.error(f"Unexpected error processing configuration {self.file_name}: {str(e)}")
             raise ConfiguratorException(f"Unexpected error processing configuration {self.file_name}: {str(e)}", event)
+
+    def delete(self):
+        """Delete configuration and its directly orphaned dictionaries and test_data."""
+        if self._locked:
+            event = ConfiguratorEvent(event_id=f"{self.config.CONFIGURATION_FOLDER}-02", event_type="DELETE_CONFIGURATION")
+            raise ConfiguratorException(f"Cannot delete locked {self.config.CONFIGURATION_FOLDER}", event)
+
+        # Collect directly orphaned dictionaries and test_data from versions
+        dictionary_files = set()
+        test_data_files = set()
+        for version in self.versions:
+            dictionary_files.add(version.version_number.get_schema_filename())
+            if version.test_data:
+                test_data_files.add(version.test_data)
+
+        # Delete orphaned dictionaries
+        for file_name in dictionary_files:
+            if FileIO.file_exists(Config.get_instance().DICTIONARY_FOLDER, file_name):
+                FileIO.delete_document(Config.get_instance().DICTIONARY_FOLDER, file_name)
+                logger.info(f"Deleted orphaned dictionary {file_name}")
+
+        # Delete orphaned test_data
+        for file_name in test_data_files:
+            if FileIO.file_exists(Config.get_instance().TEST_DATA_FOLDER, file_name):
+                FileIO.delete_document(Config.get_instance().TEST_DATA_FOLDER, file_name)
+                logger.info(f"Deleted orphaned test_data {file_name}")
+
+        # Delete the configuration
+        return FileIO.delete_document(self._folder_name, self.file_name)
 
     @staticmethod
     def lock_all(status: bool = True):
@@ -161,6 +204,34 @@ class Configuration(ServiceBase):
             event.record_failure(f"Unexpected error updating enumerators: {str(e)}")
             logger.error(f"Unexpected error updating enumerators: {str(e)}")
             raise ConfiguratorException("Cannot update enumerators", event)
+
+    @staticmethod
+    def get_collections_summary() -> list:
+        """
+        Return a collection-centric view: one summary per configuration.
+        Each item: collection_name, configuration_file, latest_dictionary_file, latest_version, _locked.
+        """
+        config = Config.get_instance()
+        result = []
+        for file in FileIO.get_documents(config.CONFIGURATION_FOLDER):
+            try:
+                configuration = Configuration(file.file_name)
+                latest = configuration.get_latest_version()
+                result.append({
+                    "collection_name": configuration.collection_name,
+                    "configuration_file": configuration.file_name,
+                    "latest_dictionary_file": latest.version_number.get_schema_filename(),
+                    "latest_version": latest.version_str,
+                    "_locked": latest._locked,
+                    "description": configuration.description or "",
+                })
+            except ConfiguratorException as e:
+                logger.warning(f"Skipping {file.file_name}: {e}")
+                continue
+            except Exception as e:
+                logger.warning(f"Skipping {file.file_name}: {e}")
+                continue
+        return result
 
     @staticmethod
     def process_all():

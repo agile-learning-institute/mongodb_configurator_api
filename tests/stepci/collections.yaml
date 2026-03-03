@@ -1,0 +1,20 @@
+version: "1.1"
+name: Test Collections Endpoint
+env:
+  host: localhost:8081
+
+tests:
+  collections:
+    name: Test GET /api/collections/
+    steps:
+      - name: Get collections list
+        http:
+          url: http://${{env.host}}/api/collections/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              $[0].collection_name: /sample|test|Rectangle|Circle|Square/
+              $[0].configuration_file: /.+\.yaml$/
+              $[0].latest_dictionary_file: /.+\.yaml$/
+              $[0].latest_version: /\d+\.\d+\.\d+\.\d+/

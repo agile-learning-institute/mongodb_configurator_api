@@ -1,7 +1,6 @@
 from flask import Blueprint, request, jsonify
 from configurator.utils.config import Config
 from configurator.utils.configurator_exception import ConfiguratorEvent, ConfiguratorException
-from configurator.utils.file_io import FileIO
 from configurator.services.type_services import Type
 from configurator.utils.route_decorators import event_route
 import logging
@@ -12,12 +11,12 @@ def create_type_routes():
     type_routes = Blueprint('type_routes', __name__)
     config = Config.get_instance()
     
-    # GET /api/types/ - Return the current type files
+    # GET /api/types/ - Return type summaries (file_name, description, _locked, etc.) for card display
     @type_routes.route('/', methods=['GET'])
     @event_route("TYP-01", "GET_TYPES", "listing types")
     def get_types():
-        files = FileIO.get_documents(config.TYPE_FOLDER)
-        return jsonify([file.to_dict() for file in files])
+        result = Type.get_types_summary()
+        return jsonify(result)
 
     # PATCH /api/types/ - Lock All Types
     @type_routes.route('/', methods=['PATCH'])

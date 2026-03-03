@@ -38,7 +38,8 @@ def create_configuration_routes():
     @event_route("CFG-ROUTES-04", "CREATE_COLLECTION", "creating collection")
     def create_collection(collection_name):
         config.assert_local()
-        result = TemplateService.create_collection(collection_name)
+        description = (request.json or {}).get("description", "") if request.is_json else ""
+        result = TemplateService.create_collection(collection_name, description=description)
         return jsonify(result)
 
     @blueprint.route('/<file_name>/', methods=['GET'])
@@ -70,6 +71,13 @@ def create_configuration_routes():
         config.assert_local()
         events = Configuration.process_one(file_name)
         return jsonify(events.to_dict())
+
+    @blueprint.route('json_schema/<file_name>/latest/', methods=['GET'])
+    @event_route("CFG-ROUTES-10a", "GET_JSON_SCHEMA_LATEST", "getting JSON schema for latest version")
+    def get_json_schema_latest(file_name):
+        configuration = Configuration(file_name)
+        schema = configuration.get_json_schema_latest()
+        return jsonify(schema)
 
     @blueprint.route('json_schema/<file_name>/<version>/', methods=['GET'])
     @event_route("CFG-ROUTES-10", "GET_JSON_SCHEMA", "getting JSON schema")

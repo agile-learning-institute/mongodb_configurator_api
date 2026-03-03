@@ -15,6 +15,56 @@ servers:
     description: Local development server
 
 paths:
+  /api/collections/:
+    get:
+      summary: List collection summaries
+      description: |
+        Returns a collection-centric view of the configuration repository.
+        Each item includes collection name, configuration file, latest dictionary file,
+        latest version, and locked status. Simplifies the SPA's dictionary-first refactor.
+      operationId: list_collections
+      tags:
+        - Collections
+      responses:
+        '200':
+          description: List of collection summaries
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  required:
+                    - collection_name
+                    - configuration_file
+                    - latest_dictionary_file
+                    - latest_version
+                  properties:
+                    collection_name:
+                      type: string
+                      description: Derived from configuration name
+                    configuration_file:
+                      type: string
+                      description: Configuration file name (e.g., sample.yaml)
+                    latest_dictionary_file:
+                      type: string
+                      description: Dictionary file for latest version (e.g., sample.1.0.0.yaml)
+                    latest_version:
+                      type: string
+                      description: Latest version string (e.g., 1.0.0.0)
+                    _locked:
+                      type: boolean
+                      description: Whether the latest version is locked
+                    description:
+                      type: string
+                      description: Configuration description (from configuration file)
+        '500':
+          description: Processing error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/event'
+
   /docs/index.html:
     get:
       summary: (this) API Explorer
@@ -31,6 +81,10 @@ paths:
   /api/configurations/:
     get:
       summary: List all Collection Configurations
+      deprecated: true
+      description: |
+        Deprecated. Use GET /api/collections/ for the collection-centric view.
+        This endpoint remains functional for backward compatibility.
       tags:
         - Collection Configurations
       operationId: list_configurations
@@ -165,6 +219,11 @@ paths:
                 $ref: '#/components/schemas/event'
     delete:
       summary: Delete a collection configuration
+      description: |
+        Deletes the configuration file and its directly orphaned dictionaries and test_data.
+        For each version in the configuration, the corresponding dictionary file (schema) and
+        test_data file (if referenced) are deleted when they exist. Locked configurations
+        cannot be deleted.
       operationId: delete_configuration
       tags:
         - Collection Configurations
@@ -176,7 +235,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Collection configuration deleted
+          description: Collection configuration and orphaned dictionaries/test_data deleted
           content:    
             application/json:
               schema:
@@ -192,8 +251,9 @@ paths:
     post:
       summary: Create a new collection
       description: |
-        Creates a new collection by generating configuration and dictionary files from templates found in the /templates directory.
-        This endpoint creates both a configuration file and a dictionary file for the specified collection name.
+        Creates a new collection by generating configuration, dictionary, and test_data files.
+        New collections start at version 1.0.0.0. Creates: configuration file, dictionary file (from template),
+        and empty test_data JSON array. Optional description in request body for dictionary template substitution.
       tags:
         - Collection Configurations
       parameters:
@@ -205,15 +265,55 @@ paths:
             type: string
             pattern: '^[a-zA-Z][a-zA-Z0-9_]*$'
             example: "my_collection"
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                description:
+                  type: string
+                  description: Optional description for the collection (used in dictionary template)
       responses:
         '200':
           description: Collection created successfully
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/configuration'
+                $ref: '#/components/schemas/create_collection_response'
         '500':
           description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/event'
+
+  /api/configurations/json_schema/{file_name}/latest/:
+    get:
+      summary: Get JSON Schema for latest version
+      description: |
+        Returns the JSON Schema for the latest version defined in the configuration.
+        No version parameter required; the configuration file is read to determine the latest version.
+      operationId: get_json_schema_latest
+      tags:
+        - Collection Configurations
+      parameters:
+        - name: file_name
+          in: path
+          required: true
+          schema:
+            description: Configuration file name (e.g., sample.yaml)
+            type: string
+      responses:
+        '200':
+          description: JSON Schema for the latest version
+          content:
+            application/json:
+              schema:
+                type: object
+        '500':
+          description: Processing error
           content:
             application/json:
               schema:
@@ -243,7 +343,7 @@ paths:
         '200':
           description: Schema
           content:
-            text/json:
+            application/json:
               schema:
                 type: object
         '500':
@@ -277,7 +377,7 @@ paths:
         '200':
           description: Schema
           content:
-            text/json:
+            application/json:
               schema:
                 type: object
         '500':
@@ -406,16 +506,19 @@ paths:
   /api/types/:
     get:
       summary: List all Types
+      description: |
+        Returns type summaries for card display. Each item includes file_name, created_at,
+        updated_at, size, _locked, and description (from root.description).
       operationId: list_types
       tags:
         - Data Types
       responses:
         '200':
-          description: List of type files
+          description: List of type summaries
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/files'
+                $ref: '#/components/schemas/type_summaries'
         '500':
           description: Processing error
           content:
@@ -642,6 +745,10 @@ paths:
   /api/test_data/:
     get:
       summary: List all Test Data Files
+      deprecated: true
+      description: |
+        Deprecated. Test data files are accessed via configuration versions.
+        This endpoint remains functional for backward compatibility.
       operationId: list_data_files
       tags:
         - Test Data
@@ -751,6 +858,10 @@ paths:
   /api/migrations/:
     get:
       summary: List all Migration Files
+      deprecated: true
+      description: |
+        Deprecated. Migration files are accessed via configuration versions.
+        This endpoint remains functional for backward compatibility.
       operationId: list_migrations
       tags:
         - Migrations
@@ -932,6 +1043,33 @@ components:
         size:
           type: number
           description: Size in bytes
+    type_summaries:
+      type: array
+      description: List of type summaries for card display (GET /api/types/)
+      items:
+        $ref: '#/components/schemas/type_summary'
+    type_summary:
+      type: object
+      description: Lightweight type summary with description for list/card display
+      properties:
+        file_name:
+          type: string
+          description: Name of the type file
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        size:
+          type: number
+          description: Size in bytes
+        _locked:
+          type: boolean
+          description: Whether the type is locked from editing
+        description:
+          type: string
+          description: Description from root.description in the type file
     enumerations:
       type: object
       properties:
@@ -961,19 +1099,47 @@ components:
                       type: string
                     description:
                       type: string
+    create_collection_response:
+      description: Response from POST /api/configurations/collection/{name}
+      type: object
+      required:
+        - configuration_file
+        - dictionary_file
+        - test_data_file
+        - version
+      properties:
+        configuration_file:
+          type: string
+          description: Name of the created configuration file (e.g., my_collection.yaml)
+        dictionary_file:
+          type: string
+          description: Name of the created dictionary file (e.g., my_collection.1.0.0.yaml)
+        test_data_file:
+          type: string
+          description: Name of the created test data file (e.g., my_collection.1.0.0.0.json)
+        version:
+          type: string
+          description: Initial version string (1.0.0.0)
     configuration:
       description: SchemaManager Collection Configuration
       type: object
       required:
-        - name
+        - file_name
         - versions
       properties:
-        name:
-          description: The name of the MongoDB collection
+        file_name:
+          description: Name of the configuration file (e.g., sample.yaml)
+          type: string
+        title:
+          description: Display title for the collection
           type: string
         description:
           description: A description of the MongoDB collection
           type: string
+        _locked:
+          description: Whether the configuration is locked from modification
+          type: boolean
+          default: false
         versions:
           description: List of version configurations in chronological order
           type: array
@@ -1131,6 +1297,7 @@ components:
         - $ref: '#/components/schemas/type_object'
         - $ref: '#/components/schemas/type_one_of'
         - $ref: '#/components/schemas/type_ref'
+        - $ref: '#/components/schemas/type_simple'
     type_array:
       description: An Array type
       type: object
@@ -1152,6 +1319,9 @@ components:
           description: The items of the array
           $ref: '#/components/schemas/property'
     type_complex:
+      description: A Complex type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1174,6 +1344,9 @@ components:
           type: object
           additionalProperties: true
     type_constant:
+      description: A Constant type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1191,6 +1364,9 @@ components:
           description: Constant value for constant type
           type: string
     type_custom:
+      description: A Custom type (e.g., void)
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1204,6 +1380,9 @@ components:
           description: Whether the property is required
           type: boolean
     type_enum_array:
+      description: An Enum Array type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1221,6 +1400,9 @@ components:
           description: Enum name for enum or enum_array types
           type: string
     type_enum:
+      description: An Enum type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1238,6 +1420,9 @@ components:
           description: Enum name for enum or enum_array types
           type: string
     type_object:
+      description: An Object type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1260,6 +1445,9 @@ components:
           items:
             $ref: '#/components/schemas/property'
     type_one_of:
+      description: A OneOf type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string
@@ -1279,6 +1467,9 @@ components:
           items:
             $ref: '#/components/schemas/property'
     type_ref:
+      description: A Ref type
+      type: object
+      properties:
         name:
           description: The name of the property
           type: string
@@ -1296,6 +1487,9 @@ components:
           description: Reference to another type file
           type: string
     type_simple:
+      description: A Simple type
+      type: object
+      properties:
         name:
           description: The name of the Property
           type: string

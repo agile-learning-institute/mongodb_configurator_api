@@ -7,6 +7,16 @@ tests:
   configurations:
     name: Test Configurations Endpoints
     steps:
+      # Get JSON Schema Latest - GET schema for latest version (no version param)
+      - name: Get JSON Schema Latest (sample.yaml)
+        http:
+          url: http://${{env.host}}/api/configurations/json_schema/sample.yaml/latest/
+          method: GET
+          check:
+            status: /200/
+            jsonpath:
+              type: object
+
       # Create - POST to create a new configuration
       - name: Create Test Configuration
         http:

@@ -114,22 +114,62 @@ class TestConfiguration(unittest.TestCase):
         self.assertEqual(result, {"saved": "document"})
         mock_file_io.put_document.assert_called_once()
 
-    @patch('configurator.services.service_base.FileIO')
+    @patch('configurator.services.configuration_services.FileIO')
     @patch('configurator.services.configuration_services.Version')
     def test_delete_unlocked_configuration(self, mock_version, mock_file_io):
         """Test Configuration delete method for unlocked configuration"""
-        # Arrange
-        mock_version_instances = [Mock(), Mock()]
-        mock_version.side_effect = mock_version_instances
+        # Arrange - mock Version instances with version_number and test_data
+        mock_v1 = Mock()
+        mock_v1.version_number.get_schema_filename.return_value = "test.1.0.0.yaml"
+        mock_v1.test_data = None
+        mock_v2 = Mock()
+        mock_v2.version_number.get_schema_filename.return_value = "test.1.1.0.yaml"
+        mock_v2.test_data = None
+        mock_version.side_effect = [mock_v1, mock_v2]
+        mock_file_io.file_exists.return_value = False  # no orphan files exist
         mock_file_io.delete_document.return_value = Mock()
-        
+
         config = Configuration(self.test_file_name, self.test_document)
-        
+
         # Act
         result = config.delete()
-        
-        # Assert
-        mock_file_io.delete_document.assert_called_once()
+
+        # Assert - config file deleted; file_exists checked for orphan dicts
+        mock_file_io.delete_document.assert_called_once_with(
+            Config.get_instance().CONFIGURATION_FOLDER, self.test_file_name
+        )
+
+    @patch('configurator.services.configuration_services.FileIO')
+    @patch('configurator.services.configuration_services.Version')
+    def test_delete_configuration_deletes_orphaned_dictionaries_and_test_data(self, mock_version, mock_file_io):
+        """Test Configuration delete removes directly orphaned dictionaries and test_data."""
+        # Arrange - versions with dictionaries and test_data
+        mock_v1 = Mock()
+        mock_v1.version_number.get_schema_filename.return_value = "test.1.0.0.yaml"
+        mock_v1.test_data = "test.1.0.0.0.json"
+        mock_v2 = Mock()
+        mock_v2.version_number.get_schema_filename.return_value = "test.1.1.0.yaml"
+        mock_v2.test_data = None  # shared dict, no test_data
+        mock_version.side_effect = [mock_v1, mock_v2]
+        mock_file_io.file_exists.return_value = True  # orphans exist
+        mock_file_io.delete_document.return_value = Mock()
+
+        config = Configuration(self.test_file_name, self.test_document)
+
+        # Act
+        config.delete()
+
+        # Assert - delete_document called for 2 dicts, 1 test_data, 1 config
+        cfg = Config.get_instance()
+        expected_calls = [
+            (cfg.DICTIONARY_FOLDER, "test.1.0.0.yaml"),
+            (cfg.DICTIONARY_FOLDER, "test.1.1.0.yaml"),
+            (cfg.TEST_DATA_FOLDER, "test.1.0.0.0.json"),
+            (cfg.CONFIGURATION_FOLDER, self.test_file_name),
+        ]
+        self.assertEqual(mock_file_io.delete_document.call_count, 4)
+        for i, (folder, file_name) in enumerate(expected_calls):
+            mock_file_io.delete_document.assert_any_call(folder, file_name)
 
     @patch('configurator.services.configuration_services.Version')
     def test_delete_locked_configuration(self, mock_version):
@@ -167,6 +207,40 @@ class TestConfiguration(unittest.TestCase):
                 
                 # Assert
                 self.assertEqual(result, {"schema": "json"})
+
+    @patch('configurator.services.configuration_services.Configuration.get_json_schema')
+    def test_get_json_schema_latest_calls_get_json_schema_with_latest_version(self, mock_get_json_schema):
+        """Test get_json_schema_latest calls get_json_schema with the latest version string."""
+        mock_get_json_schema.return_value = {"schema": "json_latest"}
+        config = Configuration(self.test_file_name, self.test_document)
+        result = config.get_json_schema_latest()
+        self.assertEqual(result, {"schema": "json_latest"})
+        # Versions are 1.0.0 and 1.1.0 -> latest is 1.1.0.0
+        mock_get_json_schema.assert_called_once_with("1.1.0.0")
+
+    def test_get_latest_version_returns_last_when_ordered(self):
+        """Test get_latest_version returns the version with highest version number."""
+        from configurator.services.configuration_version import Version
+        doc = {
+            "title": "Test",
+            "description": "Test",
+            "versions": [
+                {"version": "1.0.0"},
+                {"version": "1.1.0"},
+                {"version": "2.0.0"}
+            ]
+        }
+        config = Configuration("test.yaml", doc)
+        latest = config.get_latest_version()
+        self.assertEqual(latest.version_str, "2.0.0.0")
+
+    def test_get_latest_version_empty_raises(self):
+        """Test get_latest_version raises when no versions exist."""
+        doc = {"title": "Test", "description": "Test", "versions": []}
+        config = Configuration("test.yaml", doc)
+        with self.assertRaises(ConfiguratorException) as ctx:
+            config.get_latest_version()
+        self.assertIn("No versions found", str(ctx.exception))
 
     def test_get_bson_schema(self):
         """Test Configuration get_bson_schema method"""
@@ -243,6 +317,37 @@ class TestVersion(unittest.TestCase):
         self.assertEqual(version.version_str, "1.0.0.0")
         self.assertEqual(version.collection_name, "test_collection")
         self.assertFalse(version._locked)
+
+
+class TestGetCollectionsSummary(unittest.TestCase):
+    """Test cases for Configuration.get_collections_summary."""
+
+    @patch('configurator.services.service_base.FileIO')
+    @patch('configurator.services.configuration_services.FileIO')
+    def test_get_collections_summary_returns_summaries(self, mock_file_io_cfg, mock_file_io_base):
+        """Test get_collections_summary returns correct structure."""
+        mock_file = Mock()
+        mock_file.file_name = "sample.yaml"
+        mock_file_io_cfg.get_documents.return_value = [mock_file]
+
+        config_doc = {
+            "title": "Sample",
+            "description": "Test",
+            "versions": [
+                {"version": "1.0.0.0", "drop_indexes": [], "add_indexes": [], "migrations": [], "test_data": "sample.json", "_locked": False}
+            ],
+            "_locked": False
+        }
+        mock_file_io_base.get_document.return_value = config_doc
+
+        result = Configuration.get_collections_summary()
+
+        self.assertEqual(len(result), 1)
+        self.assertEqual(result[0]["collection_name"], "sample")
+        self.assertEqual(result[0]["configuration_file"], "sample.yaml")
+        self.assertEqual(result[0]["latest_dictionary_file"], "sample.1.0.0.yaml")
+        self.assertEqual(result[0]["latest_version"], "1.0.0.0")
+        self.assertFalse(result[0]["_locked"])
 
 
 class TestConfigurationLockAll(unittest.TestCase):

@@ -40,6 +40,7 @@ metrics = PrometheusMetrics(app, path='/api/health')
 metrics.info('app_info', 'Application info', version=config.BUILT_AT)
 
 # Register flask routes
+from configurator.routes.collection_routes import create_collection_routes
 from configurator.routes.config_routes import create_config_routes
 from configurator.routes.configuration_routes import create_configuration_routes
 from configurator.routes.dictionary_routes import create_dictionary_routes
@@ -49,6 +50,7 @@ from configurator.routes.database_routes import create_database_routes
 from configurator.routes.enumerator_routes import create_enumerator_routes
 from configurator.routes.migration_routes import create_migration_routes
 
+app.register_blueprint(create_collection_routes(), url_prefix='/api/collections')
 app.register_blueprint(create_config_routes(), url_prefix='/api/config')
 app.register_blueprint(create_configuration_routes(), url_prefix='/api/configurations')
 app.register_blueprint(create_dictionary_routes(), url_prefix='/api/dictionaries')

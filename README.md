@@ -65,6 +65,58 @@ pipenv run stepci
 
 ```
 
+### Custom Templates (for API extenders)
+
+The API uses default templates when creating new collections via `POST /api/configurations/collection/{name}`.
+
+#### Dictionary template (`default_new_dictionary.yaml`)
+
+**Default value**: An object root with `_id`, `name`, `description`, `status`, `created`, `last_saved`:
+```yaml
+name: root
+description: "{{description}}"
+type: object
+properties:
+  - name: _id
+    type: identifier
+    required: true
+  - name: name
+    type: word
+    required: true
+  - name: description
+    type: sentence
+    required: false
+  - name: status
+    type: enum
+    enums: default_status
+    required: true
+  - name: created
+    type: breadcrumb
+    required: true
+  - name: last_saved
+    type: breadcrumb
+    required: true
+```
+
+**Location** (checked in order):
+1. **Override**: `{INPUT_FOLDER}/{API_CONFIG_FOLDER}/templates/default_new_dictionary.yaml`
+2. **Built-in**: `configurator/templates/default_new_dictionary.yaml`
+
+#### Configuration template (`default_new_configuration.yaml`)
+
+**Default value**: Default `add_indexes` for the initial version (nameIndex, statusIndex, createdIndex, savedIndex).
+
+**Location** (checked in order):
+1. **Override**: `{INPUT_FOLDER}/{API_CONFIG_FOLDER}/templates/default_new_configuration.yaml`
+2. **Built-in**: `configurator/templates/default_new_configuration.yaml`
+
+**Playground/Docker**: The Dockerfile loads `tests/test_cases/passing_template/api_playground/templates/` into `/input/api_config/templates/`. Both templates are included.
+
+To provide custom templates in your extended image:
+1. Create your template files with placeholders `{{collection_name}}` and `{{description}}` (dictionary only)
+2. Copy to `/input/api_config/templates/` in your Dockerfile
+3. Ensure the `api_config/templates/` directory exists
+
 ## Separation of Concerns
 The /configurator directory contains source code.
 ```
@@ -122,7 +174,7 @@ tests/
 │   ├── stepci/             # Configuration for step ci testing - setup/tear down in tests
 
 ```
-The Docker build will package passing_template into the containers /input folder to support playground deployments.
+The Docker build packages `passing_template` into the container's `/input` folder for playground deployments. The `api_playground/` subfolder (config files and `templates/default_new_dictionary.yaml`) is copied to `/input/api_config/`.
 
 ## API Documentation
 
@@ -158,6 +210,9 @@ curl -X PATCH http://localhost:8081/api/types/ | jq
 curl -X PUT localhost:8081/api/dictionaries/sample.1.0.0.yaml/ \
   -H "Content-Type: application/json" \
   --data @./temp.json | jq
+
+# Delete a configuration (also removes orphaned dictionaries and test_data)
+curl -X DELETE http://localhost:8081/api/configurations/sample.yaml/ | jq
 ```
 ---
 
