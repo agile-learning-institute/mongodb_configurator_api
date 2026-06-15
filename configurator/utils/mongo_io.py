@@ -325,7 +325,7 @@ class MongoIO:
             for collection_name in self.db.list_collection_names():
                 sub_event = ConfiguratorEvent(event_id=f"MON-{collection_name}", event_type="COUNT_DOCUMENTS")
                 doc_count = self.db.get_collection(collection_name).count_documents({})
-                if doc_count > 100:
+                if doc_count > config.MONGODB_DROP_SAFETY:
                     collections_with_many_docs.append({
                         "collection": collection_name,
                         "document_count": doc_count
