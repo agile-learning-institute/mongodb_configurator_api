@@ -41,6 +41,7 @@ class Config:
             self.LOAD_TEST_DATA = False
             self.ENABLE_DROP_DATABASE = False
             self.MONGODB_REQUIRE_TLS = False
+            self.MONGODB_DROP_SAFETY = 0
             self.RENDER_STACK_MAX_DEPTH = 0
             self.UI_HEADER = ''
     
@@ -65,6 +66,7 @@ class Config:
                 "API_PORT": "8081",
                 "SPA_PORT": "8082",
                 "RENDER_STACK_MAX_DEPTH": "100",
+                "MONGODB_DROP_SAFETY": "100",
             }
             self.config_booleans = {
                 "AUTO_PROCESS": "false",
